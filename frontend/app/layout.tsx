@@ -1,15 +1,33 @@
-'use client';
-
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
-import { AuthProvider } from '@/lib/auth-context'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
-// Note: metadata export will be moved to individual layout files
+export const metadata: Metadata = {
+  title: 'BrightScope - School Management System',
+  description: 'Comprehensive school management system for students, teachers, and administrators',
+  generator: 'v0.app',
+  icons: {
+    icon: [
+      {
+        url: '/icon-light-32x32.png',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        url: '/icon-dark-32x32.png',
+        media: '(prefers-color-scheme: dark)',
+      },
+      {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    apple: '/apple-icon.png',
+  },
+}
 
 export default function RootLayout({
   children,
@@ -18,14 +36,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <title>ABC School Management System</title>
-        <meta name="description" content="ABC School - Professional school management and education portal" />
-      </head>
       <body className="font-sans antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
         <Analytics />
       </body>
     </html>
