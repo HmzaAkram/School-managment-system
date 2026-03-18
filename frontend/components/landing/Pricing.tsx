@@ -106,7 +106,7 @@ export default function Pricing() {
   return (
     <section id="pricing" ref={sectionRef} className="py-24 bg-white relative overflow-hidden">
       <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-blue-50/50 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-      
+
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-primary font-bold tracking-wider uppercase text-sm mb-3 block">Simple Pricing</span>
@@ -122,37 +122,54 @@ export default function Pricing() {
           {packages.map((pkg, i) => (
             <div 
               key={i} 
-              className={`pricing-card relative bg-white rounded-3xl p-8 border hover:-translate-y-2 transition-all duration-300 flex flex-col h-full ${
+              className={`pricing-card relative rounded-3xl p-8 border hover:-translate-y-2 transition-all duration-300 flex flex-col h-full ${
                 pkg.popular 
-                  ? "border-[#3B4FE8]/30 shadow-[0_20px_60px_rgba(59,79,232,0.1)] ring-1 ring-[#3B4FE8]/10" 
-                  : "border-slate-100 shadow-sm hover:shadow-xl"
+                  ? "bg-white border-[#3B4FE8]/30 shadow-[0_20px_60px_rgba(59,79,232,0.1)] ring-1 ring-[#3B4FE8]/10" 
+                  : pkg.name === "Premium"
+                    ? "bg-slate-900 border-transparent shadow-[0_20px_50px_rgba(6,182,212,0.2)] text-white"
+                    : "bg-white border-slate-100 shadow-sm hover:shadow-xl"
               }`}
             >
+              {pkg.name === "Premium" && (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#06B6D4]/20 to-[#6366F1]/20 rounded-3xl pointer-events-none" />
+              )}
               {pkg.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-primary text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-md">
                   MOST POPULAR
                 </div>
               )}
 
-              <div className="mb-6">
-                <h3 className="font-sora font-bold text-2xl text-slate-900 mb-1">{pkg.name}</h3>
-                <p className="text-slate-500 text-sm font-medium h-4">{pkg.subtitle}</p>
+              <div className="mb-6 relative z-10">
+                <h3 className={`font-sora font-bold text-2xl mb-1 ${pkg.name === "Premium" ? "text-white" : "text-slate-900"}`}>{pkg.name}</h3>
+                <p className={`text-sm font-medium h-4 ${pkg.name === "Premium" ? "text-slate-300" : "text-slate-500"}`}>{pkg.subtitle}</p>
               </div>
 
-              <div className="mb-6">
+              <div className="mb-6 relative z-10">
                 <div className="flex items-end gap-1 mb-1">
-                  <span className="text-4xl font-extrabold font-sora text-slate-900">{pkg.price}</span>
+                  <span className={`text-4xl font-extrabold font-sora ${pkg.name === "Premium" ? "text-white" : "text-slate-900"}`}>{pkg.price}</span>
                 </div>
-                <div className="text-sm font-semibold text-emerald-600 bg-emerald-50 inline-block px-2.5 py-1 rounded-md mt-2">
+                <div className={`text-sm font-semibold inline-block px-2.5 py-1 rounded-md mt-2 ${
+                  pkg.name === "Premium" 
+                    ? "text-[#06B6D4] bg-cyan-500/10" 
+                    : "text-emerald-600 bg-emerald-50"
+                }`}>
                   ⏱ {pkg.duration}
                 </div>
               </div>
 
-              <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl text-sm text-slate-600 leading-relaxed mb-6">
+              <div className={`border p-4 rounded-xl text-sm leading-relaxed mb-6 relative z-10 ${
+                pkg.name === "Premium"
+                  ? "bg-white/5 border-white/10 text-slate-300"
+                  : "bg-slate-50 border-slate-100 text-slate-600"
+              }`}>
                 {pkg.target}
               </div>
 
-              <button className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-8 ${pkg.buttonClass}`}>
+              <button className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-8 relative z-10 ${
+                pkg.name === "Premium"
+                  ? "bg-gradient-to-r from-[#06B6D4] to-[#6366F1] text-white hover:opacity-90 shadow-lg"
+                  : pkg.buttonClass
+              }`}>
                 Get Started with {pkg.name}
               </button>
 
@@ -162,9 +179,9 @@ export default function Pricing() {
                   {pkg.features.map((f, j) => (
                     <li key={j} className="flex items-start gap-3">
                       <div className="mt-0.5 flex-shrink-0">
-                        <Check size={16} className="text-primary" strokeWidth={3} />
+                        <Check size={16} className={pkg.name === "Premium" ? "text-[#06B6D4]" : "text-primary"} strokeWidth={3} />
                       </div>
-                      <span className="text-sm text-slate-700 font-medium">{f}</span>
+                      <span className={`text-sm font-medium ${pkg.name === "Premium" ? "text-slate-300" : "text-slate-700"}`}>{f}</span>
                     </li>
                   ))}
                 </ul>
