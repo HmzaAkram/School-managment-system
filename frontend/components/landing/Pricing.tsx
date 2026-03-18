@@ -141,7 +141,7 @@ export default function Pricing() {
 
               <div className="mb-6 relative z-10">
                 <h3 className={`font-sora font-bold text-2xl mb-1 ${pkg.name === "Premium" ? "text-white" : "text-slate-900"}`}>{pkg.name}</h3>
-                <p className={`text-sm font-medium h-4 ${pkg.name === "Premium" ? "text-slate-300" : "text-slate-500"}`}>{pkg.subtitle}</p>
+                <p className={`text-sm font-medium h-4 ${pkg.name === "Premium" ? "text-slate-300" : "text-slate-600"}`}>{pkg.subtitle}</p>
               </div>
 
               <div className="mb-6 relative z-10">
@@ -159,8 +159,8 @@ export default function Pricing() {
 
               <div className={`border p-4 rounded-xl text-sm leading-relaxed mb-6 relative z-10 ${
                 pkg.name === "Premium"
-                  ? "bg-white/5 border-white/10 text-slate-300"
-                  : "bg-slate-50 border-slate-100 text-slate-600"
+                    ? "bg-white/5 border-white/10 text-slate-300"
+                    : "bg-slate-50 border-slate-100 text-slate-900"
               }`}>
                 {pkg.target}
               </div>
@@ -181,7 +181,7 @@ export default function Pricing() {
                       <div className="mt-0.5 flex-shrink-0">
                         <Check size={16} className={pkg.name === "Premium" ? "text-[#06B6D4]" : "text-primary"} strokeWidth={3} />
                       </div>
-                      <span className={`text-sm font-medium ${pkg.name === "Premium" ? "text-slate-300" : "text-slate-700"}`}>{f}</span>
+                      <span className={`text-sm font-medium ${pkg.name === "Premium" ? "text-slate-300" : "text-slate-900"}`}>{f}</span>
                     </li>
                   ))}
                 </ul>

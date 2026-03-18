@@ -69,7 +69,7 @@ export default function ProblemSolution() {
                   <div className="w-6 h-6 rounded-full bg-red-200/60 flex flex-shrink-0 items-center justify-center text-red-500 mt-0.5">
                     <X size={13} strokeWidth={3} />
                   </div>
-                  <span className="text-slate-700 text-base leading-snug">{prob}</span>
+                  <span className="text-slate-900 text-base leading-snug">{prob}</span>
                 </li>
               ))}
             </ul>
@@ -92,7 +92,7 @@ export default function ProblemSolution() {
                     style={{ backgroundColor: "rgba(59,79,232,0.15)" }}>
                     <Check size={13} strokeWidth={3} />
                   </div>
-                  <span className="text-slate-800 text-base leading-snug font-medium">{sol}</span>
+                  <span className="text-slate-900 text-base leading-snug font-medium">{sol}</span>
                 </li>
               ))}
             </ul>

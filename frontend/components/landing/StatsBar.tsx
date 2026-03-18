@@ -65,14 +65,14 @@ export default function StatsBar() {
                 <div className="text-3xl lg:text-4xl font-extrabold font-sora text-white mb-1 tracking-tight">
                   <CountUp target={stat.value} suffix={stat.suffix} separator={stat.separator} />
                 </div>
-                <div className="text-sm font-sans text-slate-400 font-medium">{stat.label}</div>
+                <div className="text-sm font-sans text-slate-300 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
 
           {/* Trusted logos */}
           <div className="lg:w-[40%] flex flex-col items-center lg:items-end gap-4 w-full border-t lg:border-t-0 border-slate-800 pt-8 lg:pt-0">
-            <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
+            <span className="text-xs font-mono tracking-widest text-slate-400 uppercase">
               Trusted by schools in:
             </span>
             <div className="flex flex-wrap justify-center lg:justify-end gap-3">
