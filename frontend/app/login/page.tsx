@@ -64,9 +64,9 @@ export default function Login() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 relative z-10">
           <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center font-sora font-bold text-white text-sm">
-            BS
+            SK
           </div>
-          <span className="font-sora font-bold text-xl text-white">BrightScope</span>
+          <span className="font-sora font-bold text-xl text-white">Skoolms</span>
         </Link>
 
         {/* Middle content */}
@@ -102,7 +102,7 @@ export default function Login() {
             Demo Credentials
           </p>
           <div className="text-white/80 text-xs font-mono">
-            {role}@brightscope.edu<br />{role}123
+            {role}@skoolms.edu<br />{role}123
           </div>
         </div>
       </div>
@@ -112,8 +112,8 @@ export default function Login() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <Link href="/" className="flex items-center gap-3 mb-10 lg:hidden">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-sora font-bold text-white text-xs shadow-md ${getRoleGradient()}`}>BS</div>
-            <span className="font-sora font-bold text-lg text-slate-800">BrightScope</span>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-sora font-bold text-white text-xs shadow-md ${getRoleGradient()}`}>SK</div>
+            <span className="font-sora font-bold text-lg text-slate-800">Skoolms</span>
           </Link>
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
@@ -133,7 +133,7 @@ export default function Login() {
                     type="button"
                     onClick={() => {
                       setRole(r.value as any);
-                      setEmail(`${r.value}@brightscope.edu`);
+                      setEmail(`${r.value}@skoolms.edu`);
                       setPassword(`${r.value}123`);
                       setError('');
                     }}

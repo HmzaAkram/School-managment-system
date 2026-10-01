@@ -83,7 +83,7 @@ export default function ProblemSolution() {
           >
             <div className="inline-block px-4 py-1.5 rounded-full text-primary font-mono text-xs uppercase tracking-widest font-semibold mb-8"
               style={{ backgroundColor: "rgba(59,79,232,0.1)" }}>
-              ✅ The BrightScope Way
+              ✅ The Skoolms Way
             </div>
             <ul className="flex flex-col gap-6">
               {solutions.map((sol, i) => (

@@ -20,7 +20,7 @@ export function DashboardHeader({ title, role, onLogout }: DashboardHeaderProps)
                 BS
               </div>
               <span className="text-xl font-bold text-foreground hidden sm:inline">
-                BrightScope
+                Skoolms
               </span>
             </Link>
             <div className="hidden md:flex items-center gap-2 ml-4 pl-4 border-l border-border">

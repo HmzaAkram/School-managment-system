@@ -26,7 +26,7 @@ const dmMono = DM_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'BrightScope — School Management System',
+  title: 'Skoolms — School Management System',
   description: 'The all-in-one platform trusted by 500+ schools. Manage students, fees, attendance, staff, and reports from one beautiful dashboard.',
   icons: {
     icon: [

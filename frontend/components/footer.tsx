@@ -8,7 +8,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
           <div>
-            <h3 className="font-bold text-lg mb-4">BrightScope</h3>
+            <h3 className="font-bold text-lg mb-4">Skoolms</h3>
             <p className="text-sm opacity-90">
               Comprehensive school management system for modern education.
             </p>
@@ -37,7 +37,7 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <p className="text-sm opacity-90">
-              Email: info@brightscope.edu<br/>
+              Email: info@skoolms.edu<br/>
               Phone: +1 (555) 123-4567<br/>
               Address: 123 Education St.
             </p>
@@ -45,7 +45,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-white/20 py-6 text-center text-sm opacity-75">
-          <p>&copy; 2026 BrightScope. All rights reserved.</p>
+          <p>&copy; 2026 Skoolms. All rights reserved.</p>
         </div>
       </div>
     </footer>

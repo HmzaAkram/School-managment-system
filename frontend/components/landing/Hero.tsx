@@ -6,7 +6,7 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 import { Check } from "lucide-react";
 import { useMagneticButton } from "@/hooks/useMagneticButton";
 
-const headline = ["Run", "Your", "School", "Smarter", "with", "BrightScope"];
+const headline = ["Run", "Your", "School", "Smarter", "with", "Skoolms"];
 
 const statCards = [
   { label: "Total Students", value: "1,248", icon: "👨‍🎓" },
@@ -152,7 +152,7 @@ export default function Hero() {
                 <div className="flex-1" />
                 <div className="h-6 w-56 bg-white border border-slate-200 rounded-md shadow-sm mx-auto flex items-center justify-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span className="text-[10px] text-slate-400 font-mono">dashboard.brightscope.app</span>
+                  <span className="text-[10px] text-slate-400 font-mono">dashboard.skoolms.app</span>
                 </div>
                 <div className="flex-1" />
               </div>
@@ -163,8 +163,8 @@ export default function Hero() {
                 {/* Sidebar */}
                 <div className="hidden md:flex flex-col w-56 p-4 border-r border-slate-100 bg-white/90 gap-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-xs font-bold">BS</div>
-                    <span className="text-sm font-bold text-slate-700 font-sora">BrightScope</span>
+                    <div className="w-7 h-7 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-xs font-bold">SK</div>
+                    <span className="text-sm font-bold text-slate-700 font-sora">Skoolms</span>
                   </div>
                   {[
                     ["📊", "Dashboard", true],
@@ -187,7 +187,7 @@ export default function Hero() {
                   <div className="flex justify-between items-center">
                     <div>
                       <h2 className="text-lg font-bold font-sora text-slate-800">Good morning, Principal! 👋</h2>
-                      <p className="text-xs text-slate-500">Here's what's happening today at BrightScope Academy.</p>
+                      <p className="text-xs text-slate-500">Here's what's happening today at Skoolms Academy.</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-bold">P</div>

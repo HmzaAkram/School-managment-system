@@ -1,8 +1,8 @@
-# BrightScope School Management System - Project Summary
+# Skoolms School Management System - Project Summary
 
 ## Overview
 
-BrightScope is a comprehensive, full-featured school management system built with Next.js 16, React 19, and Tailwind CSS. The platform provides role-based dashboards for Administrators, Teachers, and Students with a modern, responsive user interface.
+Skoolms is a comprehensive, full-featured school management system built with Next.js 16, React 19, and Tailwind CSS. The platform provides role-based dashboards for Administrators, Teachers, and Students with a modern, responsive user interface.
 
 ## Project Architecture
 
@@ -114,9 +114,9 @@ The system includes comprehensive demo data:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@brightscope.edu | admin123 |
-| Teacher | teacher@brightscope.edu | teacher123 |
-| Student | student@brightscope.edu | student123 |
+| Admin | admin@skoolms.edu | admin123 |
+| Teacher | teacher@skoolms.edu | teacher123 |
+| Student | student@skoolms.edu | student123 |
 
 ## Key Components & Features
 
@@ -229,7 +229,7 @@ vercel deploy
 
 ## Contact & Support
 
-For questions or support, visit the Contact page or email info@brightscope.edu.
+For questions or support, visit the Contact page or email info@skoolms.edu.
 
 ---
 

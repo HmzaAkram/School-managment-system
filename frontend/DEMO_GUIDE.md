@@ -1,10 +1,10 @@
-# BrightScope School Management System - Demo Guide
+# Skoolms School Management System - Demo Guide
 
-Welcome to BrightScope, a comprehensive school management system designed for modern education institutions.
+Welcome to Skoolms, a comprehensive school management system designed for modern education institutions.
 
 ## System Overview
 
-BrightScope is a full-featured platform that enables:
+Skoolms is a full-featured platform that enables:
 - **Administrators** to manage the entire school system
 - **Teachers** to manage classes, assignments, and student performance
 - **Students** to track their grades, attendance, and academic progress
@@ -14,17 +14,17 @@ BrightScope is a full-featured platform that enables:
 Use the following credentials to test different user roles:
 
 ### Administrator Access
-- **Email**: `admin@brightscope.edu`
+- **Email**: `admin@skoolms.edu`
 - **Password**: `admin123`
 - **Features**: Teacher management, student management, class management, fee tracking, attendance monitoring
 
 ### Teacher Access
-- **Email**: `teacher@brightscope.edu`
+- **Email**: `teacher@skoolms.edu`
 - **Password**: `teacher123`
 - **Features**: Class management, assignment creation, exam management, student performance tracking
 
 ### Student Access
-- **Email**: `student@brightscope.edu`
+- **Email**: `student@skoolms.edu`
 - **Password**: `student123`
 - **Features**: Grade tracking, attendance monitoring, assignment submission, fee information
 
@@ -85,7 +85,7 @@ Each user role has access to multiple tabs for different functionalities:
 
 ### Public Pages
 - **Home** (`/`): Landing page with features overview
-- **About** (`/about`): Information about BrightScope
+- **About** (`/about`): Information about Skoolms
 - **Events** (`/events`): Upcoming school events
 - **Classes** (`/classes`): Overview of all classes
 - **Contact** (`/contact`): Contact form and information

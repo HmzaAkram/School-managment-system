@@ -13,7 +13,7 @@ const events = [
     title: "Annual Science Exhibition",
     desc: "Students showcase their innovative science projects. Open to parents and the public. Awards for top 3 projects in each category.",
     time: "9:00 AM – 4:00 PM",
-    location: "BrightScope Academy Main Hall",
+    location: "Skoolms Academy Main Hall",
     attendees: "500+ expected",
     category: "Academic",
     color: "from-[#3B4FE8] to-[#7C3AED]",
@@ -105,7 +105,7 @@ export default function Events() {
               </span>
               <h1 className="font-sora font-extrabold text-slate-900 leading-tight mb-6" style={{ fontSize: "clamp(3rem,6vw,5rem)" }}>
                 What's Happening at{" "}
-                <span className="text-gradient">BrightScope</span>
+                <span className="text-gradient">Skoolms</span>
               </h1>
               <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto">
                 Stay up to date with school events, parent meetings, exams, and celebrations.

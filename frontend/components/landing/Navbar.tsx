@@ -58,10 +58,10 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-lg font-sora shadow-[0_4px_14px_rgba(59,79,232,0.3)]">
-              BS
+              SK
             </div>
             <span className="font-sora font-bold text-xl text-slate-800">
-              BrightScope
+              Skoolms
             </span>
           </Link>
 

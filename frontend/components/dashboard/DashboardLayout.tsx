@@ -44,10 +44,10 @@ export default function DashboardLayout({
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${colors.gradient} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
-          BS
+          SK
         </div>
         <div>
-          <div className="font-sora font-bold text-white text-sm">BrightScope</div>
+          <div className="font-sora font-bold text-white text-sm">Skoolms</div>
           <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${colors.badge} font-mono uppercase tracking-wide mt-0.5 inline-block`}>
             {roleLabels[role]}
           </div>

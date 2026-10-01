@@ -34,7 +34,7 @@ export default function Footer() {
               <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-[0_4px_14px_rgba(59,79,232,0.4)]">
                 BS
               </div>
-              <span className="font-sora font-bold text-lg text-white">BrightScope</span>
+              <span className="font-sora font-bold text-lg text-white">Skoolms</span>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed">
               The modern school management platform designed for the next generation of educators.
@@ -75,7 +75,7 @@ export default function Footer() {
           {/* Contact */}
           <div className="flex flex-col gap-4">
             <h4 className="font-sora font-semibold text-white mb-1">Contact</h4>
-            <span className="text-slate-400 text-sm">hello@brightscope.app</span>
+            <span className="text-slate-400 text-sm">hello@skoolms.app</span>
             <span className="text-slate-400 text-sm">+1 (555) 123-4567</span>
             <span className="text-slate-400 text-sm leading-relaxed">123 Education Lane<br />San Francisco, CA 94111</span>
           </div>
@@ -85,7 +85,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-500 text-sm">
-            © 2026 BrightScope. All rights reserved.
+            © 2026 Skoolms. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-slate-500 hover:text-white text-sm transition-colors">Privacy Policy</a>

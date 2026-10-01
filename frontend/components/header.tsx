@@ -26,7 +26,7 @@ export function Header() {
               BS
             </div>
             <span className="text-xl font-bold text-foreground hidden sm:inline">
-              BrightScope
+              Skoolms
             </span>
           </Link>
 

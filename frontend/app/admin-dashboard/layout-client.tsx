@@ -27,16 +27,12 @@ const navItems = [
   { label: 'HR / Staff',     href: '/admin-dashboard/teachers',   icon: <Briefcase size={18} /> },
   { label: 'Classes',        href: '/admin-dashboard/classes',    icon: <BookOpen size={18} /> },
   { label: 'Attendance',     href: '/admin-dashboard/attendance', icon: <CheckSquare size={18} /> },
-  { label: 'Timetable',      href: '#',                           icon: <Calendar size={18} /> },
-  { label: 'Examinations',   href: '#',                           icon: <ClipboardList size={18} /> },
+  { label: 'Timetable',      href: '/admin-dashboard/timetable',  icon: <Calendar size={18} /> },
+  { label: 'Examinations',   href: '/admin-dashboard/examinations', icon: <ClipboardList size={18} /> },
   { label: 'Fees',           href: '/admin-dashboard/fees',       icon: <CreditCard size={18} /> },
-  { label: 'Payroll',        href: '#',                           icon: <Wallet size={18} /> },
-  { label: 'Accounting',     href: '#',                           icon: <Calculator size={18} /> },
-  { label: 'Library',        href: '#',                           icon: <Library size={18} /> },
-  { label: 'Transport',      href: '#',                           icon: <Bus size={18} /> },
   { label: 'Notices',        href: '/admin-dashboard/notices',    icon: <BellRing size={18} /> },
-  { label: 'Reports',        href: '#',                           icon: <BarChart3 size={18} /> },
-  { label: 'Settings',       href: '#',                           icon: <Settings size={18} /> },
+  { label: 'Reports',        href: '/admin-dashboard/reports',    icon: <BarChart3 size={18} /> },
+  { label: 'Settings',       href: '/admin-dashboard/settings',   icon: <Settings size={18} /> },
 ];
 
 export default function DashboardLayoutClient({ children }: { children: React.ReactNode }) {

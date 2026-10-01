@@ -16,7 +16,7 @@ export default function Contact() {
   };
 
   const contactInfo = [
-    { icon: <Mail size={20} className="text-primary" />, label: "Email", value: "hello@brightscope.app" },
+    { icon: <Mail size={20} className="text-primary" />, label: "Email", value: "hello@skoolms.app" },
     { icon: <Phone size={20} className="text-primary" />, label: "Phone", value: "+1 (555) 123-4567" },
     { icon: <MapPin size={20} className="text-primary" />, label: "Address", value: "123 Education Lane, San Francisco, CA 94111" },
     { icon: <Clock size={20} className="text-primary" />, label: "Support Hours", value: "Mon–Fri, 9 AM – 6 PM PST" },
@@ -88,7 +88,7 @@ export default function Contact() {
                       <label className="block text-sm font-semibold text-slate-700 mb-2">School Name</label>
                       <input
                         type="text"
-                        placeholder="BrightScope Academy"
+                        placeholder="Skoolms Academy"
                         value={form.school}
                         onChange={(e) => setForm((p) => ({ ...p, school: e.target.value }))}
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
@@ -144,7 +144,7 @@ export default function Contact() {
                 <div className="bg-gradient-primary rounded-2xl p-8 text-white relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                   <h3 className="font-sora font-bold text-xl mb-2 relative z-10">Book a Free Demo</h3>
-                  <p className="text-white/80 text-sm mb-5 relative z-10">See BrightScope in action with a personalized 30-minute walkthrough.</p>
+                  <p className="text-white/80 text-sm mb-5 relative z-10">See Skoolms in action with a personalized 30-minute walkthrough.</p>
                   <button className="relative z-10 bg-white text-primary font-bold text-sm px-5 py-2.5 rounded-xl hover:shadow-lg transition-shadow">
                     Schedule Demo →
                   </button>

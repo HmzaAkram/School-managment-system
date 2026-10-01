@@ -1,4 +1,4 @@
-# BrightScope — Premium Landing Page Redesign Prompt
+# Skoolms — Premium Landing Page Redesign Prompt
 ### Complete Design & Code Specification for AI Frontend Generation
 
 > **Best Model to Use for This Task:** → **Claude Opus 4.6 (Thinking)**
@@ -11,7 +11,7 @@
 
 You are a **world-class UI/UX designer and senior frontend engineer**.
 
-Redesign the existing BrightScope School Management System landing page into a **PREMIUM, MODERN, HIGH-END SaaS landing page** that looks like it was designed by the teams behind Apple.com, Stripe.com, Linear.app, and Vercel.com.
+Redesign the existing Skoolms School Management System landing page into a **PREMIUM, MODERN, HIGH-END SaaS landing page** that looks like it was designed by the teams behind Apple.com, Stripe.com, Linear.app, and Vercel.com.
 
 The audience is **school principals and academic decision-makers** — so the design must feel **professional, trustworthy, clean, and impressive**. This is not a student project. This should look like a **billion-dollar SaaS product**.
 
@@ -107,7 +107,7 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'BrightScope — School Management System',
+  title: 'Skoolms — School Management System',
   description: 'The all-in-one platform trusted by 500+ schools. Manage students, fees, attendance, staff, and reports from one beautiful dashboard.',
 };
 
@@ -229,7 +229,7 @@ Glass card:             backdrop-blur-xl bg-white/70 border border-white/30
 **Design:**
 - Fixed top bar, full width
 - Background: `bg-white/80 backdrop-blur-xl border-b border-slate-100`
-- Logo: "BS" monogram in gradient box + "BrightScope" text in Sora bold
+- Logo: "BS" monogram in gradient box + "Skoolms" text in Sora bold
 - Nav links: Home, Features, Pricing, About, Contact — DM Sans, text-slate-600, hover:text-primary with underline animation
 - Right side: "Sign In" ghost button + "Get Demo" filled pill button (gradient bg)
 - Mobile: hamburger menu with smooth slide-down panel
@@ -257,7 +257,7 @@ Glass card:             backdrop-blur-xl bg-white/70 border border-white/30
 [HEADLINE]
 "Run Your School
  Smarter with
- BrightScope"
+ Skoolms"
 ← Sora 800, clamp(3.5rem, 7vw, 6rem)
 ← "Smarter" word has gradient text (blue→purple)
 ← Line height: 1.1
@@ -366,7 +366,7 @@ List of 5 problems, each with ❌ icon:
 ❌ Staff records in filing cabinets — impossible to search
 ```
 
-**RIGHT COLUMN — "The BrightScope Way" (Solutions)**
+**RIGHT COLUMN — "The Skoolms Way" (Solutions)**
 ```
 Background: gradient bg (primary-soft), border border-blue-100, rounded-3xl, p-8
 
@@ -435,7 +435,7 @@ Hover state:
 
 **Background:** `bg-slate-900` dark section, full width
 
-**Headline:** "See BrightScope in Action" (white text, gradient word "BrightScope")
+**Headline:** "See Skoolms in Action" (white text, gradient word "Skoolms")
 **Subtext:** "A modern, intuitive dashboard your entire team will love from day one." (text-slate-400)
 
 **Main Visual:**
@@ -496,7 +496,7 @@ Desc: "Use analytics to identify what's working, act on insights, and improve ou
 Name: "Mr. Ahmad Raza"
 Role: "Principal, Al-Noor Secondary School"
 Avatar: Initials "AR" in gradient circle
-Quote: "BrightScope completely transformed how we manage our school.
+Quote: "Skoolms completely transformed how we manage our school.
         Fee collection alone saves us 10 hours a week. I can't imagine going back."
 Stars: ⭐⭐⭐⭐⭐
 
@@ -588,7 +588,7 @@ CTA: "Contact Sales" (outline button)
  Start Today — Free."
 
 [Subtext — white/70]
-"Join 500+ schools already using BrightScope.
+"Join 500+ schools already using Skoolms.
  Setup takes less than a week. No IT team required."
 
 [2 CTA Buttons]
@@ -613,7 +613,7 @@ Column 2: Product links (Features, Pricing, Demo, Changelog)
 Column 3: Company links (About, Blog, Careers, Press)
 Column 4: Contact (email, phone, address)
 
-Bottom bar: © 2026 BrightScope · Privacy Policy · Terms of Service
+Bottom bar: © 2026 Skoolms · Privacy Policy · Terms of Service
 ```
 
 **Design:** bg-slate-900, text-slate-400, links hover:text-white
@@ -844,7 +844,7 @@ useEffect(() => {
 
 **How to split hero headline into words (JSX):**
 ```tsx
-const headline = "Run Your School Smarter with BrightScope";
+const headline = "Run Your School Smarter with Skoolms";
 const words = headline.split(' ');
 
 <h1>
@@ -1235,5 +1235,5 @@ Each file should be clean, readable, and production-ready.
 
 ---
 
-*This prompt was prepared for BrightScope School Management System — a platform serving schools worldwide.*
-*© 2026 BrightScope. All rights reserved.*
+*This prompt was prepared for Skoolms School Management System — a platform serving schools worldwide.*
+*© 2026 Skoolms. All rights reserved.*

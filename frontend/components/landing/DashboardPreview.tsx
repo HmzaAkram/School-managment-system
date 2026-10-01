@@ -57,7 +57,7 @@ export default function DashboardPreview() {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="section-headline-dash text-center max-w-3xl mx-auto mb-16 md:mb-20">
           <h2 className="font-sora font-bold text-white leading-tight mb-5" style={{ fontSize: "clamp(2.5rem,5vw,4rem)" }}>
-            See <span className="text-gradient-cyan">BrightScope</span> in Action
+            See <span className="text-gradient-cyan">Skoolms</span> in Action
           </h2>
           <p className="text-lg md:text-xl text-slate-400 leading-relaxed font-sans">
             A modern, intuitive dashboard your entire team will love from day one.
@@ -108,7 +108,7 @@ export default function DashboardPreview() {
                 </div>
                 <div className="flex-1 px-4 flex">
                   <div className="bg-slate-700 rounded-md h-5 w-full max-w-xs mx-auto flex items-center justify-center">
-                    <span className="text-slate-400 text-[9px] font-mono">dashboard.brightscope.app</span>
+                    <span className="text-slate-400 text-[9px] font-mono">dashboard.skoolms.app</span>
                   </div>
                 </div>
               </div>
@@ -118,8 +118,8 @@ export default function DashboardPreview() {
                 {/* Sidebar */}
                 <div className="w-44 bg-white border-r border-slate-200 hidden sm:flex flex-col p-3 gap-1">
                   <div className="flex items-center gap-2 mb-3 p-1">
-                    <div className="w-6 h-6 rounded-md bg-gradient-primary flex items-center justify-center text-white text-[9px] font-bold">BS</div>
-                    <span className="text-[11px] font-bold text-slate-700">BrightScope</span>
+                    <div className="w-6 h-6 rounded-md bg-gradient-primary flex items-center justify-center text-white text-[9px] font-bold">SK</div>
+                    <span className="text-[11px] font-bold text-slate-700">Skoolms</span>
                   </div>
                   {[["📊","Dashboard",true],["👨‍🎓","Students",false],["📋","Attendance",false],["💰","Fees",false],["💬","Messages",false],["📈","Reports",false]].map(([icon, label, active]) => (
                     <div key={label as string} className={`h-8 rounded-lg flex items-center px-2 gap-2 ${active ? "bg-primary/10" : ""}`}>
@@ -134,7 +134,7 @@ export default function DashboardPreview() {
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="text-[11px] font-bold text-slate-800">Good morning, Principal! 👋</div>
-                      <div className="text-[9px] text-slate-500">BrightScope Academy Dashboard</div>
+                      <div className="text-[9px] text-slate-500">Skoolms Academy Dashboard</div>
                     </div>
                     <div className="w-7 h-7 rounded-full bg-gradient-primary flex items-center justify-center text-white text-[9px] font-bold">P</div>
                   </div>

@@ -43,14 +43,14 @@ export default function About() {
               className="text-center max-w-4xl mx-auto"
             >
               <span className="inline-block font-mono text-xs uppercase tracking-[0.15em] px-3 py-1 rounded-full mb-6" style={{ backgroundColor: "rgba(59,79,232,0.08)", color: "#3B4FE8" }}>
-                About BrightScope
+                About Skoolms
               </span>
               <h1 className="font-sora font-extrabold text-slate-900 leading-tight mb-6" style={{ fontSize: "clamp(3rem,6vw,5rem)" }}>
                 Built by Educators,{" "}
                 <span className="text-gradient">for Educators</span>
               </h1>
               <p className="text-lg md:text-xl text-slate-500 leading-relaxed max-w-2xl mx-auto">
-                BrightScope was founded by a team of educators and engineers who believed schools deserved better than spreadsheets and paper forms.
+                Skoolms was founded by a team of educators and engineers who believed schools deserved better than spreadsheets and paper forms.
               </p>
             </motion.div>
           </div>
@@ -66,7 +66,7 @@ export default function About() {
                   We believe that when administrators spend less time on paperwork, they have more time for what truly matters — nurturing students and supporting teachers.
                 </p>
                 <p className="text-lg text-slate-600 leading-relaxed mb-6">
-                  BrightScope is dedicated to making world-class school management tools accessible to every school, regardless of size or budget.
+                  Skoolms is dedicated to making world-class school management tools accessible to every school, regardless of size or budget.
                 </p>
                 <ul className="space-y-3">
                   {["Total transparency for parents and students", "Less admin work, more teaching", "Real-time data to catch problems early", "Designed for schools in emerging markets"].map((item, i) => (

@@ -13,7 +13,7 @@ const packages = [
     duration: "7 Days Delivery",
     target: "Best for small schools testing digital management.",
     features: [
-      "Complete BrightScope frontend",
+      "Complete Skoolms frontend",
       "Student Dashboard (Grades, Fees, Diary)",
       "Teacher Dashboard (Attendance, Reviews)",
       "Admin Dashboard (Manage Users, Notices)",

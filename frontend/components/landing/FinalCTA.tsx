@@ -62,7 +62,7 @@ export default function FinalCTA() {
           id="cta-sub"
           className="text-lg md:text-xl text-white/80 font-sans max-w-2xl mb-12 leading-relaxed"
         >
-          Join 500+ schools already using BrightScope.
+          Join 500+ schools already using Skoolms.
           Setup takes less than a week. No IT team required.
         </p>
 

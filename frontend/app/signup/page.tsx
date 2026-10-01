@@ -32,9 +32,9 @@ export default function SignUp() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 relative z-10">
           <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center font-sora font-bold text-white text-sm">
-            BS
+            SK
           </div>
-          <span className="font-sora font-bold text-xl text-white">BrightScope</span>
+          <span className="font-sora font-bold text-xl text-white">Skoolms</span>
         </Link>
 
         {/* Middle content */}
@@ -43,7 +43,7 @@ export default function SignUp() {
             The smartest way to run your school.
           </h2>
           <p className="text-white/80 text-lg leading-relaxed mb-10">
-            Join 500+ schools already saving time and improving outcomes with BrightScope.
+            Join 500+ schools already saving time and improving outcomes with Skoolms.
           </p>
 
           <ul className="space-y-4">
@@ -67,7 +67,7 @@ export default function SignUp() {
         {/* Testimonial */}
         <div className="relative z-10 bg-white/10 border border-white/20 backdrop-blur rounded-2xl p-5">
           <p className="text-white/90 text-sm italic mb-4">
-            "We set up BrightScope in 5 days. The support team was incredible. Now I can manage everything from my phone."
+            "We set up Skoolms in 5 days. The support team was incredible. Now I can manage everything from my phone."
           </p>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center font-bold text-white text-xs">AR</div>
@@ -84,8 +84,8 @@ export default function SignUp() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <Link href="/" className="flex items-center gap-3 mb-10 lg:hidden">
-            <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center font-sora font-bold text-white text-xs shadow-md">BS</div>
-            <span className="font-sora font-bold text-lg text-slate-800">BrightScope</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center font-sora font-bold text-white text-xs shadow-md">SK</div>
+            <span className="font-sora font-bold text-lg text-slate-800">Skoolms</span>
           </Link>
 
           {submitted ? (
@@ -124,7 +124,7 @@ export default function SignUp() {
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">School Name</label>
                   <input
-                    type="text" placeholder="BrightScope Academy" required
+                    type="text" placeholder="Skoolms Academy" required
                     value={form.school}
                     onChange={(e) => setForm((p) => ({ ...p, school: e.target.value }))}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"

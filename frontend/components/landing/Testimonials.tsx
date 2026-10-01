@@ -8,7 +8,7 @@ const testimonials = [
     role: "Principal, Al-Noor Secondary School",
     initials: "AR",
     avatarGradient: "from-[#3B4FE8] to-[#7C3AED]",
-    quote: "BrightScope completely transformed how we manage our school. Fee collection alone saves us 10 hours a week. I can't imagine going back.",
+    quote: "Skoolms completely transformed how we manage our school. Fee collection alone saves us 10 hours a week. I can't imagine going back.",
   },
   {
     name: "Ms. Sarah Malik",
