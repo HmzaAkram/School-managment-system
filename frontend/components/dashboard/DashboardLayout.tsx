@@ -5,9 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Users, CheckSquare, CreditCard,
-  BarChart2, MessageSquare, Briefcase, BookOpen,
-  Calendar, Menu, X, LogOut, Bell, Search, ChevronRight,
+  LogOut, Bell, Search, ChevronRight, Menu, X
 } from "lucide-react";
 
 interface NavItem {
@@ -26,9 +24,9 @@ interface DashboardLayoutProps {
 }
 
 const roleColors = {
-  admin:   { gradient: "from-[#3B4FE8] to-[#7C3AED]", badge: "bg-blue-100 text-blue-700" },
-  teacher: { gradient: "from-[#06B6D4] to-[#6366F1]", badge: "bg-cyan-100 text-cyan-700" },
-  student: { gradient: "from-[#7C3AED] to-[#EC4899]", badge: "bg-purple-100 text-purple-700" },
+  admin:   { gradient: "from-[#C4993C] to-[#D4A843]", badge: "bg-amber-100/10 text-amber-500" },
+  teacher: { gradient: "from-[#A37C27] to-[#C4993C]", badge: "bg-amber-100/10 text-amber-500" },
+  student: { gradient: "from-[#D4A843] to-[#E3C273]", badge: "bg-amber-100/10 text-amber-500" },
 };
 
 const roleLabels = { admin: "Administrator", teacher: "Teacher", student: "Student" };
@@ -42,15 +40,15 @@ export default function DashboardLayout({
   const colors = roleColors[role];
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[#1A1A1A] text-white">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-100">
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${colors.gradient} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
           BS
         </div>
         <div>
-          <div className="font-sora font-bold text-slate-800 text-sm">BrightScope</div>
-          <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${colors.badge} font-mono uppercase tracking-wide`}>
+          <div className="font-sora font-bold text-white text-sm">BrightScope</div>
+          <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${colors.badge} font-mono uppercase tracking-wide mt-0.5 inline-block`}>
             {roleLabels[role]}
           </div>
         </div>
@@ -68,10 +66,10 @@ export default function DashboardLayout({
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                 isActive
                   ? `bg-gradient-to-r ${colors.gradient} text-white shadow-md`
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  : "text-slate-400 hover:bg-white/5 hover:text-white"
               }`}
             >
-              <span className={isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600"}>
+              <span className={isActive ? "text-white" : "text-slate-400 group-hover:text-white"}>
                 {item.icon}
               </span>
               {item.label}
@@ -82,18 +80,18 @@ export default function DashboardLayout({
       </nav>
 
       {/* User footer */}
-      <div className="p-4 border-t border-slate-100">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+      <div className="p-4 border-t border-white/10">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
           <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${colors.gradient} flex items-center justify-center text-white font-bold text-xs flex-shrink-0`}>
             {userInitials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-slate-800 truncate">{userName}</div>
-            <div className="text-xs text-slate-500">{roleLabels[role]}</div>
+            <div className="text-sm font-semibold text-white truncate">{userName}</div>
+            <div className="text-xs text-slate-400">{roleLabels[role]}</div>
           </div>
           <button
             onClick={onLogout}
-            className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50"
+            className="text-slate-400 hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-white/10"
             title="Logout"
           >
             <LogOut size={16} />
@@ -104,9 +102,9 @@ export default function DashboardLayout({
   );
 
   return (
-    <div className="min-h-screen flex bg-[#F8F9FE]">
+    <div className="min-h-screen flex bg-[var(--color-bg)]">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 flex-shrink-0 shadow-sm">
+      <aside className="hidden lg:flex flex-col w-64 bg-[#1A1A1A] border-r border-[#2A2A2A] flex-shrink-0 shadow-sm fixed inset-y-0 left-0 z-40">
         <SidebarContent />
       </aside>
 
@@ -126,7 +124,7 @@ export default function DashboardLayout({
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200 z-50 lg:hidden shadow-xl"
+              className="fixed left-0 top-0 bottom-0 w-64 bg-[#1A1A1A] border-r border-[#2A2A2A] z-50 lg:hidden shadow-xl"
             >
               <SidebarContent />
             </motion.aside>
@@ -135,7 +133,7 @@ export default function DashboardLayout({
       </AnimatePresence>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
         {/* Topbar */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center gap-4 px-4 md:px-6 sticky top-0 z-30 shadow-sm">
           <button
@@ -149,7 +147,7 @@ export default function DashboardLayout({
           <div className="flex-1 max-w-sm hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
             <Search size={15} className="text-slate-400" />
             <input
-              placeholder="Search..."
+              placeholder="Search everywhere..."
               className="bg-transparent text-sm text-slate-600 outline-none w-full placeholder-slate-400"
             />
           </div>

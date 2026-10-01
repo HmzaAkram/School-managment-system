@@ -403,17 +403,17 @@ function getActivityIcon(type: "success" | "info" | "warning" | "primary") {
 // ────────────────────────────────────────────────────────────
 
 const attendanceChartConfig = {
-  present: { label: "Present", color: "#3B82F6" },
+  present: { label: "Present", color: "var(--color-primary)" },
   absent: { label: "Absent", color: "#F43F5E" },
   late: { label: "Late", color: "#F59E0B" },
 };
 
 const feeChartConfig = {
-  collected: { label: "Collected", color: "#3B82F6" },
+  collected: { label: "Collected", color: "var(--color-primary)" },
   outstanding: { label: "Outstanding", color: "#F59E0B" },
 };
 
-const subjectColors = ["#3B82F6", "#06B6D4", "#10B981", "#8B5CF6", "#F59E0B", "#EC4899"];
+const subjectColors = ["var(--color-primary)", "var(--color-accent)", "#10B981", "#8B5CF6", "#F59E0B", "#EC4899"];
 
 // ────────────────────────────────────────────────────────────
 // MAIN DASHBOARD COMPONENT
@@ -440,8 +440,8 @@ export default function AdminOverview() {
       value: formatNumber(data.students.total),
       change: data.students.change,
       icon: <GraduationCap size={20} />,
-      iconBg: "bg-blue-50 text-blue-600",
-      accent: "border-l-blue-500",
+      iconBg: "bg-primary/10 text-primary",
+      accent: "border-l-primary",
     },
     {
       label: "Total Staff",
@@ -456,8 +456,8 @@ export default function AdminOverview() {
       value: `${data.attendance.rate}%`,
       change: data.attendance.rate > 93 ? data.attendance.rate - 93 : -(93 - data.attendance.rate),
       icon: <CheckCircle2 size={20} />,
-      iconBg: "bg-emerald-50 text-emerald-600",
-      accent: "border-l-emerald-500",
+      iconBg: "bg-amber-50 text-amber-600",
+      accent: "border-l-amber-500",
     },
     {
       label: "Fee Collection",

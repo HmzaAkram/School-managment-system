@@ -8,7 +8,7 @@ import { Eye, EyeOff, Check } from "lucide-react";
 
 export default function Login() {
   const router = useRouter();
-  const [role, setRole] = useState<'admin' | 'teacher' | 'student'>('admin');
+  const [role, setRole] = useState<'super-admin' | 'admin' | 'teacher' | 'student'>('super-admin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -19,9 +19,10 @@ export default function Login() {
     setError('');
 
     const valid = 
-      (role === 'admin' && email === 'admin@brightscope.edu' && password === 'admin123') ||
-      (role === 'teacher' && email === 'teacher@brightscope.edu' && password === 'teacher123') ||
-      (role === 'student' && email === 'student@brightscope.edu' && password === 'student123');
+      (role === 'super-admin' && email === 'super@skoolms.edu' && password === 'super123') ||
+      (role === 'admin' && email === 'admin@skoolms.edu' && password === 'admin123') ||
+      (role === 'teacher' && email === 'teacher@skoolms.edu' && password === 'teacher123') ||
+      (role === 'student' && email === 'student@skoolms.edu' && password === 'student123');
 
     if (valid) {
       localStorage.setItem('userRole', role);
@@ -33,15 +34,17 @@ export default function Login() {
   };
 
   const getRoleGradient = () => {
-    if (role === 'admin') return 'bg-gradient-to-r from-[#3B4FE8] to-[#7C3AED]';
-    if (role === 'teacher') return 'bg-gradient-to-r from-[#06B6D4] to-[#6366F1]';
-    return 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899]';
+    if (role === 'super-admin') return 'bg-gradient-to-r from-[#2D2823] to-[#4A453F]';
+    if (role === 'admin') return 'bg-gradient-to-r from-[#C4993C] to-[#D4A843]';
+    if (role === 'teacher') return 'bg-gradient-to-r from-[#A37C27] to-[#C4993C]';
+    return 'bg-gradient-to-r from-[#D4A843] to-[#E3C273]';
   };
 
   const getRoleGradientText = () => {
-    if (role === 'admin') return 'text-transparent bg-clip-text bg-gradient-to-r from-[#3B4FE8] to-[#7C3AED]';
-    if (role === 'teacher') return 'text-transparent bg-clip-text bg-gradient-to-r from-[#06B6D4] to-[#6366F1]';
-    return 'text-transparent bg-clip-text bg-gradient-to-r from-[#7C3AED] to-[#EC4899]';
+    if (role === 'super-admin') return 'text-transparent bg-clip-text bg-gradient-to-r from-[#2D2823] to-[#4A453F]';
+    if (role === 'admin') return 'text-transparent bg-clip-text bg-gradient-to-r from-[#C4993C] to-[#D4A843]';
+    if (role === 'teacher') return 'text-transparent bg-clip-text bg-gradient-to-r from-[#A37C27] to-[#C4993C]';
+    return 'text-transparent bg-clip-text bg-gradient-to-r from-[#D4A843] to-[#E3C273]';
   };
 
   const features = [
@@ -118,9 +121,9 @@ export default function Login() {
             <p className="text-slate-500 mb-8">Select your role to access your dashboard.</p>
 
             <form onSubmit={handleLogin} className="space-y-5">
-              {/* Role Select */}
-              <div className="grid grid-cols-3 gap-3 mb-2">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-2">
                 {[
+                  { value: 'super-admin', label: 'Super Admin', icon: '👑' },
                   { value: 'admin', label: 'Admin', icon: '⚙️' },
                   { value: 'teacher', label: 'Teacher', icon: '👨‍🏫' },
                   { value: 'student', label: 'Student', icon: '👨‍🎓' },
