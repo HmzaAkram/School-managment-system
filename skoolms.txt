@@ -1,0 +1,53 @@
+I want to make an website for school managment system where school admin princicple can track all the finance expence student attend teacher attendence basically har bnda apni har cheez website se track kr skta hu ga student teacher etc 
+
+
+user role:
+
+1. Super admin (jo apne pass se sare school create kr skta hu ga ur ur total kitna revenue aa rha wo sb bhi track kr skta ha baki tum smjho iss ke pass har school ki profile ho gi jis me kitne student ha teacher ur jo jo cheeze hote ha wo bhi add kr skta ha basically full stat wagera ho ga pore system ka )
+
+2. school admin(jo apne passe se student staff expence student profile teacher profile basically har ek cheez wo track kr skta hu scholl ki)
+
+3. Teacher/staff (teacher apne pass se student mark kr skte ha apni over all atendence dek skte ha)
+
+4. student/parent (student apne attence check kr skte ha dairy dek skte ha apni sees check krskte ha kitni pandin ha overall studen apne pass se cheeze track krskta ha)
+
+ 
+here some core pages (jo lazmi ho ge page me)
+
+super admin role 
+1. Super admin dashboard (yha sare stat ayy ga montly basis pr admin stats check kr skta hu kitne expence hui ha software kitna revenue generate hua agr koi ,Financial Overview)
+2. school list page (jo jo school add ho gi humare website pr iss page me un school ke admin ka name number location)
+3. school profile{schoolname} (school Information me hu ga jis me school name admin name number address login email/username pass, Financial Summary jis me kitne time ka contract hua tha jis me se abhi tk kitna pay hua ha kitn baki ha proper Recent Transactions huga iss page me isse company ka etc )
+4. Payments (Record and track received payments , super admin full Transaction History dek skta ha  ur sare filter bhi ho ge is page me i mean school wise date wise)
+5. Ledger (View transaction history and running balances,with Ledger Filters)
+6. reports
+7. Support Queries(Manage and reply to queries from school)
+8. Setting
+
+school admin
+9. School admin dashboard (yha sare stat ayy ga by default today ka data ayy ga montly basis pr admin stats check kr skta hu kitne expence hui ha software kitna revenue generate hua agr koi kitne fees collect hui ha kitne baki ha kitne student aj ayy ha kitne teachers ayy ha kitne absent ha etc scool ke sare data, Financial Overview)
+10. student classes page (is page me bhi classes ki sare list agy gi ur admin asign kr sktahar class ko ek teacher fr wo class teacher students ki ateendance mark kr skta hu ga apni acount login kr ke axha list me class name ho ga assig teacher ka name ayy ga average attenced ayy gaadmin apne pass se class create kr skta ha ur jo class pass out hu gye un ka bhi data bhi para ho ur end me view,edit,passout ka icon ho ga)
+11. student class page (ye page student classes page me view ka button click krne pr opne ho ga iss page me student ki list ho ga jo us class me ho ga  ur end me view ka button ho ga )
+12. student profile (ye page student class page me view ka button click krne pr opne ho ga iss page me student ki attendence history fees history remaing fees test marks etc ayy ga)
+13. teachers page (iss page teacher ki list ho ga ur iss page se admin teacher staff add kr skta ha ur end me view ka button ho ga)
+14. teacher profile (ye page teacher page me view ka button click krne pr opne ho ga iss page me student ki attendence mark kr skta ho ga agr wo teacher use assign hua tu salery dek skta ha kis month ki kitni paid hui ha etc )
+15. fees page (Record and track received fees)
+16. expance page (Record and track expance)
+17. report page
+18. Support Queries(send and reply to queries from company)
+
+
+Teacher/staff
+19. 
+
+
+student/ parent
+
+
+
+
+
+
+
+
+
