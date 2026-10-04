@@ -10,8 +10,9 @@ class ExamSchedule extends Model
     use HasFactory;
 
     protected $fillable = [
-        'exam_id', 'class_id', 'subject_id', 'date',
-        'start_time', 'end_time', 'room_number', 'max_marks', 'pass_marks',
+        'exam_id', 'class_id', 'section_id', 'subject_id', 'date',
+        'start_time', 'end_time', 'room_number', 'invigilator',
+        'max_marks', 'pass_marks',
     ];
 
     protected $casts = [
@@ -30,8 +31,18 @@ class ExamSchedule extends Model
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
+    public function section()
+    {
+        return $this->belongsTo(Section::class);
+    }
+
     public function subject()
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function marks()
+    {
+        return $this->hasMany(Mark::class, 'subject_id', 'subject_id');
     }
 }

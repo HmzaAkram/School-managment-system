@@ -10,8 +10,8 @@ class SchoolPayment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'school_id', 'contract_id', 'transaction_id', 'amount', 'payment_date',
-        'payment_method', 'status', 'invoice_url', 'notes',
+        'school_id', 'contract_id', 'school_contract_id', 'transaction_id', 'amount', 'payment_date',
+        'payment_method', 'reference', 'description', 'notes', 'status', 'invoice_url', 'month_for',
     ];
 
     protected $casts = [
@@ -27,5 +27,15 @@ class SchoolPayment extends Model
     public function contract()
     {
         return $this->belongsTo(SchoolContract::class, 'contract_id');
+    }
+
+    public function schoolContract()
+    {
+        return $this->belongsTo(SchoolContract::class, 'school_contract_id');
+    }
+
+    public function ledgerEntry()
+    {
+        return $this->hasOne(LedgerEntry::class, 'school_payment_id');
     }
 }

@@ -10,8 +10,9 @@ class FeePayment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'school_id', 'fee_invoice_id', 'student_id', 'transaction_id',
-        'amount', 'payment_method', 'payment_date', 'status', 'received_by', 'remarks',
+        'school_id', 'fee_invoice_id', 'student_id', 'transaction_id', 'receipt_no',
+        'amount', 'payment_method', 'reference', 'remarks', 'notes',
+        'payment_date', 'status', 'received_by',
     ];
 
     protected $casts = [

@@ -25,4 +25,14 @@ class Section extends Model
     {
         return $this->hasMany(Student::class, 'section_id');
     }
+
+    public function timetables()
+    {
+        return $this->hasMany(Timetable::class);
+    }
+
+    public function examSchedules()
+    {
+        return $this->hasMany(ExamSchedule::class);
+    }
 }

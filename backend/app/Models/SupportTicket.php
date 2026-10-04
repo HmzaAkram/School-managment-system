@@ -10,9 +10,16 @@ class SupportTicket extends Model
     use HasFactory;
 
     protected $fillable = [
-        'ticket_id', 'school_id', 'user_id', 'subject', 'category',
+        'ticket_id', 'school_id', 'user_id', 'created_by', 'subject', 'category',
         'priority', 'status', 'description', 'assigned_to',
     ];
+
+    protected $appends = ['reference_number'];
+
+    public function getReferenceNumberAttribute(): string
+    {
+        return $this->ticket_id ?: ('#'.$this->id);
+    }
 
     public function school()
     {

@@ -10,13 +10,13 @@ class AuditLog extends Model
     use HasFactory;
 
     protected $fillable = [
-        'school_id', 'user_id', 'action', 'module',
-        'ip_address', 'user_agent', 'old_values', 'new_values',
+        'school_id', 'user_id', 'action', 'entity_type', 'entity_id',
+        'old_data', 'new_data', 'ip_address',
     ];
 
     protected $casts = [
-        'old_values' => 'array',
-        'new_values' => 'array',
+        'old_data' => 'array',
+        'new_data' => 'array',
     ];
 
     public function school()

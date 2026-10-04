@@ -11,11 +11,14 @@ class Diary extends Model
 
     protected $fillable = [
         'school_id', 'teacher_id', 'class_id', 'section_id', 'subject_id',
-        'date', 'task', 'notes',
+        'date', 'task', 'notes', 'note', 'type',
+        'completed', 'parent_acknowledged_at',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'completed' => 'boolean',
+        'parent_acknowledged_at' => 'datetime',
     ];
 
     public function school()

@@ -26,18 +26,18 @@ export default function SuperAdminDashboard() {
         const [statsRes, schoolsRes, expensesRes] = await Promise.all([
           api.get("/super-admin/stats"),
           api.get("/super-admin/schools?per_page=15"),
-          api.get("/super-admin/expenses?per_page=100"),
+          api.get("/super-admin/expenses?per_page=4"),
         ]);
         setStats(statsRes);
         setSchoolsList(schoolsRes?.data || []);
-        const exps = expensesRes?.data || [];
-        setExpensesList(exps);
-        const byMonth: Record<string, number> = {};
-        exps.forEach((e: any) => {
-          const m = String(e.expense_date || "").slice(0, 7);
-          if (m) byMonth[m] = (byMonth[m] || 0) + Number(e.amount || 0);
-        });
-        setMonthlyExpenses(byMonth);
+        setExpensesList(expensesRes?.data || []);
+        // Monthly expense totals come straight from the server-side aggregate so
+        // the P&L chart is never limited by a truncated expense page.
+        setMonthlyExpenses(
+          Object.fromEntries(
+            (statsRes?.monthly_expenses || []).map((m: any) => [m.month, Number(m.total || 0)])
+          )
+        );
       } catch (err: any) {
         if (err?.status === 401) { router.push("/login"); return; }
         setError("Unable to load dashboard data. Please try again.");
@@ -56,10 +56,13 @@ export default function SuperAdminDashboard() {
   const totalExpensesThisMonth = summary.total_expenses ?? 0;
   const netProfit = summary.net_profit ?? 0;
   const profitMarginPercent = totalPaidRevenue > 0 ? ((netProfit / totalPaidRevenue) * 100).toFixed(1) : "0";
-  const totalPendingDue = schoolsList.reduce((acc, s) => acc + Number(s.pending_amount || 0), 0);
-  const totalContractValueAll = schoolsList.reduce((acc, s) => acc + Number(s.contract_amount || 0), 0);
+  // All totals come from the server-side aggregate in /super-admin/stats so they
+  // cover every row, not just the current page of the contracts table.
+  const totalPendingDue = summary.total_pending_amount ?? 0;
+  const totalContractValueAll = summary.total_contract_value ?? 0;
   const latestMonth = monthlyRevenue.length > 0 ? monthlyRevenue[0] : null;
   const monthlySaaSRecurring = latestMonth ? Number(latestMonth.total || 0) : 0;
+  const annualRecurring = summary.arr ?? 0;
 
   // Contract-expiry alert: first school with contract_end within 60 days, else first with pending balance
   const now = new Date();
@@ -200,12 +203,12 @@ export default function SuperAdminDashboard() {
               {totalSchools} Partner Schools
             </span>
           </div>
-          <p className="text-[11px] font-bold text-[#8C847B] uppercase tracking-wider">Total Contract Value (ARR)</p>
+          <p className="text-[11px] font-bold text-[#8C847B] uppercase tracking-wider">Annual Recurring Revenue (ARR)</p>
           <div className="font-serif font-bold text-2xl text-[#23201B] mt-1">
-            PKR {(totalContractValueAll / 1000000).toFixed(2)}M
+            PKR {(annualRecurring / 1000000).toFixed(2)}M
           </div>
           <div className="text-[11px] text-[#706B62] mt-2">
-            {summary.active_contracts ?? 0} active • {summary.pending_contracts ?? 0} pending contracts
+            PKR {totalContractValueAll.toLocaleString()} total contracted • {totalSchools} schools
           </div>
         </div>
 
@@ -477,7 +480,7 @@ export default function SuperAdminDashboard() {
               {expensesList.length === 0 && (
                 <p className="text-xs text-[#8C847B] py-4 text-center">No platform expenses recorded.</p>
               )}
-              {expensesList.slice(0, 4).map((exp) => (
+              {expensesList.map((exp) => (
                 <div key={exp.id} className="p-3 rounded-xl border border-[#EBE5D9] bg-[#FAF8F5] flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-white border border-[#EBE5D9] flex items-center justify-center text-[#C4993C] flex-shrink-0">
@@ -522,12 +525,9 @@ export default function SuperAdminDashboard() {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-serif font-bold text-lg text-[#23201B]">School Subdomain & Whitelabel Portals</h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Wildcard SSL Active
-              </span>
             </div>
             <p className="text-xs text-[#706B62] mt-0.5">
-              Dedicated isolated subdomains & custom branded login URLs for each partner school.
+              Dedicated isolated subdomains &amp; custom branded login URLs for each partner school.
             </p>
           </div>
         </div>
@@ -537,12 +537,12 @@ export default function SuperAdminDashboard() {
             <div key={d.id} className="p-4 rounded-xl bg-[#FAF8F5] border border-[#EBE5D9] flex flex-col justify-between">
               <div>
                 <div className="font-bold text-xs text-[#23201B]">{d.name}</div>
-                <div className="font-mono text-[11px] text-[#996B1E] mt-1">{d.domain || (d.code ? `${String(d.code).toLowerCase()}.skoolms.edu` : "—")}</div>
+                <div className="font-mono text-[11px] text-[#996B1E] mt-1">{d.domain || "—"}</div>
                 <div className="text-[10px] text-[#706B62] mt-0.5">{[d.city, d.state].filter(Boolean).join(", ") || d.address || "—"}</div>
               </div>
               <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#EBE5D9] text-[10px]">
-                <span className="text-emerald-700 font-bold">🔒 SSL: Active</span>
-                <span className="text-[#706B62]">{d.plan}</span>
+                <span className="text-[#706B62]">{d.code || "—"}</span>
+                <span className="text-[#706B62]">{d.plan || "—"}</span>
               </div>
             </div>
           ))}

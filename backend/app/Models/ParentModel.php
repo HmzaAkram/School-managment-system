@@ -12,9 +12,27 @@ class ParentModel extends Model
     protected $table = 'parent_profiles';
 
     protected $fillable = [
-        'school_id', 'user_id', 'father_name', 'mother_name', 'occupation',
-        'income', 'alternate_phone', 'address',
+        'school_id', 'user_id',
+        'father_name', 'father_phone', 'father_email', 'father_occupation',
+        'mother_name', 'mother_phone', 'mother_email', 'mother_occupation',
+        'occupation', 'income', 'alternate_phone',
+        'guardian_name', 'guardian_phone', 'guardian_relation',
+        'address', 'emergency_contact',
     ];
+
+    protected $casts = [
+        'income' => 'decimal:2',
+    ];
+
+    public function getNameAttribute(): string
+    {
+        return $this->father_name ?: ($this->guardian_name ?: 'Guardian');
+    }
+
+    public function getPhoneAttribute(): ?string
+    {
+        return $this->father_phone ?: ($this->guardian_phone ?: $this->user?->phone);
+    }
 
     public function school()
     {

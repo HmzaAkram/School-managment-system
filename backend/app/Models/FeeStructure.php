@@ -11,11 +11,14 @@ class FeeStructure extends Model
 
     protected $fillable = [
         'school_id', 'class_id', 'academic_year_id', 'name',
-        'amount', 'frequency', 'due_day', 'description', 'status',
+        'amount', 'frequency', 'due_day', 'description',
+        'academic_year', 'status', 'is_active',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'due_day' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     public function school()
@@ -31,5 +34,10 @@ class FeeStructure extends Model
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(FeeInvoice::class);
     }
 }

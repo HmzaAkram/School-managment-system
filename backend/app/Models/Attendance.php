@@ -10,7 +10,7 @@ class Attendance extends Model
     use HasFactory;
 
     protected $fillable = [
-        'school_id', 'student_id', 'teacher_id', 'class_id', 'section_id',
+        'school_id', 'student_id', 'teacher_id', 'class_id', 'section_id', 'subject_id',
         'date', 'status', 'type', 'remarks', 'marked_by', 'user_id',
     ];
 
@@ -41,5 +41,15 @@ class Attendance extends Model
     public function section()
     {
         return $this->belongsTo(Section::class);
+    }
+
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
+    public function marker()
+    {
+        return $this->belongsTo(User::class, 'marked_by');
     }
 }

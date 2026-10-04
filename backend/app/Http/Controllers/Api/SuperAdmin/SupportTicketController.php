@@ -2,12 +2,30 @@
 
 namespace App\Http\Controllers\Api\SuperAdmin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
 use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 
-class SupportTicketController extends Controller
+class SupportTicketController extends ApiController
 {
+    public function stats(Request $request)
+    {
+        $query = SupportTicket::query();
+
+        if (! $request->user()->isSuperAdmin()) {
+            $query->where('school_id', $request->user()->school_id);
+        }
+
+        return response()->json([
+            'total' => (clone $query)->count(),
+            'open' => (clone $query)->where('status', 'Open')->count(),
+            'in_progress' => (clone $query)->where('status', 'In Progress')->count(),
+            'resolved' => (clone $query)->where('status', 'Resolved')->count(),
+            'closed' => (clone $query)->where('status', 'Closed')->count(),
+            'by_priority' => (clone $query)->select('priority')->selectRaw('COUNT(*) as total')->groupBy('priority')->pluck('total', 'priority'),
+        ]);
+    }
+
     public function index(Request $request)
     {
         $query = SupportTicket::with(['school', 'user']);
@@ -40,6 +58,7 @@ class SupportTicketController extends Controller
             'ticket_id' => 'TCK-' . strtoupper(uniqid()),
             'school_id' => $request->user()->school_id,
             'user_id' => $request->user()->id,
+            'created_by' => $request->user()->id,
             'subject' => $request->subject,
             'category' => $request->category,
             'priority' => $request->priority,

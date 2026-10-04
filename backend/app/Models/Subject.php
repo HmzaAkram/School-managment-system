@@ -9,7 +9,13 @@ class Subject extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['school_id', 'name', 'code', 'type', 'pass_marks', 'total_marks', 'description'];
+    protected $fillable = ['school_id', 'name', 'code', 'type', 'pass_marks', 'total_marks', 'credits', 'description', 'status'];
+
+    protected $casts = [
+        'pass_marks' => 'decimal:2',
+        'total_marks' => 'decimal:2',
+        'credits' => 'decimal:1',
+    ];
 
     public function school()
     {

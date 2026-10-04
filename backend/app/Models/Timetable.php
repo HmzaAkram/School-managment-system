@@ -11,7 +11,12 @@ class Timetable extends Model
 
     protected $fillable = [
         'school_id', 'class_id', 'section_id', 'subject_id', 'teacher_id',
-        'day_of_week', 'start_time', 'end_time', 'room_number',
+        'day_of_week', 'day', 'period', 'type',
+        'start_time', 'end_time', 'room_number', 'room',
+    ];
+
+    protected $casts = [
+        'period' => 'integer',
     ];
 
     public function school()
@@ -37,5 +42,11 @@ class Timetable extends Model
     public function teacher()
     {
         return $this->belongsTo(Teacher::class);
+    }
+
+    /** Normalised weekday name, preferring the enum `day` column. */
+    public function getDayNameAttribute(): string
+    {
+        return $this->day ?: $this->day_of_week;
     }
 }

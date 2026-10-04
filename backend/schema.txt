@@ -1,0 +1,771 @@
+DATABASE: skoolms
+GENERATED: 2026-10-04 10:46:43
+
+== academic_years (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  name varchar(255) null=NO key=
+  start_date date null=NO key=
+  end_date date null=NO key=
+  is_active tinyint(1) null=NO default='0' key=
+  is_current tinyint(1) null=NO default='0' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+
+== announcements (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  title varchar(255) null=NO key=
+  content text null=YES default='NULL' key=
+  description text null=YES default='NULL' key=
+  publish_date date null=YES default='NULL' key=
+  expiry_date date null=YES default='NULL' key=
+  date date null=YES default='NULL' key=
+  status varchar(30) null=NO default=''Published'' key=
+  priority enum('Low','Medium','High') null=NO default=''Medium'' key=
+  pinned tinyint(1) null=NO default='0' key=
+  category varchar(50) null=YES default='NULL' key=
+  target_audience varchar(50) null=NO default=''All'' key=
+  class_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  attachment varchar(255) null=YES default='NULL' key=
+  is_published tinyint(1) null=NO default='1' key=
+  created_by bigint(20) unsigned null=YES default='NULL' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  deleted_at timestamp null=YES default='NULL' key=
+  FK class_id -> classes.id
+  FK created_by -> users.id
+  FK school_id -> schools.id
+
+== assignments (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  teacher_id bigint(20) unsigned null=NO key=MUL
+  class_id bigint(20) unsigned null=NO key=MUL
+  section_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  subject_id bigint(20) unsigned null=NO key=MUL
+  title varchar(255) null=NO key=
+  description text null=YES default='NULL' key=
+  attachment_url varchar(255) null=YES default='NULL' key=
+  attachment varchar(255) null=YES default='NULL' key=
+  due_date date null=NO key=
+  max_marks decimal(6,2) null=NO default='100.00' key=
+  max_score decimal(6,2) null=NO default='100.00' key=
+  status enum('Active','Closed','Draft') null=NO default=''Active'' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK class_id -> classes.id
+  FK school_id -> schools.id
+  FK section_id -> sections.id
+  FK subject_id -> subjects.id
+  FK teacher_id -> teachers.id
+
+== assignment_submissions (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  assignment_id bigint(20) unsigned null=NO key=MUL
+  student_id bigint(20) unsigned null=NO key=MUL
+  content text null=YES default='NULL' key=
+  file_url varchar(255) null=YES default='NULL' key=
+  attachment varchar(255) null=YES default='NULL' key=
+  marks_obtained decimal(6,2) null=YES default='NULL' key=
+  obtained_score decimal(6,2) null=YES default='NULL' key=
+  feedback text null=YES default='NULL' key=
+  status enum('Pending','Submitted','Graded') null=NO default=''Pending'' key=
+  submitted_at timestamp null=YES default='NULL' key=
+  graded_at timestamp null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK assignment_id -> assignments.id
+  FK student_id -> student_profiles.id
+
+== attendances (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  student_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  teacher_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  user_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  class_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  section_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  subject_id bigint(20) unsigned null=YES default='NULL' key=
+  date date null=NO key=
+  type varchar(20) null=NO default=''Student'' key=
+  status varchar(20) null=NO default=''Present'' key=
+  remarks text null=YES default='NULL' key=
+  marked_by bigint(20) unsigned null=YES default='NULL' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK marked_by -> users.id
+  FK school_id -> schools.id
+  FK section_id -> sections.id
+  FK student_id -> student_profiles.id
+  FK teacher_id -> teachers.id
+  FK user_id -> users.id
+  FK class_id -> classes.id
+
+== audit_logs (rows=0)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  user_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  school_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  action varchar(255) null=NO key=
+  entity_type varchar(255) null=NO key=MUL
+  entity_id bigint(20) unsigned null=YES default='NULL' key=
+  old_data longtext null=YES default='NULL' key=
+  new_data longtext null=YES default='NULL' key=
+  ip_address varchar(45) null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK user_id -> users.id
+  FK school_id -> schools.id
+
+== cache (rows=0)
+  key varchar(255) null=NO key=PRI auto_increment
+  value mediumtext null=NO key=
+  expiration int(11) null=NO key=MUL
+
+== cache_locks (rows=0)
+  key varchar(255) null=NO key=PRI auto_increment
+  owner varchar(255) null=NO key=
+  expiration int(11) null=NO key=MUL
+
+== classes (rows=2)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  academic_year_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  name varchar(255) null=NO key=
+  code varchar(50) null=YES default='NULL' key=
+  numeric_level int(11) null=NO default='1' key=
+  description text null=YES default='NULL' key=
+  section varchar(10) null=NO default=''A'' key=
+  display_name varchar(255) null=YES default='NULL' key=
+  class_teacher_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  room varchar(255) null=YES default='NULL' key=
+  capacity int(11) null=NO default='50' key=
+  status enum('Active','Archived') null=NO default=''Active'' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  deleted_at timestamp null=YES default='NULL' key=
+  FK class_teacher_id -> users.id
+  FK school_id -> schools.id
+  FK academic_year_id -> academic_years.id
+
+== class_subject (rows=3)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  class_id bigint(20) unsigned null=NO key=MUL
+  subject_id bigint(20) unsigned null=NO key=MUL
+  teacher_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK class_id -> classes.id
+  FK subject_id -> subjects.id
+  FK teacher_id -> users.id
+
+== diaries (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  teacher_id bigint(20) unsigned null=NO key=MUL
+  class_id bigint(20) unsigned null=NO key=MUL
+  section_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  subject_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  date date null=NO key=
+  task text null=YES default='NULL' key=
+  notes text null=YES default='NULL' key=
+  completed tinyint(1) null=NO default='0' key=
+  parent_acknowledged_at timestamp null=YES default='NULL' key=
+  note text null=YES default='NULL' key=
+  type enum('Homework','Notice','Exam Prep') null=NO default=''Homework'' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK section_id -> sections.id
+  FK subject_id -> subjects.id
+  FK teacher_id -> teachers.id
+  FK class_id -> classes.id
+
+== events (rows=0)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  title varchar(255) null=NO key=
+  description text null=YES default='NULL' key=
+  start_date date null=NO key=
+  end_date date null=YES default='NULL' key=
+  start_time time null=YES default='NULL' key=
+  end_time time null=YES default='NULL' key=
+  location varchar(255) null=YES default='NULL' key=
+  event_type varchar(50) null=NO default=''General'' key=
+  color varchar(20) null=NO default=''#6366f1'' key=
+  audience varchar(50) null=NO default=''All'' key=
+  status varchar(30) null=NO default=''Upcoming'' key=
+  is_published tinyint(1) null=NO default='1' key=
+  created_by bigint(20) unsigned null=YES default='NULL' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  deleted_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK created_by -> users.id
+
+== exams (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  academic_year_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  name varchar(255) null=NO key=
+  term varchar(255) null=YES default='NULL' key=
+  start_date date null=YES default='NULL' key=
+  end_date date null=YES default='NULL' key=
+  description text null=YES default='NULL' key=
+  status varchar(30) null=NO default=''Upcoming'' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK academic_year_id -> academic_years.id
+
+== exam_schedules (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  exam_id bigint(20) unsigned null=NO key=MUL
+  class_id bigint(20) unsigned null=NO key=MUL
+  section_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  subject_id bigint(20) unsigned null=NO key=MUL
+  date date null=YES default='NULL' key=
+  start_time time null=YES default='NULL' key=
+  end_time time null=YES default='NULL' key=
+  room_number varchar(50) null=YES default='NULL' key=
+  invigilator varchar(120) null=YES default='NULL' key=
+  max_marks decimal(6,2) null=NO default='100.00' key=
+  pass_marks decimal(6,2) null=NO default='33.00' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK exam_id -> exams.id
+  FK section_id -> sections.id
+  FK subject_id -> subjects.id
+  FK class_id -> classes.id
+
+== expenses (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  expense_id varchar(50) null=YES default='NULL' key=
+  title varchar(255) null=NO key=
+  category varchar(255) null=YES default='NULL' key=
+  amount decimal(12,2) null=NO key=
+  expense_date date null=YES default='NULL' key=
+  date date null=YES default='NULL' key=
+  paid_to varchar(255) null=YES default='NULL' key=
+  payment_method varchar(50) null=NO default=''Bank Transfer'' key=
+  receipt_number varchar(50) null=YES default='NULL' key=
+  description text null=YES default='NULL' key=
+  notes text null=YES default='NULL' key=
+  attachment varchar(255) null=YES default='NULL' key=
+  status varchar(30) null=NO default=''Paid'' key=
+  created_by bigint(20) unsigned null=YES default='NULL' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  deleted_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK created_by -> users.id
+
+== failed_jobs (rows=0)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  uuid varchar(255) null=NO key=UNI
+  connection text null=NO key=
+  queue text null=NO key=
+  payload longtext null=NO key=
+  exception longtext null=NO key=
+  failed_at timestamp null=NO default='current_timestamp()' key=
+
+== fee_invoices (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  student_id bigint(20) unsigned null=NO key=MUL
+  fee_structure_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  invoice_number varchar(50) null=YES default='NULL' key=
+  title varchar(255) null=NO key=
+  amount decimal(12,2) null=NO key=
+  paid_amount decimal(12,2) null=NO default='0.00' key=
+  discount_amount decimal(12,2) null=NO default='0.00' key=
+  fine_amount decimal(12,2) null=NO default='0.00' key=
+  due_date date null=NO key=
+  status varchar(30) null=NO default=''Unpaid'' key=
+  month varchar(30) null=YES default='NULL' key=
+  notes text null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK student_id -> student_profiles.id
+  FK fee_structure_id -> fee_structures.id
+
+== fee_payments (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  fee_invoice_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  student_id bigint(20) unsigned null=NO key=MUL
+  transaction_id varchar(100) null=YES default='NULL' key=
+  receipt_no varchar(30) null=YES default='NULL' key=
+  amount decimal(12,2) null=NO key=
+  payment_method varchar(50) null=NO default=''Cash'' key=
+  reference varchar(255) null=YES default='NULL' key=
+  remarks text null=YES default='NULL' key=
+  notes text null=YES default='NULL' key=
+  payment_date date null=NO key=
+  status varchar(30) null=NO default=''Completed'' key=
+  received_by bigint(20) unsigned null=YES default='NULL' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK received_by -> users.id
+  FK school_id -> schools.id
+  FK student_id -> student_profiles.id
+  FK fee_invoice_id -> fee_invoices.id
+
+== fee_structures (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  class_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  academic_year_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  name varchar(255) null=NO key=
+  amount decimal(12,2) null=NO key=
+  frequency varchar(50) null=NO default=''Monthly'' key=
+  due_day int(11) null=NO default='10' key=
+  description text null=YES default='NULL' key=
+  academic_year varchar(255) null=YES default='NULL' key=
+  status enum('Active','Inactive') null=NO default=''Active'' key=
+  is_active tinyint(1) null=NO default='1' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK class_id -> classes.id
+  FK school_id -> schools.id
+  FK academic_year_id -> academic_years.id
+
+== jobs (rows=0)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  queue varchar(255) null=NO key=MUL
+  payload longtext null=NO key=
+  attempts tinyint(3) unsigned null=NO key=
+  reserved_at int(10) unsigned null=YES default='NULL' key=
+  available_at int(10) unsigned null=NO key=
+  created_at int(10) unsigned null=NO key=
+
+== job_batches (rows=0)
+  id varchar(255) null=NO key=PRI auto_increment
+  name varchar(255) null=NO key=
+  total_jobs int(11) null=NO key=
+  pending_jobs int(11) null=NO key=
+  failed_jobs int(11) null=NO key=
+  failed_job_ids longtext null=NO key=
+  options mediumtext null=YES default='NULL' key=
+  cancelled_at int(11) null=YES default='NULL' key=
+  created_at int(11) null=NO key=
+  finished_at int(11) null=YES default='NULL' key=
+
+== ledger_entries (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  transaction_id varchar(50) null=YES default='NULL' key=
+  date date null=YES default='NULL' key=
+  entry_date date null=YES default='NULL' key=
+  description varchar(255) null=NO key=
+  category varchar(255) null=YES default='NULL' key=
+  type enum('Credit','Debit') null=NO key=
+  amount decimal(12,2) null=NO default='0.00' key=
+  debit decimal(12,2) null=NO default='0.00' key=
+  credit decimal(12,2) null=NO default='0.00' key=
+  balance decimal(15,2) null=NO default='0.00' key=
+  running_balance decimal(15,2) null=NO default='0.00' key=
+  payment_method varchar(50) null=YES default='NULL' key=
+  school_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  school_payment_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  expense_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  reference_id bigint(20) unsigned null=YES default='NULL' key=
+  reference_type varchar(255) null=YES default='NULL' key=
+  status enum('Completed','Pending') null=NO default=''Completed'' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK school_payment_id -> school_payments.id
+  FK expense_id -> expenses.id
+
+== marks (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  exam_id bigint(20) unsigned null=NO key=MUL
+  student_id bigint(20) unsigned null=NO key=MUL
+  subject_id bigint(20) unsigned null=NO key=MUL
+  class_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  marks_obtained decimal(6,2) null=NO default='0.00' key=
+  total_marks decimal(6,2) null=NO default='100.00' key=
+  coursework decimal(6,2) null=NO default='0.00' key=
+  midterm decimal(6,2) null=NO default='0.00' key=
+  final_exam decimal(6,2) null=NO default='0.00' key=
+  total_score decimal(6,2) null=NO default='0.00' key=
+  max_score decimal(6,2) null=NO default='100.00' key=
+  grade varchar(10) null=YES default='NULL' key=
+  gpa_point decimal(3,1) null=NO default='0.0' key=
+  remarks text null=YES default='NULL' key=
+  entered_by bigint(20) unsigned null=YES default='NULL' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK entered_by -> teachers.id
+  FK exam_id -> exams.id
+  FK school_id -> schools.id
+  FK student_id -> student_profiles.id
+  FK subject_id -> subjects.id
+  FK class_id -> classes.id
+
+== migrations (rows=20)
+  id int(10) unsigned null=NO key=PRI auto_increment
+  migration varchar(255) null=NO key=
+  batch int(11) null=NO key=
+
+== notifications (rows=0)
+  id char(36) null=NO key=PRI auto_increment
+  type varchar(255) null=NO key=
+  notifiable_type varchar(255) null=NO key=MUL
+  notifiable_id bigint(20) unsigned null=NO key=
+  data text null=NO key=
+  read_at timestamp null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+
+== parent_profiles (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  user_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  school_id bigint(20) unsigned null=NO key=MUL
+  father_name varchar(255) null=YES default='NULL' key=
+  father_phone varchar(30) null=YES default='NULL' key=
+  father_email varchar(255) null=YES default='NULL' key=
+  father_occupation varchar(255) null=YES default='NULL' key=
+  mother_name varchar(255) null=YES default='NULL' key=
+  mother_phone varchar(30) null=YES default='NULL' key=
+  mother_email varchar(255) null=YES default='NULL' key=
+  mother_occupation varchar(255) null=YES default='NULL' key=
+  occupation varchar(255) null=YES default='NULL' key=
+  income decimal(12,2) null=NO default='0.00' key=
+  alternate_phone varchar(30) null=YES default='NULL' key=
+  guardian_name varchar(255) null=YES default='NULL' key=
+  guardian_phone varchar(30) null=YES default='NULL' key=
+  guardian_relation varchar(255) null=YES default='NULL' key=
+  address text null=YES default='NULL' key=
+  emergency_contact varchar(30) null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK user_id -> users.id
+  FK school_id -> schools.id
+
+== password_reset_tokens (rows=0)
+  email varchar(255) null=NO key=PRI auto_increment
+  token varchar(255) null=NO key=
+  created_at timestamp null=YES default='NULL' key=
+
+== personal_access_tokens (rows=21)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  tokenable_type varchar(255) null=NO key=MUL
+  tokenable_id bigint(20) unsigned null=NO key=
+  name varchar(255) null=NO key=
+  token varchar(64) null=NO key=UNI
+  abilities text null=YES default='NULL' key=
+  last_used_at timestamp null=YES default='NULL' key=
+  expires_at timestamp null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+
+== schools (rows=2)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  name varchar(255) null=NO key=
+  code varchar(20) null=NO key=UNI
+  logo varchar(255) null=YES default='NULL' key=
+  email varchar(255) null=YES default='NULL' key=
+  phone varchar(30) null=YES default='NULL' key=
+  address text null=YES default='NULL' key=
+  city varchar(100) null=YES default='NULL' key=MUL
+  state varchar(100) null=YES default='NULL' key=
+  country varchar(100) null=NO default=''Pakistan'' key=
+  website varchar(255) null=YES default='NULL' key=
+  tagline varchar(255) null=YES default='NULL' key=
+  domain varchar(255) null=YES default='NULL' key=
+  subdomain varchar(255) null=YES default='NULL' key=UNI
+  custom_domain varchar(255) null=YES default='NULL' key=
+  principal_name varchar(255) null=YES default='NULL' key=
+  ssl_active tinyint(1) null=NO default='1' key=
+  status enum('Active','Inactive','Suspended') null=NO default=''Active'' key=MUL
+  subscription_status enum('Active','Expired','Trial','Cancelled') null=NO default=''Active'' key=
+  plan varchar(255) null=NO default=''Standard'' key=
+  contract_amount decimal(12,2) null=NO default='0.00' key=
+  contract_start date null=YES default='NULL' key=
+  contract_end date null=YES default='NULL' key=
+  contract_type varchar(255) null=NO default=''Annual'' key=
+  paid_amount decimal(12,2) null=NO default='0.00' key=
+  pending_amount decimal(12,2) null=NO default='0.00' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  deleted_at timestamp null=YES default='NULL' key=
+
+== school_contracts (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  contract_number varchar(50) null=YES default='NULL' key=UNI
+  plan_name varchar(255) null=YES default='NULL' key=
+  per_student_fee decimal(10,2) null=NO default='0.00' key=
+  school_share_percent decimal(5,2) null=NO default='50.00' key=
+  saas_share_percent decimal(5,2) null=NO default='50.00' key=
+  saas_fee_per_student decimal(10,2) null=NO default='0.00' key=
+  contract_duration_months int(11) null=NO default='12' key=
+  start_date date null=YES default='NULL' key=
+  end_date date null=YES default='NULL' key=
+  contract_start date null=YES default='NULL' key=
+  contract_end date null=YES default='NULL' key=
+  total_amount decimal(15,2) null=NO default='0.00' key=
+  paid_amount decimal(15,2) null=NO default='0.00' key=
+  balance_due decimal(15,2) null=NO default='0.00' key=
+  total_contract_value decimal(15,2) null=NO default='0.00' key=
+  total_paid_amount decimal(15,2) null=NO default='0.00' key=
+  total_pending_amount decimal(15,2) null=NO default='0.00' key=
+  billing_cycle varchar(255) null=NO default=''Annually'' key=
+  current_month_status enum('Paid','Pending','Overdue') null=NO default=''Pending'' key=
+  status enum('Active','Pending','Pending Renewal','Expired','Inactive') null=NO default=''Active'' key=MUL
+  notes text null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  deleted_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+
+== school_payments (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  school_contract_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  contract_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  transaction_id varchar(100) null=YES default='NULL' key=
+  amount decimal(12,2) null=NO key=
+  payment_date date null=NO key=MUL
+  payment_method varchar(50) null=NO default=''Bank Transfer'' key=
+  reference varchar(255) null=YES default='NULL' key=
+  description text null=YES default='NULL' key=
+  notes text null=YES default='NULL' key=
+  invoice_url varchar(255) null=YES default='NULL' key=
+  month_for varchar(255) null=YES default='NULL' key=
+  status enum('Completed','Pending','Failed') null=NO default=''Completed'' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_contract_id -> school_contracts.id
+  FK school_id -> schools.id
+  FK contract_id -> school_contracts.id
+
+== school_settings (rows=0)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  key varchar(255) null=NO key=
+  value text null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+
+== sections (rows=2)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  class_id bigint(20) unsigned null=NO key=MUL
+  name varchar(255) null=NO key=
+  capacity int(11) null=NO default='40' key=
+  room_number varchar(255) null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK class_id -> classes.id
+
+== sessions (rows=0)
+  id varchar(255) null=NO key=PRI auto_increment
+  user_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  ip_address varchar(45) null=YES default='NULL' key=
+  user_agent text null=YES default='NULL' key=
+  payload longtext null=NO key=
+  last_activity int(11) null=NO key=MUL
+
+== student_leaves (rows=0)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  student_id bigint(20) unsigned null=NO key=MUL
+  class_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  leave_type varchar(50) null=NO default=''Casual'' key=
+  from_date date null=NO key=
+  to_date date null=YES default='NULL' key=
+  reason text null=YES default='NULL' key=
+  status varchar(30) null=NO default=''Pending'' key=
+  remarks text null=YES default='NULL' key=
+  reviewed_by bigint(20) unsigned null=YES default='NULL' key=MUL
+  reviewed_at timestamp null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK reviewed_by -> users.id
+  FK school_id -> schools.id
+  FK student_id -> student_profiles.id
+  FK class_id -> classes.id
+
+== student_parent (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  student_id bigint(20) unsigned null=NO key=MUL
+  parent_id bigint(20) unsigned null=NO key=MUL
+  relationship varchar(255) null=NO default=''Father'' key=
+  is_primary tinyint(1) null=NO default='1' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK parent_id -> parent_profiles.id
+  FK student_id -> student_profiles.id
+
+== student_profiles (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  user_id bigint(20) unsigned null=NO key=MUL
+  school_id bigint(20) unsigned null=NO key=MUL
+  admission_number varchar(50) null=YES default='NULL' key=
+  student_id varchar(30) null=YES default='NULL' key=
+  roll_number varchar(20) null=YES default='NULL' key=
+  roll_no varchar(20) null=YES default='NULL' key=
+  first_name varchar(255) null=YES default='NULL' key=
+  last_name varchar(255) null=YES default='NULL' key=
+  class_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  section_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  dob date null=YES default='NULL' key=
+  date_of_birth date null=YES default='NULL' key=
+  gender enum('Male','Female','Other') null=YES default='NULL' key=
+  blood_group varchar(10) null=YES default='NULL' key=
+  address text null=YES default='NULL' key=
+  city varchar(100) null=YES default='NULL' key=
+  state varchar(100) null=YES default='NULL' key=
+  admission_date date null=YES default='NULL' key=
+  previous_school varchar(255) null=YES default='NULL' key=
+  emergency_contact varchar(50) null=YES default='NULL' key=
+  status enum('Active','Inactive','Graduated','Transferred') null=NO default=''Active'' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  deleted_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK section_id -> sections.id
+  FK user_id -> users.id
+  FK class_id -> classes.id
+
+== student_reviews (rows=0)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  teacher_id bigint(20) unsigned null=NO key=MUL
+  student_id bigint(20) unsigned null=NO key=MUL
+  rating varchar(30) null=NO default=''Satisfactory'' key=
+  remarks text null=YES default='NULL' key=
+  strengths longtext null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK student_id -> student_profiles.id
+  FK teacher_id -> teachers.id
+
+== subjects (rows=3)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  name varchar(255) null=NO key=
+  code varchar(20) null=YES default='NULL' key=
+  type varchar(30) null=NO default=''Theory'' key=
+  pass_marks decimal(5,2) null=NO default='33.00' key=
+  total_marks decimal(5,2) null=NO default='100.00' key=
+  credits decimal(4,1) null=NO default='1.0' key=
+  description text null=YES default='NULL' key=
+  status enum('Active','Inactive') null=NO default=''Active'' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+
+== support_tickets (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  ticket_id varchar(50) null=YES default='NULL' key=
+  school_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  user_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  created_by bigint(20) unsigned null=YES default='NULL' key=MUL
+  subject varchar(255) null=NO key=
+  category varchar(50) null=YES default='NULL' key=
+  description text null=YES default='NULL' key=
+  priority varchar(20) null=NO default=''Medium'' key=
+  status varchar(30) null=NO default=''Open'' key=
+  assigned_to bigint(20) unsigned null=YES default='NULL' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK created_by -> users.id
+  FK school_id -> schools.id
+  FK user_id -> users.id
+  FK assigned_to -> users.id
+
+== teachers (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  user_id bigint(20) unsigned null=NO key=MUL
+  school_id bigint(20) unsigned null=NO key=MUL
+  employee_id varchar(30) null=YES default='NULL' key=
+  first_name varchar(255) null=YES default='NULL' key=
+  last_name varchar(255) null=YES default='NULL' key=
+  designation varchar(255) null=YES default='NULL' key=
+  department varchar(255) null=YES default='NULL' key=MUL
+  joining_date date null=YES default='NULL' key=
+  dob date null=YES default='NULL' key=
+  experience_years int(11) null=NO default='0' key=
+  gender enum('Male','Female','Other') null=YES default='NULL' key=
+  qualification varchar(255) null=YES default='NULL' key=
+  specialization varchar(255) null=YES default='NULL' key=
+  salary decimal(12,2) null=NO default='0.00' key=
+  salary_status enum('Paid','Pending','Overdue') null=NO default=''Pending'' key=
+  address text null=YES default='NULL' key=
+  status enum('Active','Inactive','On Leave','Resigned') null=NO default=''Active'' key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  deleted_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK user_id -> users.id
+
+== teacher_class (rows=0)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  teacher_id bigint(20) unsigned null=NO key=MUL
+  class_id bigint(20) unsigned null=NO key=MUL
+  is_class_teacher tinyint(1) null=NO default='0' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK class_id -> classes.id
+  FK teacher_id -> teachers.id
+
+== teacher_subject (rows=2)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  teacher_id bigint(20) unsigned null=NO key=MUL
+  subject_id bigint(20) unsigned null=NO key=MUL
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK subject_id -> subjects.id
+  FK teacher_id -> teachers.id
+
+== timetables (rows=1)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  school_id bigint(20) unsigned null=NO key=MUL
+  class_id bigint(20) unsigned null=NO key=MUL
+  section_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  subject_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  teacher_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  day_of_week varchar(20) null=NO default=''Monday'' key=
+  day enum('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') null=NO default=''Monday'' key=
+  period int(11) null=NO default='1' key=
+  type varchar(30) null=NO default=''lecture'' key=
+  start_time time null=NO key=
+  end_time time null=NO key=
+  room_number varchar(50) null=YES default='NULL' key=
+  room varchar(50) null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+  FK section_id -> sections.id
+  FK subject_id -> subjects.id
+  FK teacher_id -> teachers.id
+  FK class_id -> classes.id
+
+== users (rows=5)
+  id bigint(20) unsigned null=NO key=PRI auto_increment
+  name varchar(255) null=NO key=
+  email varchar(255) null=NO key=UNI
+  email_verified_at timestamp null=YES default='NULL' key=
+  password varchar(255) null=NO key=
+  role enum('super_admin','school_admin','teacher','student','parent') null=NO default=''student'' key=MUL
+  school_id bigint(20) unsigned null=YES default='NULL' key=MUL
+  phone varchar(30) null=YES default='NULL' key=
+  avatar varchar(255) null=YES default='NULL' key=
+  timezone varchar(64) null=NO default=''UTC'' key=
+  status enum('Active','Inactive','Suspended') null=NO default=''Active'' key=MUL
+  remember_token varchar(100) null=YES default='NULL' key=
+  created_at timestamp null=YES default='NULL' key=
+  updated_at timestamp null=YES default='NULL' key=
+  deleted_at timestamp null=YES default='NULL' key=
+  FK school_id -> schools.id
+
