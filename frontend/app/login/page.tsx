@@ -5,36 +5,44 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Check } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function Login() {
   const router = useRouter();
   const [role, setRole] = useState<'super-admin' | 'admin' | 'teacher' | 'student'>('super-admin');
-  const [email, setEmail] = useState('super-admin@skoolms.edu');
-  const [password, setPassword] = useState('super-admin123');
+  const [email, setEmail] = useState('superadmin@skoolms.com');
+  const [password, setPassword] = useState('password123');
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const normalizedPass = password.trim();
+    try {
+      const data = await api.post('/login', {
+        email: email.trim(),
+        password: password.trim(),
+      });
 
-    const valid = 
-      (role === 'super-admin' && (normalizedEmail === 'super-admin@skoolms.edu' || normalizedEmail === 'super@skoolms.edu' || normalizedEmail.includes('super')) && (normalizedPass === 'super-admin123' || normalizedPass === 'super123' || normalizedPass.length > 0)) ||
-      (role === 'admin' && (normalizedEmail === 'admin@skoolms.edu' || normalizedEmail.includes('admin')) && normalizedPass.length > 0) ||
-      (role === 'teacher' && (normalizedEmail === 'teacher@skoolms.edu' || normalizedEmail.includes('teacher')) && normalizedPass.length > 0) ||
-      (role === 'student' && (normalizedEmail === 'student@skoolms.edu' || normalizedEmail.includes('student')) && normalizedPass.length > 0) ||
-      // Or if credentials match the prefilled demo
-      (normalizedEmail === `${role}@skoolms.edu` || normalizedEmail === `${role.replace('-','') }@skoolms.edu` || normalizedEmail.length > 3);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('userRole', data.user.role);
+      localStorage.setItem('userEmail', data.user.email);
 
-    if (valid) {
-      localStorage.setItem('userRole', role);
-      localStorage.setItem('userEmail', email);
-      router.push(`/${role}-dashboard`);
-    } else {
-      setError('Invalid credentials for selected role');
+      const dest =
+        data.user.role === 'super_admin' ? '/super-admin-dashboard'
+        : data.user.role === 'school_admin' ? '/admin-dashboard'
+        : data.user.role === 'teacher' ? '/teacher-dashboard'
+        : '/student-dashboard';
+
+      router.push(dest);
+    } catch (err: any) {
+      setError(err?.data?.email?.[0] || err?.message || 'Invalid credentials');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,7 +115,7 @@ export default function Login() {
             Demo Credentials
           </p>
           <div className="text-white/80 text-xs font-mono">
-            {role}@skoolms.edu<br />{role}123
+            {role === 'super-admin' ? 'superadmin@skoolms.com' : `${role === 'super-admin' ? '' : role}@greenwood.com`}<br />password123
           </div>
         </div>
       </div>
@@ -138,8 +146,8 @@ export default function Login() {
                     type="button"
                     onClick={() => {
                       setRole(r.value as any);
-                      setEmail(`${r.value}@skoolms.edu`);
-                      setPassword(`${r.value}123`);
+                      setEmail(r.value === 'super-admin' ? 'superadmin@skoolms.com' : r.value === 'admin' ? 'admin@greenwood.com' : r.value === 'teacher' ? 'teacher@greenwood.com' : 'student@greenwood.com');
+                      setPassword('password123');
                       setError('');
                     }}
                     className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
@@ -199,7 +207,7 @@ export default function Login() {
                 type="submit"
                 className={`w-full py-4 mt-2 rounded-xl text-white font-bold text-base shadow-[0_8px_24px_rgba(59,79,232,0.25)] hover:shadow-[0_16px_40px_rgba(59,79,232,0.35)] hover:-translate-y-0.5 transition-all ${getRoleGradient()}`}
               >
-                Sign In →
+                {loading ? 'Signing in...' : 'Sign In →'}
               </button>
             </form>
 

@@ -18,17 +18,26 @@ const navItems = [
 export default function DashboardLayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [userName, setUserName] = useState('Student');
 
   useEffect(() => {
-    const role = localStorage.getItem('userRole');
-    if (role !== 'student') router.push('/login');
-    else setIsAuthorized(true);
+    const token = localStorage.getItem('token');
+    let user: any = null;
+    try { user = JSON.parse(localStorage.getItem('user') || 'null'); } catch {}
+    if (!token || !user || (user.role !== 'student' && user.role !== 'parent')) {
+      router.push('/login');
+    } else {
+      setUserName(user.name || 'Student');
+      setIsAuthorized(true);
+    }
   }, [router]);
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userEmail');
-    router.push('/');
+    router.push('/login');
   };
 
   if (!isAuthorized) {
@@ -43,7 +52,7 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
   }
 
   return (
-    <DashboardLayout role="student" userName="Ali Hassan" userInitials="AH" navItems={navItems} onLogout={handleLogout}>
+    <DashboardLayout role="student" userName={userName} userInitials={userName.slice(0, 2).toUpperCase()} navItems={navItems} onLogout={handleLogout}>
       {children}
     </DashboardLayout>
   );
