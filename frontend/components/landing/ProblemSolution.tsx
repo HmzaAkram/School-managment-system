@@ -2,22 +2,22 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { Check, X } from "lucide-react";
+import { Check, X, ArrowRight } from "lucide-react";
 
 const problems = [
-  "Manual attendance sheets — lost, inaccurate",
-  "Fee collection via cash — no records, no reminders",
-  "WhatsApp groups for parent updates — unprofessional",
-  "Excel gradebooks — no analysis, easy to corrupt",
-  "Staff records in filing cabinets — impossible to search",
+  "Paper roll-call registers — easily lost, manipulated, or inaccurate",
+  "Cash & physical cheque collection — lost slips, unrecorded reconciliation",
+  "Informal WhatsApp groups — unprofessional and impossible to audit",
+  "Unconnected Excel gradebooks — error-prone GPA and manual report cards",
+  "Filing cabinets for faculty records — zero instant access during audits",
 ];
 
 const solutions = [
-  "One-click digital attendance with parent alerts",
-  "Online fee portal with auto-reminders and receipts",
-  "Professional parent portal with real-time updates",
-  "Smart gradebook with auto GPA and report cards",
-  "Centralized staff profiles, payroll, and leave management",
+  "Instant biometric & web roll-call with automated SMS alerts to parents",
+  "Integrated banking fee collection with live defaulter ledgers & receipts",
+  "Certified student & guardian portal with verified teacher homework diaries",
+  "Automated exam scheduling, weighted rubric calculations, & PDF transcripts",
+  "Comprehensive HR suite: staff attendance, automated payroll, & leave rosters",
 ];
 
 export default function ProblemSolution() {
@@ -26,76 +26,94 @@ export default function ProblemSolution() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from("#prob-left", {
-        x: -80, opacity: 0, duration: 1.0, ease: "power3.out",
+        x: -50, opacity: 0, duration: 0.9, ease: "power3.out",
         scrollTrigger: { trigger: sectionRef.current, start: "top 80%" },
       });
       gsap.from("#prob-right", {
-        x: 80, opacity: 0, duration: 1.0, ease: "power3.out", delay: 0.1,
+        x: 50, opacity: 0, duration: 0.9, ease: "power3.out", delay: 0.1,
         scrollTrigger: { trigger: sectionRef.current, start: "top 80%" },
-      });
-      gsap.from(".section-headline-ps", {
-        y: 50, opacity: 0, duration: 1.0, ease: "power3.out",
-        scrollTrigger: { trigger: ".section-headline-ps", start: "top 88%" },
       });
     }, sectionRef);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 md:py-32 bg-white overflow-hidden">
+    <section ref={sectionRef} className="py-24 md:py-32 bg-[#FAF8F5] overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
 
-        <div className="section-headline-ps text-center max-w-3xl mx-auto mb-16 md:mb-24">
-          <h2 className="font-sora font-bold text-slate-900 leading-tight" style={{ fontSize: "clamp(2rem,4vw,3.5rem)" }}>
-            Schools Run on Paperwork.{" "}
+        <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
+          <span className="text-xs font-mono uppercase tracking-widest text-[#C4993C] font-bold block mb-2">
+            The Transformation
+          </span>
+          <h2 className="font-sora font-extrabold text-[#23201B] leading-tight text-3xl sm:text-4xl md:text-5xl">
+            Schools Run on Legacy Friction.{" "}
             <span className="text-gradient">Until Now.</span>
           </h2>
+          <p className="text-sm md:text-base text-[#706B62] mt-4">
+            Replace fragmented paper slips, spreadsheet formulas, and manual follow-ups with a unified institutional OS.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 relative">
-          {/* Arrow between columns on desktop */}
-          <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-14 h-14 bg-white rounded-full border border-slate-100 shadow-lg items-center justify-center text-slate-400 text-xl font-bold">
-            →
-          </div>
+        <div className="grid md:grid-cols-2 gap-8 relative items-stretch">
+          {/* Left: The Legacy Problem */}
+          <div
+            id="prob-left"
+            className="p-8 md:p-10 rounded-3xl bg-white border border-[#EBE8E2] shadow-sm flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold text-xs">
+                  ✕
+                </span>
+                <h3 className="font-bold text-lg text-[#23201B] font-sora">The Legacy Paperwork Era</h3>
+              </div>
 
-          {/* Problems */}
-          <div id="prob-left" className="bg-red-50 border border-red-100 rounded-[2rem] p-8 md:p-10 shadow-sm">
-            <div className="inline-block px-4 py-1.5 rounded-full bg-red-100 text-red-600 font-mono text-xs uppercase tracking-widest font-semibold mb-8">
-              ❌ The Old Way
+              <ul className="space-y-4">
+                {problems.map((p, i) => (
+                  <li key={i} className="flex items-start gap-3 text-xs md:text-sm text-[#706B62]">
+                    <div className="w-5 h-5 rounded-full bg-red-50 text-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <X size={12} strokeWidth={2.5} />
+                    </div>
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="flex flex-col gap-6">
-              {problems.map((prob, i) => (
-                <li key={i} className="flex gap-4 items-start">
-                  <div className="w-6 h-6 rounded-full bg-red-200/60 flex flex-shrink-0 items-center justify-center text-red-500 mt-0.5">
-                    <X size={13} strokeWidth={3} />
-                  </div>
-                  <span className="text-slate-900 text-base leading-snug">{prob}</span>
-                </li>
-              ))}
-            </ul>
+
+            <div className="mt-8 pt-4 border-t border-[#EBE8E2] text-xs text-[#8C877D] font-mono">
+              Result: 30+ wasted admin hours weekly & uncollected revenue.
+            </div>
           </div>
 
-          {/* Solutions */}
+          {/* Right: The Skoolms Solution */}
           <div
             id="prob-right"
-            className="border border-blue-100 rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgba(59,79,232,0.06)]"
-            style={{ background: "linear-gradient(135deg,#EEF0FD 0%,#f0f4ff 100%)" }}
+            className="p-8 md:p-10 rounded-3xl bg-[#FFFDF9] border-2 border-[#C4993C]/40 shadow-md flex flex-col justify-between"
           >
-            <div className="inline-block px-4 py-1.5 rounded-full text-primary font-mono text-xs uppercase tracking-widest font-semibold mb-8"
-              style={{ backgroundColor: "rgba(59,79,232,0.1)" }}>
-              ✅ The Skoolms Way
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="w-8 h-8 rounded-full bg-[#C4993C]/10 text-[#C4993C] flex items-center justify-center font-bold text-xs">
+                  ✓
+                </span>
+                <h3 className="font-bold text-lg text-[#23201B] font-sora">The Skoolms Operating System</h3>
+              </div>
+
+              <ul className="space-y-4">
+                {solutions.map((s, i) => (
+                  <li key={i} className="flex items-start gap-3 text-xs md:text-sm text-[#23201B] font-medium">
+                    <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check size={12} strokeWidth={3} />
+                    </div>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="flex flex-col gap-6">
-              {solutions.map((sol, i) => (
-                <li key={i} className="flex gap-4 items-start">
-                  <div className="w-6 h-6 rounded-full flex flex-shrink-0 items-center justify-center text-primary mt-0.5"
-                    style={{ backgroundColor: "rgba(59,79,232,0.15)" }}>
-                    <Check size={13} strokeWidth={3} />
-                  </div>
-                  <span className="text-slate-900 text-base leading-snug font-medium">{sol}</span>
-                </li>
-              ))}
-            </ul>
+
+            <div className="mt-8 pt-4 border-t border-[#F1EAD9] flex items-center justify-between text-xs font-bold text-[#C4993C]">
+              <span>Result: 100% Audit Precision & Rapid Parent Trust</span>
+              <ArrowRight size={14} />
+            </div>
           </div>
         </div>
       </div>

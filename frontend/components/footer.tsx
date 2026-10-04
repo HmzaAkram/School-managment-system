@@ -29,7 +29,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/contact" className="hover:opacity-80">Contact Us</Link></li>
               <li><a href="#" className="hover:opacity-80">FAQ</a></li>
-              <li><a href="#" className="hover:opacity-80">Pricing</a></li>
+              <li><a href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo." target="_blank" rel="noopener noreferrer" className="hover:opacity-80">Book a Demo</a></li>
               <li><a href="#" className="hover:opacity-80">Blog</a></li>
             </ul>
           </div>

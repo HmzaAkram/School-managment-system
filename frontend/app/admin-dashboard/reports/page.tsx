@@ -59,7 +59,7 @@ export default function AdminReports() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Overall Attendance Rate", value: "94.2%", change: "+1.8% vs last month", icon: Users, color: "text-emerald-700", bg: "bg-emerald-50/60 border-emerald-200/80" },
-          { label: "Fee Collection Efficiency", value: "96.4%", change: "$420,000 collected", icon: CreditCard, color: "text-[#C4993C]", bg: "bg-[#FFFDF9] border-[#F1EAD9]" },
+          { label: "Fee Collection Efficiency", value: "96.4%", change: "PKR 4.8M collected", icon: CreditCard, color: "text-[#C4993C]", bg: "bg-[#FFFDF9] border-[#F1EAD9]" },
           { label: "Academic GPA Average", value: "3.58", change: "Across Grade 6-12", icon: TrendingUp, color: "text-blue-700", bg: "bg-blue-50/60 border-blue-200/80" },
           { label: "Compliance & Audits", value: "100%", change: "Zero pending alerts", icon: CheckCircle, color: "text-purple-700", bg: "bg-purple-50/60 border-purple-200/80" },
         ].map((stat, i) => (

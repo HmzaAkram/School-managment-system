@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { LayoutDashboard, Building2, CreditCard, BookOpen, BarChart3, HelpCircle, Settings } from "lucide-react";
+import { LayoutDashboard, Building2, CreditCard, Receipt, BookOpen, BarChart3, HelpCircle, Settings } from "lucide-react";
 
 const navItems = [
   { label: 'Dashboard',      href: '/super-admin-dashboard',          icon: <LayoutDashboard size={18} /> },
   { label: 'Schools',        href: '/super-admin-dashboard/schools',  icon: <Building2 size={18} /> },
   { label: 'Payments',       href: '/super-admin-dashboard/payments', icon: <CreditCard size={18} /> },
+  { label: 'Expenses',       href: '/super-admin-dashboard/expenses', icon: <Receipt size={18} /> },
   { label: 'Ledger',         href: '/super-admin-dashboard/ledger',   icon: <BookOpen size={18} /> },
   { label: 'Reports',        href: '/super-admin-dashboard/reports',  icon: <BarChart3 size={18} /> },
   { label: 'Support Queries',href: '/super-admin-dashboard/support',  icon: <HelpCircle size={18} /> },

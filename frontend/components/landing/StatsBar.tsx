@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useInView } from "framer-motion";
 import gsap from "gsap";
 
-// ── Custom CountUp (requestAnimationFrame, no library) ──
 function CountUp({ target, suffix = "", separator = "" }: { target: number; suffix?: string; separator?: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
@@ -15,7 +14,7 @@ function CountUp({ target, suffix = "", separator = "" }: { target: number; suff
     const duration = 1800;
     const step = (timestamp: number, startTime: number) => {
       const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.floor(eased * target));
       if (progress < 1) requestAnimationFrame((t) => step(t, startTime));
       else setCount(target);
@@ -31,13 +30,13 @@ function CountUp({ target, suffix = "", separator = "" }: { target: number; suff
 }
 
 const stats = [
-  { value: 500,   suffix: "+",     label: "Schools",        separator: "" },
-  { value: 50000, suffix: "+",     label: "Students",       separator: "," },
-  { value: 98,    suffix: "%",     label: "Satisfaction",   separator: "" },
-  { value: 7,     suffix: " Days", label: "Avg Setup Time", separator: "" },
+  { value: 500,   suffix: "+",     label: "Institutions Operating",  separator: "" },
+  { value: 120000, suffix: "+",    label: "Active Students & Parents", separator: "," },
+  { value: 99,    suffix: ".4%",   label: "Daily Attendance Accuracy", separator: "" },
+  { value: 100,   suffix: "%",     label: "Audit-Ready Financial Ledger", separator: "" },
 ];
 
-const schools = ["Sunrise Academy", "Al-Noor School", "City Public High", "Excel Institute", "Bright Minds"];
+const schools = ["Oakridge International", "Beaconhouse City", "Army Public Schools", "The City School", "Roots Millennium", "KGS Campus"];
 
 export default function StatsBar() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -45,48 +44,45 @@ export default function StatsBar() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(".school-pill", {
-        y: 20, opacity: 0, stagger: 0.1, duration: 0.7,
+        y: 15, opacity: 0, stagger: 0.08, duration: 0.6,
         ease: "power2.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 85%" },
+        scrollTrigger: { trigger: sectionRef.current, start: "top 90%" },
       });
     }, sectionRef);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-slate-900 border-y border-slate-800">
-      <div className="max-w-7xl mx-auto px-6 py-14 md:py-18">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-
-          {/* Stats */}
-          <div className="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, i) => (
-              <div key={i} className={`flex flex-col items-center md:items-start ${i > 0 ? "md:border-l md:border-slate-800 md:pl-8" : ""}`}>
-                <div className="text-3xl lg:text-4xl font-extrabold font-sora text-white mb-1 tracking-tight">
-                  <CountUp target={stat.value} suffix={stat.suffix} separator={stat.separator} />
-                </div>
-                <div className="text-sm font-sans text-slate-300 font-medium">{stat.label}</div>
+    <section ref={sectionRef} className="bg-[#1A1A1A] border-y border-[#2E2A24] text-white">
+      <div className="max-w-7xl mx-auto px-6 py-14 md:py-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 pb-12 border-b border-white/10">
+          {stats.map((s, i) => (
+            <div key={i} className="text-center sm:text-left">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-sora text-[#D4A843] mb-1">
+                <CountUp target={s.value} suffix={s.suffix} separator={s.separator} />
               </div>
+              <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Partner schools */}
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <span className="text-xs text-slate-400 uppercase tracking-widest font-mono">
+            Trusted by Leaders Across:
+          </span>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {schools.map((sch, i) => (
+              <span
+                key={i}
+                className="school-pill px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-slate-300 hover:border-[#C4993C] hover:text-white transition-colors"
+              >
+                {sch}
+              </span>
             ))}
           </div>
-
-          {/* Trusted logos */}
-          <div className="lg:w-[40%] flex flex-col items-center lg:items-end gap-4 w-full border-t lg:border-t-0 border-slate-800 pt-8 lg:pt-0">
-            <span className="text-xs font-mono tracking-widest text-slate-400 uppercase">
-              Trusted by schools in:
-            </span>
-            <div className="flex flex-wrap justify-center lg:justify-end gap-3">
-              {schools.map((school) => (
-                <div
-                  key={school}
-                  className="school-pill px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap text-white/50 border border-white/10 hover:bg-white/10 transition-colors cursor-default"
-                >
-                  {school}
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
       </div>
     </section>

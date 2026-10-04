@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { Lock, Cloud, Globe, Zap } from "lucide-react";
+import { Lock, Cloud, Globe, Zap, Phone, ArrowUpRight } from "lucide-react";
 import { useMagneticButton } from "@/hooks/useMagneticButton";
 
 const trustItems = [
@@ -39,9 +39,9 @@ export default function FinalCTA() {
       <div className="absolute top-0 left-0 w-72 h-72 rounded-full opacity-20 pointer-events-none blur-3xl"
         style={{ background: "#ffffff" }} />
       <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full opacity-15 pointer-events-none blur-3xl"
-        style={{ background: "#06B6D4" }} />
+        style={{ background: "#D4A843" }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full opacity-10 pointer-events-none blur-3xl"
-        style={{ background: "#7C3AED" }} />
+        style={{ background: "#A37C27" }} />
 
       {/* Subtle grid pattern overlay */}
       <div className="absolute inset-0 opacity-10 pointer-events-none"
@@ -55,7 +55,7 @@ export default function FinalCTA() {
           style={{ fontSize: "clamp(2.5rem,5vw,4.5rem)" }}
         >
           Your School Deserves Better.<br />
-          <span className="text-white/90">Start Today — Free.</span>
+          <span className="text-white/90">Let&apos;s Get Started.</span>
         </h2>
 
         <p
@@ -67,18 +67,25 @@ export default function FinalCTA() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-16">
-          <button
+          <a
             ref={primaryBtnRef}
-            className="cta-btn w-full sm:w-auto px-8 py-4 rounded-full bg-white font-bold text-primary text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
+            href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cta-btn w-full sm:w-auto px-8 py-4 rounded-full bg-white font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all inline-flex items-center justify-center gap-2"
+            style={{ color: "var(--color-accent)" }}
           >
-            Get Free Demo
-          </button>
-          <button
-            className="cta-btn w-full sm:w-auto px-8 py-4 rounded-full border-2 border-white/30 text-white font-bold text-lg hover:bg-white/10 transition-all group"
+            <Phone size={18} />
+            Book a Demo
+            <ArrowUpRight size={16} className="opacity-70" />
+          </a>
+          <a
+            href="/login"
+            className="cta-btn w-full sm:w-auto px-8 py-4 rounded-full border-2 border-white/30 text-white font-bold text-lg hover:bg-white/10 transition-all group inline-flex items-center justify-center"
           >
-            Talk to Our Team{" "}
+            Portal Login{" "}
             <span className="inline-block group-hover:translate-x-1 transition-transform ml-1">→</span>
-          </button>
+          </a>
         </div>
 
         {/* Trust items */}

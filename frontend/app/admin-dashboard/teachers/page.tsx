@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { mockTeachers } from "@/lib/mock-data";
 import { Search, Filter, Plus, Download, Upload, MoreVertical, Eye, Edit, Trash2, ShieldAlert, BookOpen, Clock, Mail, Phone, Calendar } from "lucide-react";
 
@@ -79,7 +80,7 @@ export default function AdminTeachers() {
                         {teacher.name.replace('Mr. ', '').replace('Ms. ', '').substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-semibold text-slate-900 group-hover:text-primary transition-colors cursor-pointer">{teacher.name}</div>
+                        <Link href={`/admin-dashboard/teachers/${teacher.id}`} className="font-semibold text-slate-900 group-hover:text-primary transition-colors cursor-pointer">{teacher.name}</Link>
                         <div className="text-xs text-slate-500 mt-0.5">{teacher.id}</div>
                       </div>
                     </div>

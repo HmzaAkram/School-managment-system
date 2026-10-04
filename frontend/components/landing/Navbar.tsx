@@ -2,18 +2,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowUpRight, Phone } from "lucide-react";
 import gsap from "gsap";
-import ScrollTrigger from "gsap/ScrollTrigger";
 import Link from "next/link";
 
 const navLinks = [
-  { name: "Home",    href: "/" },
-  { name: "About",   href: "/about" },
-  { name: "Events",  href: "/events" },
-  { name: "Classes", href: "/classes" },
-  { name: "Pricing", href: "/pricing" },
-  { name: "Contact", href: "/contact" },
+  { name: "Product",      href: "#hero" },
+  { name: "Intelligence", href: "#features" },
+  { name: "Portals",      href: "#dashboard-preview" },
+  { name: "Analytics",    href: "#how-it-works" },
+  { name: "About",        href: "#testimonials" },
 ];
 
 export default function Navbar() {
@@ -43,7 +41,7 @@ export default function Navbar() {
       <div
         id="scroll-progress"
         className="fixed top-0 left-0 right-0 h-[2px] z-[9999] origin-left scale-x-0 pointer-events-none"
-        style={{ background: "linear-gradient(90deg, #3B4FE8, #7C3AED)" }}
+        style={{ background: "linear-gradient(90deg, #C4993C, #D4A843)" }}
       />
 
       <motion.nav
@@ -51,23 +49,23 @@ export default function Navbar() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed top-[2px] left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100"
+        className="fixed top-0 left-0 right-0 z-50 bg-[#FAF8F5]/90 backdrop-blur-xl border-b border-[#EBE8E2]/80"
       >
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-lg font-sora shadow-[0_4px_14px_rgba(59,79,232,0.3)]">
-              SK
+          {/* Brand / Logo */}
+          <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
+            <div className="w-9 h-9 rounded-xl bg-[#23201B] flex items-center justify-center text-[#D4A843] font-bold text-sm shadow-sm border border-[#3D382F] group-hover:scale-105 transition-transform">
+              <span className="font-serif italic font-bold">SK</span>
             </div>
-            <span className="font-sora font-bold text-xl text-slate-800">
-              Skoolms
+            <span className="font-serif font-bold text-2xl text-[#23201B] tracking-tight">
+              Skoolms<span className="text-[#C4993C] font-sans text-lg">.</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-7">
               {navLinks.map((link, i) => (
                 <motion.div
                   key={link.name}
@@ -77,16 +75,16 @@ export default function Navbar() {
                 >
                   <Link
                     href={link.href}
-                    className="text-slate-600 hover:text-primary font-sans text-sm font-medium transition-colors relative group"
+                    className="text-[#5C564D] hover:text-[#23201B] font-sans text-sm font-medium transition-colors relative group py-1"
                   >
                     {link.name}
-                    <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-primary transition-all duration-300 group-hover:w-full rounded-full" />
+                    <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-[#C4993C] transition-all duration-300 group-hover:w-full rounded-full" />
                   </Link>
                 </motion.div>
               ))}
             </div>
 
-            <div className="flex items-center gap-3 border-l border-slate-200 pl-6">
+            <div className="flex items-center gap-3 border-l border-[#EBE8E2] pl-6">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -94,31 +92,36 @@ export default function Navbar() {
               >
                 <Link
                   href="/login"
-                  className="text-slate-600 hover:text-slate-900 font-sans text-sm font-medium px-4 py-2 rounded-full border border-slate-200 hover:border-slate-400 transition-all"
+                  className="text-[#23201B] hover:bg-white font-sans text-xs font-semibold px-4 py-2.5 rounded-full border border-[#D9D4CC] transition-all"
                 >
-                  Login
+                  Open dashboard
                 </Link>
               </motion.div>
+
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.45 }}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Link
-                  href="/login"
-                  className="bg-gradient-primary text-white px-6 py-2.5 rounded-full font-sans text-sm font-semibold hover:shadow-[0_8px_20px_rgba(59,79,232,0.35)] transition-shadow"
+                <a
+                  href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#23201B] hover:bg-[#3D382F] text-white px-5 py-2.5 rounded-full font-sans text-xs font-bold shadow-md hover:shadow-lg transition-all inline-flex items-center gap-1.5"
                 >
-                  Sign Up
-                </Link>
+                  <Phone size={13} className="text-[#C4993C]" />
+                  <span>Book a demo</span>
+                  <ArrowUpRight size={13} className="opacity-70" />
+                </a>
               </motion.div>
             </div>
           </div>
 
           {/* Mobile Toggle */}
           <button
-            className="lg:hidden text-slate-600 p-2"
+            className="lg:hidden text-[#23201B] p-2"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -134,32 +137,38 @@ export default function Navbar() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:hidden bg-white/95 backdrop-blur-xl border-b border-slate-100 overflow-hidden"
+              className="lg:hidden bg-[#FAF8F5]/98 backdrop-blur-xl border-b border-[#EBE8E2] overflow-hidden"
             >
-              <div className="px-6 py-4 flex flex-col gap-1">
+              <div className="px-6 py-4 flex flex-col gap-2">
                 {navLinks.map((link) => (
                   <Link
                     key={link.name}
                     href={link.href}
                     onClick={() => setIsOpen(false)}
-                    className="text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-slate-50 transition-colors"
+                    className="text-[#4A453E] hover:text-[#23201B] font-semibold text-sm py-2 border-b border-[#EBE8E2]/60"
                   >
                     {link.name}
                   </Link>
                 ))}
-                <div className="flex flex-col gap-3 pt-4 border-t border-slate-100 mt-2">
+
+                <div className="flex flex-col gap-2 pt-3">
                   <Link
                     href="/login"
-                    className="text-center font-semibold py-3 text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+                    onClick={() => setIsOpen(false)}
+                    className="text-center text-[#23201B] font-bold text-xs py-2.5 rounded-full border border-[#D9D4CC] bg-white"
                   >
-                    Login
+                    Open dashboard
                   </Link>
-                  <Link
-                    href="/login"
-                    className="bg-gradient-primary text-white rounded-xl py-3 font-semibold shadow-md text-center"
+
+                  <a
+                    href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-center bg-[#23201B] text-white font-bold text-xs py-2.5 rounded-full shadow-md flex items-center justify-center gap-1.5"
                   >
-                    Sign Up
-                  </Link>
+                    <Phone size={13} className="text-[#C4993C]" />
+                    <span>Book a demo (+92 315 2123010)</span>
+                  </a>
                 </div>
               </div>
             </motion.div>

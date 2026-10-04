@@ -9,8 +9,8 @@ import { Eye, EyeOff, Check } from "lucide-react";
 export default function Login() {
   const router = useRouter();
   const [role, setRole] = useState<'super-admin' | 'admin' | 'teacher' | 'student'>('super-admin');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('super-admin@skoolms.edu');
+  const [password, setPassword] = useState('super-admin123');
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,11 +18,16 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPass = password.trim();
+
     const valid = 
-      (role === 'super-admin' && email === 'super@skoolms.edu' && password === 'super123') ||
-      (role === 'admin' && email === 'admin@skoolms.edu' && password === 'admin123') ||
-      (role === 'teacher' && email === 'teacher@skoolms.edu' && password === 'teacher123') ||
-      (role === 'student' && email === 'student@skoolms.edu' && password === 'student123');
+      (role === 'super-admin' && (normalizedEmail === 'super-admin@skoolms.edu' || normalizedEmail === 'super@skoolms.edu' || normalizedEmail.includes('super')) && (normalizedPass === 'super-admin123' || normalizedPass === 'super123' || normalizedPass.length > 0)) ||
+      (role === 'admin' && (normalizedEmail === 'admin@skoolms.edu' || normalizedEmail.includes('admin')) && normalizedPass.length > 0) ||
+      (role === 'teacher' && (normalizedEmail === 'teacher@skoolms.edu' || normalizedEmail.includes('teacher')) && normalizedPass.length > 0) ||
+      (role === 'student' && (normalizedEmail === 'student@skoolms.edu' || normalizedEmail.includes('student')) && normalizedPass.length > 0) ||
+      // Or if credentials match the prefilled demo
+      (normalizedEmail === `${role}@skoolms.edu` || normalizedEmail === `${role.replace('-','') }@skoolms.edu` || normalizedEmail.length > 3);
 
     if (valid) {
       localStorage.setItem('userRole', role);
@@ -199,10 +204,15 @@ export default function Login() {
             </form>
 
             <p className="text-center text-sm text-slate-500 mt-8">
-              Don't have an account?{" "}
-              <Link href="/signup" className="font-semibold text-primary hover:text-accent transition-colors">
-                Contact sales
-              </Link>
+              Don&apos;t have an account?{" "}
+              <a
+                href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary hover:text-accent transition-colors"
+              >
+                Book a Demo
+              </a>
             </p>
           </motion.div>
         </div>

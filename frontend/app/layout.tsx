@@ -1,8 +1,16 @@
 import type { Metadata } from 'next'
-import { Sora, DM_Sans, DM_Mono } from 'next/font/google'
+import { Sora, DM_Sans, DM_Mono, Newsreader } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import LenisProvider from '@/components/providers/LenisProvider'
 import './globals.css'
+
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
+})
 
 const sora = Sora({
   subsets: ['latin'],
@@ -46,7 +54,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${dmSans.variable} ${dmMono.variable} scroll-smooth`}
+      className={`${newsreader.variable} ${sora.variable} ${dmSans.variable} ${dmMono.variable} scroll-smooth`}
     >
       <body className="antialiased">
         <LenisProvider>

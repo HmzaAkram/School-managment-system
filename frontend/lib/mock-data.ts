@@ -1,9 +1,256 @@
-export const mockSchools = [
-  { id: 'SCH-001', name: 'Crescent International School', admin: 'Ahmad Raza', phone: '+92 300 1234567', email: 'admin@crescent.edu', location: 'Lahore, Punjab', students: 1250, teachers: 85, contractEnd: '2027-12-31', status: 'Active', paymentStatus: 'Paid' },
-  { id: 'SCH-002', name: 'Beaconhouse Model Town', admin: 'Fatima Ali', phone: '+92 321 7654321', email: 'info@beaconhouse.edu', location: 'Lahore, Punjab', students: 3400, teachers: 210, contractEnd: '2028-06-30', status: 'Active', paymentStatus: 'Pending' },
-  { id: 'SCH-003', name: 'City School Gulberg', admin: 'Zain Malik', phone: '+92 333 9876543', email: 'contact@cityschool.edu', location: 'Lahore, Punjab', students: 2800, teachers: 150, contractEnd: '2026-11-15', status: 'Active', paymentStatus: 'Overdue' },
-  { id: 'SCH-004', name: 'Lahore Grammar School', admin: 'Sara Khan', phone: '+92 345 1122334', email: 'admin@lgs.edu', location: 'Lahore, Punjab', students: 4100, teachers: 280, contractEnd: '2029-03-01', status: 'Active', paymentStatus: 'Paid' },
-  { id: 'SCH-005', name: 'Roots Millennium', admin: 'Usman Tariq', phone: '+92 301 5566778', email: 'hello@roots.edu', location: 'Islamabad', students: 1800, teachers: 110, contractEnd: '2027-08-20', status: 'Inactive', paymentStatus: 'Pending' },
+export interface SchoolContract {
+  id: string;
+  name: string;
+  admin: string;
+  phone: string;
+  email: string;
+  location: string;
+  students: number;
+  teachers: number;
+  perStudentFee: number;          // Total fee per student (e.g. 20 PKR)
+  schoolSharePercent: number;     // e.g. 50% (10 PKR to school)
+  saasSharePercent: number;       // e.g. 50% (10 PKR to SaaS platform)
+  saasFeePerStudent: number;      // e.g. 10 PKR
+  monthlySaaSRevenue: number;     // students * saasFeePerStudent
+  contractDurationMonths: number; // e.g. 12 months (1 year)
+  contractStart: string;
+  contractEnd: string;
+  monthsElapsed: number;          // e.g. 9 of 12
+  totalContractValue: number;     // monthlySaaSRevenue * contractDurationMonths
+  totalPaidAmount: number;
+  totalPendingAmount: number;
+  currentMonthStatus: 'Paid' | 'Pending' | 'Overdue';
+  status: 'Active' | 'Pending Renewal' | 'Expired' | 'Inactive';
+}
+
+export const mockSchools: SchoolContract[] = [
+  {
+    id: 'SCH-001',
+    name: 'Crescent International School',
+    admin: 'Ahmad Raza',
+    phone: '+92 300 1234567',
+    email: 'admin@crescent.edu',
+    location: 'Lahore, Punjab',
+    students: 1250,
+    teachers: 85,
+    perStudentFee: 20,
+    schoolSharePercent: 50,
+    saasSharePercent: 50,
+    saasFeePerStudent: 10,
+    monthlySaaSRevenue: 12500,
+    contractDurationMonths: 12,
+    contractStart: '2026-01-01',
+    contractEnd: '2026-12-31',
+    monthsElapsed: 10,
+    totalContractValue: 150000,
+    totalPaidAmount: 125000,
+    totalPendingAmount: 25000,
+    currentMonthStatus: 'Paid',
+    status: 'Active',
+  },
+  {
+    id: 'SCH-002',
+    name: 'Beaconhouse Model Town',
+    admin: 'Fatima Ali',
+    phone: '+92 321 7654321',
+    email: 'info@beaconhouse.edu',
+    location: 'Lahore, Punjab',
+    students: 3400,
+    teachers: 210,
+    perStudentFee: 25,
+    schoolSharePercent: 60,
+    saasSharePercent: 40,
+    saasFeePerStudent: 10,
+    monthlySaaSRevenue: 34000,
+    contractDurationMonths: 12,
+    contractStart: '2026-03-01',
+    contractEnd: '2027-02-28',
+    monthsElapsed: 8,
+    totalContractValue: 408000,
+    totalPaidAmount: 238000,
+    totalPendingAmount: 34000,
+    currentMonthStatus: 'Pending',
+    status: 'Active',
+  },
+  {
+    id: 'SCH-003',
+    name: 'City School Gulberg',
+    admin: 'Zain Malik',
+    phone: '+92 333 9876543',
+    email: 'contact@cityschool.edu',
+    location: 'Lahore, Punjab',
+    students: 2800,
+    teachers: 150,
+    perStudentFee: 20,
+    schoolSharePercent: 50,
+    saasSharePercent: 50,
+    saasFeePerStudent: 10,
+    monthlySaaSRevenue: 28000,
+    contractDurationMonths: 12,
+    contractStart: '2025-11-01',
+    contractEnd: '2026-10-31',
+    monthsElapsed: 11,
+    totalContractValue: 336000,
+    totalPaidAmount: 280000,
+    totalPendingAmount: 56000,
+    currentMonthStatus: 'Overdue',
+    status: 'Active',
+  },
+  {
+    id: 'SCH-004',
+    name: 'Lahore Grammar School',
+    admin: 'Sara Khan',
+    phone: '+92 345 1122334',
+    email: 'admin@lgs.edu',
+    location: 'Lahore, Punjab',
+    students: 4100,
+    teachers: 280,
+    perStudentFee: 30,
+    schoolSharePercent: 50,
+    saasSharePercent: 50,
+    saasFeePerStudent: 15,
+    monthlySaaSRevenue: 61500,
+    contractDurationMonths: 24,
+    contractStart: '2026-01-01',
+    contractEnd: '2027-12-31',
+    monthsElapsed: 10,
+    totalContractValue: 1476000,
+    totalPaidAmount: 615000,
+    totalPendingAmount: 0,
+    currentMonthStatus: 'Paid',
+    status: 'Active',
+  },
+  {
+    id: 'SCH-005',
+    name: 'Roots Millennium Campus',
+    admin: 'Usman Tariq',
+    phone: '+92 301 5566778',
+    email: 'hello@roots.edu',
+    location: 'Islamabad',
+    students: 1800,
+    teachers: 110,
+    perStudentFee: 20,
+    schoolSharePercent: 50,
+    saasSharePercent: 50,
+    saasFeePerStudent: 10,
+    monthlySaaSRevenue: 18000,
+    contractDurationMonths: 12,
+    contractStart: '2026-04-01',
+    contractEnd: '2027-03-31',
+    monthsElapsed: 7,
+    totalContractValue: 216000,
+    totalPaidAmount: 108000,
+    totalPendingAmount: 18000,
+    currentMonthStatus: 'Pending',
+    status: 'Active',
+  },
+  {
+    id: 'SCH-006',
+    name: 'Army Public School & College',
+    admin: 'Col. Farhan Akhtar',
+    phone: '+92 312 9988776',
+    email: 'admin@apsacs.edu',
+    location: 'Rawalpindi',
+    students: 3200,
+    teachers: 190,
+    perStudentFee: 20,
+    schoolSharePercent: 50,
+    saasSharePercent: 50,
+    saasFeePerStudent: 10,
+    monthlySaaSRevenue: 32000,
+    contractDurationMonths: 12,
+    contractStart: '2026-02-01',
+    contractEnd: '2027-01-31',
+    monthsElapsed: 9,
+    totalContractValue: 384000,
+    totalPaidAmount: 288000,
+    totalPendingAmount: 0,
+    currentMonthStatus: 'Paid',
+    status: 'Active',
+  }
+];
+
+export interface SuperAdminExpense {
+  id: string;
+  title: string;
+  category: 'Hosting & Cloud Infrastructure' | 'SMS & WhatsApp Gateway' | 'Dev & Engineering' | 'Sales & Marketing' | 'Operations & Support' | 'Office & Misc';
+  amount: number;
+  date: string;
+  status: 'Paid' | 'Pending';
+  paymentMethod: 'Bank Transfer' | 'Credit Card' | 'JazzCash / EasyPaisa' | 'Cash';
+  notes: string;
+}
+
+export const mockExpenses: SuperAdminExpense[] = [
+  {
+    id: 'EXP-101',
+    title: 'AWS & Vercel Cloud Server Infrastructure',
+    category: 'Hosting & Cloud Infrastructure',
+    amount: 38500,
+    date: '2026-10-01',
+    status: 'Paid',
+    paymentMethod: 'Credit Card',
+    notes: 'Primary database cluster & edge CDN compute nodes',
+  },
+  {
+    id: 'EXP-102',
+    title: 'Twilio & WhatsApp Business Gateway Messages (150k sms)',
+    category: 'SMS & WhatsApp Gateway',
+    amount: 24000,
+    date: '2026-10-02',
+    status: 'Paid',
+    paymentMethod: 'Credit Card',
+    notes: 'Monthly OTPs, attendance alerts and fee reminders',
+  },
+  {
+    id: 'EXP-103',
+    title: 'Fullstack Core Platform Engineering & Maintenance',
+    category: 'Dev & Engineering',
+    amount: 55000,
+    date: '2026-10-05',
+    status: 'Paid',
+    paymentMethod: 'Bank Transfer',
+    notes: 'Bi-weekly sprint deliverables & security audits',
+  },
+  {
+    id: 'EXP-104',
+    title: 'School Outreach & Field Sales Commission',
+    category: 'Sales & Marketing',
+    amount: 18000,
+    date: '2026-10-06',
+    status: 'Paid',
+    paymentMethod: 'Bank Transfer',
+    notes: 'Commission for onboarding 2 new school campuses',
+  },
+  {
+    id: 'EXP-105',
+    title: '24/7 School Support Staff Salaries',
+    category: 'Operations & Support',
+    amount: 22000,
+    date: '2026-10-08',
+    status: 'Paid',
+    paymentMethod: 'Bank Transfer',
+    notes: 'Dedicated live customer support agent stipend',
+  },
+  {
+    id: 'EXP-106',
+    title: 'Domain, SSL Certificates & Security Scanner',
+    category: 'Hosting & Cloud Infrastructure',
+    amount: 6500,
+    date: '2026-09-28',
+    status: 'Paid',
+    paymentMethod: 'Credit Card',
+    notes: 'Annual Wildcard SSL renewal for multi-tenant subdomains',
+  },
+];
+
+export const mockMonthlyFinancials = [
+  { month: 'May', grossRevenue: 142000, expenses: 95000, netProfit: 47000 },
+  { month: 'Jun', grossRevenue: 158000, expenses: 98000, netProfit: 60000 },
+  { month: 'Jul', grossRevenue: 165000, expenses: 104000, netProfit: 61000 },
+  { month: 'Aug', grossRevenue: 172000, expenses: 110000, netProfit: 62000 },
+  { month: 'Sep', grossRevenue: 186000, expenses: 118000, netProfit: 68000 },
+  { month: 'Oct', grossRevenue: 196000, expenses: 124000, netProfit: 72000 },
 ];
 
 export const mockStudents = [
@@ -31,15 +278,16 @@ export const mockClasses = [
 ];
 
 export const mockTransactions = [
-  { id: 'TXN-9081', date: '2026-10-01', description: 'Fee Collection - Class 10', type: 'Credit', amount: 450000, method: 'Bank Transfer', status: 'Completed' },
-  { id: 'TXN-9082', date: '2026-10-02', description: 'Electricity Bill', type: 'Debit', amount: 125000, method: 'Cash', status: 'Completed' },
-  { id: 'TXN-9083', date: '2026-10-03', description: 'Fee Collection - Class 9', type: 'Credit', amount: 380000, method: 'Online', status: 'Completed' },
-  { id: 'TXN-9084', date: '2026-10-05', description: 'Staff Salaries', type: 'Debit', amount: 1250000, method: 'Bank Transfer', status: 'Pending' },
-  { id: 'TXN-9085', date: '2026-10-07', description: 'New Computers', type: 'Debit', amount: 350000, method: 'Bank Transfer', status: 'Completed' },
+  { id: 'TXN-9081', date: '2026-10-01', description: 'Monthly SaaS Fee - Crescent International', type: 'Credit', amount: 12500, method: 'Bank Transfer', status: 'Completed' },
+  { id: 'TXN-9082', date: '2026-10-01', description: 'AWS & Vercel Cloud Server Infrastructure', type: 'Debit', amount: 38500, method: 'Credit Card', status: 'Completed' },
+  { id: 'TXN-9083', date: '2026-10-02', description: 'Monthly SaaS Fee - Lahore Grammar School', type: 'Credit', amount: 61500, method: 'Bank Transfer', status: 'Completed' },
+  { id: 'TXN-9084', date: '2026-10-02', description: 'Twilio & WhatsApp Messaging Gateway', type: 'Debit', amount: 24000, method: 'Credit Card', status: 'Completed' },
+  { id: 'TXN-9085', date: '2026-10-03', description: 'Monthly SaaS Fee - Army Public School', type: 'Credit', amount: 32000, method: 'Online Transfer', status: 'Completed' },
+  { id: 'TXN-9086', date: '2026-10-05', description: 'Core Platform Engineering Sprint', type: 'Debit', amount: 55000, method: 'Bank Transfer', status: 'Completed' },
 ];
 
 export const mockSupportQueries = [
-  { id: 'TKT-101', subject: 'System Login Issue', user: 'Fatima Ali', role: 'Teacher', status: 'Open', priority: 'High', date: '2026-10-01' },
-  { id: 'TKT-102', subject: 'Fee Receipt not generating', user: 'Muhammad Hassan', role: 'Parent', status: 'In Progress', priority: 'Medium', date: '2026-10-02' },
-  { id: 'TKT-103', subject: 'Add new section in Class 8', user: 'Ahmad Raza', role: 'School Admin', status: 'Resolved', priority: 'Low', date: '2026-09-28' },
+  { id: 'TKT-101', subject: 'Customized Fee Voucher Template', user: 'Ahmad Raza', role: 'School Admin (Crescent)', status: 'Open', priority: 'High', date: '2026-10-01' },
+  { id: 'TKT-102', subject: 'Biometric Attendance Machine Sync API', user: 'Zain Malik', role: 'School Admin (City School)', status: 'In Progress', priority: 'Medium', date: '2026-10-02' },
+  { id: 'TKT-103', subject: 'Add Additional Branch Campus (500 Students)', user: 'Sara Khan', role: 'School Admin (LGS)', status: 'Resolved', priority: 'Low', date: '2026-09-28' },
 ];

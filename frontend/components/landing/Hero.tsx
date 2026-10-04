@@ -2,52 +2,37 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import ScrollTrigger from "gsap/ScrollTrigger";
-import { Check } from "lucide-react";
-import { useMagneticButton } from "@/hooks/useMagneticButton";
+import { Phone, ArrowUpRight, Sparkles, Check, BarChart3, Users, Clock, Award, ChevronRight, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import dynamic from "next/dynamic";
 
-const headline = ["Run", "Your", "School", "Smarter", "with", "Skoolms"];
-
-const statCards = [
-  { label: "Total Students", value: "1,248", icon: "👨‍🎓" },
-  { label: "Attendance Rate", value: "96.4%", icon: "📋" },
-  { label: "Fees Collected", value: "$42,500", icon: "💰" },
-  { label: "Staff Count",    value: "84",     icon: "👨‍🏫" },
-];
-
-const activityItems = [
-  { text: "Fee payment received — Ali Hassan",  time: "2 min ago",  dot: "bg-emerald-400" },
-  { text: "Attendance marked — Grade 9A",        time: "15 min ago", dot: "bg-blue-400" },
-  { text: "New student enrolled — Sara Malik",   time: "1 hr ago",   dot: "bg-purple-400" },
-  { text: "Staff leave approved — Mr. Ahmed",    time: "2 hr ago",   dot: "bg-amber-400" },
-  { text: "Report generated — Term 2 Grades",   time: "3 hr ago",   dot: "bg-cyan-400" },
-];
+// Dynamically import 3D Educational Object with SSR disabled for optimal Next.js rendering
+const Hero3DObject = dynamic(() => import("./Hero3DObject"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full max-w-[500px] aspect-square flex items-center justify-center">
+      <div className="w-16 h-16 rounded-2xl bg-[#EBE5D9] animate-pulse flex items-center justify-center text-[#C4993C]">
+        <Sparkles size={24} className="animate-spin" />
+      </div>
+    </div>
+  ),
+});
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
-  const primaryBtnRef = useMagneticButton();
-  const secondaryBtnRef = useMagneticButton();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      tl.from("#hero-badge",     { y: 24, opacity: 0, duration: 0.7 })
-        .from(".hero-word",      { y: 80, opacity: 0, stagger: 0.06, duration: 0.9 }, "-=0.3")
-        .from("#hero-sub",       { y: 30, opacity: 0, duration: 0.8 }, "-=0.4")
-        .from(".hero-btn",       { y: 20, opacity: 0, stagger: 0.1, duration: 0.7 }, "-=0.4")
-        .from("#hero-trust",     { y: 15, opacity: 0, duration: 0.6 }, "-=0.3")
-        .from("#hero-dashboard", { y: 60, opacity: 0, scale: 0.96, duration: 1.2 }, "-=0.3");
-
-      // Subtle parallax on background blobs
-      gsap.to("#hero-blob-1", {
-        y: -60, ease: "none",
-        scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 1.5 },
-      });
-      gsap.to("#hero-blob-2", {
-        y: -30, ease: "none",
-        scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 2 },
-      });
+      tl.from("#hero-tag",       { y: 15, opacity: 0, duration: 0.6 })
+        .from("#hero-title-1",   { y: 30, opacity: 0, duration: 0.7 }, "-=0.3")
+        .from("#hero-title-2",   { y: 30, opacity: 0, duration: 0.7 }, "-=0.4")
+        .from("#hero-description", { y: 20, opacity: 0, duration: 0.6 }, "-=0.3")
+        .from(".hero-action-btn", { y: 15, opacity: 0, stagger: 0.1, duration: 0.5 }, "-=0.2")
+        .from("#hero-3d-wrap",   { scale: 0.9, opacity: 0, duration: 0.9 }, "-=0.5")
+        .from("#hero-ticker",     { opacity: 0, y: 10, duration: 0.5 }, "-=0.3")
+        .from("#hero-dashboard-section", { y: 40, opacity: 0, duration: 0.8 }, "-=0.2");
     }, sectionRef);
 
     return () => ctx.revert();
@@ -57,198 +42,261 @@ export default function Hero() {
     <section
       id="hero"
       ref={sectionRef}
-      className="relative min-h-screen pt-32 pb-20 flex items-center overflow-hidden bg-white"
+      className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden bg-[#FAF8F5]"
     >
-      {/* Background blobs */}
+      {/* Ambient background lighting */}
       <div
-        id="hero-blob-1"
-        className="absolute top-0 right-0 w-[700px] h-[700px] rounded-full pointer-events-none -translate-y-1/3 translate-x-1/4"
-        style={{ background: "linear-gradient(135deg,#3B4FE8,#7C3AED)", opacity: 0.15, filter: "blur(80px)" }}
+        className="absolute top-0 left-1/3 -translate-x-1/2 w-[800px] h-[500px] rounded-full pointer-events-none opacity-35 blur-3xl -z-0"
+        style={{ background: "radial-gradient(circle, rgba(212,168,67,0.25) 0%, rgba(250,248,245,0) 70%)" }}
       />
       <div
-        id="hero-blob-2"
-        className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full pointer-events-none translate-y-1/3 -translate-x-1/4"
-        style={{ background: "#06B6D4", opacity: 0.08, filter: "blur(80px)" }}
+        className="absolute top-40 right-10 w-[450px] h-[450px] rounded-full pointer-events-none opacity-30 blur-3xl -z-0"
+        style={{ background: "radial-gradient(circle, rgba(196,153,60,0.2) 0%, rgba(250,248,245,0) 70%)" }}
       />
-      {/* Dot grid */}
-      <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
-        <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-
-          {/* Badge */}
-          <div
-            id="hero-badge"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-8"
-            style={{ borderColor: "rgba(59,79,232,0.2)", backgroundColor: "rgba(59,79,232,0.05)" }}
-          >
-            <span>🎓</span>
-            <span className="font-mono text-xs uppercase tracking-[0.15em] text-primary font-semibold">
-              School Management Platform
-            </span>
-          </div>
-
-          {/* Headline — word-by-word */}
-          <h1 className="font-sora font-extrabold leading-[1.1] text-slate-900 mb-8 tracking-tight" style={{ fontSize: "clamp(3.2rem,7vw,6rem)" }}>
-            {headline.map((word, i) => (
-              <span key={i} className="inline-block overflow-hidden align-bottom">
-                <span
-                  className={`hero-word inline-block mr-3 md:mr-4 ${word === "Smarter" ? "text-gradient" : ""}`}
-                >
-                  {word}
-                </span>
-              </span>
-            ))}
-          </h1>
-
-          {/* Subtext */}
-          <p
-            id="hero-sub"
-            className="text-lg md:text-xl text-slate-500 max-w-2xl mb-12 leading-[1.75] font-sans"
-          >
-            The all-in-one platform trusted by 500+ schools worldwide.
-            Manage students, fees, attendance, staff, and reports — all from one beautiful dashboard.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 mb-10 w-full sm:w-auto">
-            <button
-              ref={primaryBtnRef}
-              className="hero-btn w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-primary text-white font-semibold text-lg shadow-[0_8px_30px_rgba(59,79,232,0.35)] hover:shadow-[0_20px_60px_rgba(59,79,232,0.45)] transition-shadow hover:-translate-y-1 active:translate-y-0"
-            >
-              Get Free Demo
-            </button>
-            <button
-              ref={secondaryBtnRef}
-              className="hero-btn w-full sm:w-auto px-8 py-4 rounded-full border border-slate-200 text-slate-700 font-semibold text-lg hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2 group"
-            >
-              Watch How It Works
-              <span className="group-hover:translate-x-1 transition-transform">▶</span>
-            </button>
-          </div>
-
-          {/* Trust line */}
-          <div id="hero-trust" className="flex flex-wrap justify-center gap-6 text-sm text-slate-400 mb-20">
-            {["No credit card required", "Setup in 7 days", "Free onboarding support"].map((t) => (
-              <div key={t} className="flex items-center gap-2">
-                <Check size={15} className="text-emerald-500" />
-                {t}
-              </div>
-            ))}
-          </div>
-
-          {/* ── Dashboard Mockup ─────────────────────────────── */}
-          <div id="hero-dashboard" className="w-full max-w-5xl mx-auto">
+        
+        {/* ── Main Editorial Split Layout (Reference Aesthetic) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center min-h-[520px] mb-16">
+          
+          {/* Left Column: Editorial Typography & Schooling CTAs */}
+          <div className="lg:col-span-7 flex flex-col items-start text-left">
+            
+            {/* Overline Tag */}
             <div
-              className="w-full rounded-2xl md:rounded-[2rem] border border-slate-200/60 bg-white shadow-[0_40px_100px_rgba(59,79,232,0.18)] overflow-hidden animate-float"
+              id="hero-tag"
+              className="flex items-center gap-3 text-xs font-mono tracking-[0.14em] uppercase text-[#706B62] font-semibold mb-6"
             >
-              {/* Browser chrome */}
-              <div className="h-11 bg-slate-50 border-b border-slate-100 flex items-center px-4 gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400" />
-                  <div className="w-3 h-3 rounded-full bg-amber-400" />
-                  <div className="w-3 h-3 rounded-full bg-green-400" />
+              <span className="w-2 h-2 rounded-full bg-[#C4993C] animate-pulse" />
+              <span>NEXT-GEN SCHOOL OPERATING SYSTEM</span>
+              <span className="text-[#C4993C]">—</span>
+              <span>SKOOLMS ECOSYSTEM</span>
+            </div>
+
+            {/* Editorial Headline for Schooling */}
+            <h1 className="font-serif leading-[1.08] tracking-tight text-[#23201B] mb-6 text-4xl sm:text-6xl lg:text-[68px]">
+              <span id="hero-title-1" className="block font-bold">
+                Every school,
+              </span>
+              <span id="hero-title-1" className="block font-bold">
+                empowered by <span className="text-[#2B5B84]">intelligence.</span>
+              </span>
+              <span id="hero-title-2" className="block italic font-normal text-[#23201B] mt-1">
+                Every classroom & parent,
+              </span>
+              <span id="hero-title-2" className="block italic font-normal text-[#2E5E4E]">
+                connected in one portal.
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p
+              id="hero-description"
+              className="text-base sm:text-lg text-[#5C564D] max-w-xl mb-9 leading-relaxed font-sans"
+            >
+              The all-in-one ERP built for progressive institutions. Eliminate paper diaries, automate fee recoveries with 3-fold bank deposit challans, track biometric attendance, and give principals 360° real-time intelligence.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-4 mb-8 w-full sm:w-auto">
+              <a
+                href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hero-action-btn px-7 py-3.5 rounded-full bg-[#23201B] hover:bg-[#3D382F] text-white font-bold text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all inline-flex items-center gap-2"
+              >
+                <span>Book a Demo (+92 315 2123010)</span>
+                <ArrowUpRight size={15} className="text-[#C4993C]" />
+              </a>
+
+              <Link
+                href="/login"
+                className="hero-action-btn px-6 py-3.5 rounded-full border border-[#D9D4CC] bg-white hover:bg-[#FAF8F5] text-[#23201B] font-bold text-sm transition-all shadow-xs hover:-translate-y-0.5"
+              >
+                Explore Live Portals
+              </Link>
+            </div>
+
+            {/* Micro Badges */}
+            <div className="flex flex-wrap items-center gap-5 text-xs text-[#706B62]">
+              <div className="flex items-center gap-1.5">
+                <Check size={14} className="text-[#C4993C]" strokeWidth={2.5} />
+                <span>Affordable 50/50 Revenue Share Model</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Check size={14} className="text-[#C4993C]" strokeWidth={2.5} />
+                <span>Zero Server Maintenance Required</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: 3D Educational Object (Knowledge Book, Graduation Cap, Diploma & Star Badge) */}
+          <div id="hero-3d-wrap" className="lg:col-span-5 flex items-center justify-center relative">
+            <Hero3DObject />
+          </div>
+        </div>
+
+        {/* ── Bottom Section Ticker Bar ── */}
+        <div
+          id="hero-ticker"
+          className="border-y border-[#EBE8E2] py-4 my-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center md:text-left"
+        >
+          <div className="flex items-center gap-2 text-xs font-mono uppercase font-bold text-[#4A453E]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C4993C]" />
+            <span>ACADEMIC GRADEBOOK</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-mono uppercase font-bold text-[#4A453E]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C4993C]" />
+            <span>AUTOMATED 3-FOLD CHALLANS</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-mono uppercase font-bold text-[#4A453E]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C4993C]" />
+            <span>DIGITAL PARENT DIARY</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-mono uppercase font-bold text-[#4A453E]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C4993C]" />
+            <span>PRINCIPAL CONTROL ROOM</span>
+          </div>
+        </div>
+
+        {/* ── Realistic Interactive School Dashboard Showcase ── */}
+        <div id="hero-dashboard-section" className="w-full max-w-6xl mx-auto pt-6">
+          <div className="text-center mb-6">
+            <span className="text-xs uppercase font-mono tracking-widest text-[#C4993C] font-bold">LIVE PREVIEW</span>
+            <h2 className="text-2xl md:text-3xl font-serif font-bold text-[#23201B] mt-1">
+              Autonomous Principal Control Room
+            </h2>
+          </div>
+
+          <div className="w-full rounded-2xl md:rounded-3xl border border-[#EBE8E2] bg-white shadow-[0_24px_80px_rgba(35,32,27,0.08)] overflow-hidden">
+            {/* Window bar */}
+            <div className="h-10 bg-[#FAF8F5] border-b border-[#EBE8E2] flex items-center px-4 gap-2">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-[#E57373]" />
+                <div className="w-3 h-3 rounded-full bg-[#FFB74D]" />
+                <div className="w-3 h-3 rounded-full bg-[#81C784]" />
+              </div>
+              <div className="flex-1" />
+              <div className="h-6 px-4 bg-white border border-[#EBE8E2] rounded-md shadow-xs mx-auto flex items-center justify-center gap-1.5 text-[11px] font-mono text-[#8C877D]">
+                <span className="w-2 h-2 rounded-full bg-[#C4993C]" />
+                <span>app.skoolms.edu/admin-dashboard</span>
+              </div>
+              <div className="flex-1" />
+            </div>
+
+            {/* Dashboard content */}
+            <div className="flex flex-col md:flex-row min-h-[460px] bg-[#FAF8F5]">
+              {/* Sidebar */}
+              <div className="w-full md:w-56 bg-[#1A1A1A] text-white p-4 flex flex-col justify-between border-r border-[#2A2A2A]">
+                <div>
+                  <div className="flex items-center gap-2.5 pb-4 mb-3 border-b border-white/10">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C4993C] to-[#D4A843] flex items-center justify-center text-white font-bold text-xs">
+                      SK
+                    </div>
+                    <div>
+                      <div className="font-bold text-xs text-white">Skoolms</div>
+                      <div className="text-[9px] font-mono text-[#C4993C] uppercase tracking-wider">ADMINISTRATOR</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 text-xs">
+                    <div className="px-3 py-2 rounded-xl bg-gradient-to-r from-[#C4993C] to-[#D4A843] text-white font-bold flex items-center gap-2 shadow-sm">
+                      <BarChart3 size={14} /> Overview
+                    </div>
+                    <div className="px-3 py-2 rounded-xl text-slate-400 hover:text-white flex items-center gap-2">
+                      <Users size={14} /> Students (1,248)
+                    </div>
+                    <div className="px-3 py-2 rounded-xl text-slate-400 hover:text-white flex items-center gap-2">
+                      <Clock size={14} /> Attendance (94.2%)
+                    </div>
+                    <div className="px-3 py-2 rounded-xl text-slate-400 hover:text-white flex items-center gap-2">
+                      <Award size={14} /> Fee Collection
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1" />
-                <div className="h-6 w-56 bg-white border border-slate-200 rounded-md shadow-sm mx-auto flex items-center justify-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span className="text-[10px] text-slate-400 font-mono">dashboard.skoolms.app</span>
+
+                <div className="p-2 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2 text-xs">
+                  <div className="w-7 h-7 rounded-full bg-[#C4993C] flex items-center justify-center text-white font-bold text-[10px]">
+                    AD
+                  </div>
+                  <div className="truncate">
+                    <div className="font-semibold text-white text-[11px]">Principal Office</div>
+                    <div className="text-[9px] text-slate-400">Oakridge Academy</div>
+                  </div>
                 </div>
-                <div className="flex-1" />
               </div>
 
-              {/* Dashboard content */}
-              <div className="flex h-[420px] md:h-[580px] bg-slate-50/60">
-
-                {/* Sidebar */}
-                <div className="hidden md:flex flex-col w-56 p-4 border-r border-slate-100 bg-white/90 gap-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-xs font-bold">SK</div>
-                    <span className="text-sm font-bold text-slate-700 font-sora">Skoolms</span>
+              {/* Main Preview Area */}
+              <div className="flex-1 p-5 md:p-6 space-y-5">
+                <div className="flex items-center justify-between border-b border-[#EBE8E2] pb-4">
+                  <div>
+                    <h3 className="font-bold text-xl text-[#23201B] font-serif">Principal Dashboard</h3>
+                    <p className="text-xs text-[#706B62]">Live metrics across student admissions, fee recovery, and faculty.</p>
                   </div>
-                  {[
-                    ["📊", "Dashboard", true],
-                    ["👨‍🎓", "Students", false],
-                    ["📋", "Attendance", false],
-                    ["💰", "Fees", false],
-                    ["💬", "Messages", false],
-                    ["📈", "Reports", false],
-                  ].map(([icon, label, active]) => (
-                    <div key={label as string} className={`h-9 rounded-lg flex items-center px-3 gap-3 cursor-default ${active ? "bg-primary/10" : "hover:bg-slate-50"}`}>
-                      <span className="text-sm">{icon as string}</span>
-                      <span className={`text-sm font-medium ${active ? "text-primary" : "text-slate-500"}`}>{label as string}</span>
-                    </div>
-                  ))}
+                  <div className="px-3 py-1 rounded-lg bg-white border border-[#EBE8E2] text-xs font-semibold text-[#706B62]">
+                    Academic Year 2026–2027
+                  </div>
                 </div>
 
-                {/* Main area */}
-                <div className="flex-1 p-5 flex flex-col gap-5 overflow-hidden">
-                  {/* Top bar */}
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h2 className="text-lg font-bold font-sora text-slate-800">Good morning, Principal! 👋</h2>
-                      <p className="text-xs text-slate-500">Here's what's happening today at Skoolms Academy.</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-bold">P</div>
-                    </div>
+                {/* 5 Top Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  <div className="bg-white p-3.5 rounded-xl border border-[#EBE8E2] shadow-xs">
+                    <span className="text-[10px] font-bold text-[#8C847B] uppercase tracking-wider block mb-1">Total Students</span>
+                    <div className="font-bold text-lg text-[#23201B] font-serif">1,248</div>
+                    <span className="text-[10px] text-emerald-600 font-bold">↗ 3.2% vs last term</span>
                   </div>
 
-                  {/* Stat cards */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {statCards.map((s) => (
-                      <div key={s.label} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col gap-1">
-                        <div className="text-xl">{s.icon}</div>
-                        <span className="text-[11px] text-slate-500">{s.label}</span>
-                        <span className="text-base font-bold text-slate-800 font-sora">{s.value}</span>
+                  <div className="bg-white p-3.5 rounded-xl border border-[#EBE8E2] shadow-xs">
+                    <span className="text-[10px] font-bold text-[#8C847B] uppercase tracking-wider block mb-1">Total Staff</span>
+                    <div className="font-bold text-lg text-[#23201B] font-serif">86</div>
+                    <span className="text-[10px] text-emerald-600 font-bold">↗ 2.4% full faculty</span>
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-xl border border-[#EBE8E2] shadow-xs">
+                    <span className="text-[10px] font-bold text-[#8C847B] uppercase tracking-wider block mb-1">Attendance Rate</span>
+                    <div className="font-bold text-lg text-[#23201B] font-serif">94.2%</div>
+                    <span className="text-[10px] text-emerald-600 font-bold">↗ 1.2% daily active</span>
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-xl border border-[#EBE8E2] shadow-xs">
+                    <span className="text-[10px] font-bold text-[#8C847B] uppercase tracking-wider block mb-1">Fee Collection</span>
+                    <div className="font-bold text-lg text-[#23201B] font-serif">PKR 4.8M</div>
+                    <span className="text-[10px] text-emerald-600 font-bold">↗ 96.4% recovery</span>
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-xl border border-[#EBE8E2] shadow-xs col-span-2 sm:col-span-1">
+                    <span className="text-[10px] font-bold text-[#8C847B] uppercase tracking-wider block mb-1">Pending Fees</span>
+                    <div className="font-bold text-lg text-amber-700 font-serif">PKR 350K</div>
+                    <span className="text-[10px] text-amber-700 font-semibold">18 installments due</span>
+                  </div>
+                </div>
+
+                {/* Graph preview */}
+                <div className="bg-white rounded-xl border border-[#EBE8E2] p-4 shadow-xs">
+                  <div className="flex items-center justify-between mb-3 text-xs">
+                    <span className="font-bold text-[#23201B]">Daily Student Attendance Trend</span>
+                    <div className="flex items-center gap-3 text-[11px] text-[#706B62]">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" /> Present (94%)</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400" /> Absent (4%)</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> Late (2%)</span>
+                    </div>
+                  </div>
+                  <div className="h-28 w-full flex items-end gap-2 pt-2">
+                    {[92, 95, 94, 96, 95, 93, 94, 96, 97, 95, 96, 94, 95, 96, 95].map((val, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                        <div
+                          className="w-full rounded-t-md bg-gradient-to-t from-[#C4993C]/40 to-[#C4993C]"
+                          style={{ height: `${val}%` }}
+                        />
                       </div>
                     ))}
-                  </div>
-
-                  {/* Chart + Activity */}
-                  <div className="flex gap-4 flex-1 min-h-0">
-                    {/* Chart */}
-                    <div className="flex-[2] bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex flex-col">
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-xs font-bold text-slate-700">Attendance Overview</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">↑ 4.2%</span>
-                      </div>
-                      <div className="flex-1 relative overflow-hidden">
-                        <svg className="w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none">
-                          <defs>
-                            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#3B4FE8" stopOpacity="0.2" />
-                              <stop offset="100%" stopColor="#3B4FE8" stopOpacity="0" />
-                            </linearGradient>
-                          </defs>
-                          <path d="M0,80 C30,70 50,55 75,50 S120,30 150,35 S200,20 230,25 S270,15 300,18 L300,100 L0,100 Z" fill="url(#chartGrad)" />
-                          <path d="M0,80 C30,70 50,55 75,50 S120,30 150,35 S200,20 230,25 S270,15 300,18" fill="none" stroke="#3B4FE8" strokeWidth="2.5" strokeLinecap="round" />
-                          {[[0,80],[75,50],[150,35],[230,25],[300,18]].map(([x,y], idx) => (
-                            <circle key={idx} cx={x} cy={y} r="3.5" fill="#3B4FE8" />
-                          ))}
-                        </svg>
-                      </div>
-                    </div>
-
-                    {/* Activity */}
-                    <div className="flex-1 bg-white rounded-xl border border-slate-100 shadow-sm p-4 hidden lg:flex flex-col gap-3">
-                      <span className="text-xs font-bold text-slate-700 mb-1">Recent Activity</span>
-                      {activityItems.map((a, i) => (
-                        <div key={i} className="flex gap-3 items-center">
-                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${a.dot}`} />
-                          <div className="flex flex-col flex-1 min-w-0">
-                            <span className="text-[11px] text-slate-700 truncate">{a.text}</span>
-                            <span className="text-[10px] text-slate-400">{a.time}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </section>
   );

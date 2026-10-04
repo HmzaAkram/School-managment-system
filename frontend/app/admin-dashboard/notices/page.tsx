@@ -15,7 +15,10 @@ import {
   Megaphone,
   Clock,
   Sparkles,
-  Paperclip
+  Paperclip,
+  MessageSquare,
+  Phone,
+  X
 } from "lucide-react";
 
 interface NoticeItem {
@@ -93,6 +96,29 @@ export default function AdminNotices() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  
+  // WhatsApp / SMS Broadcast Center Modal State
+  const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
+  const [broadcastAudience, setBroadcastAudience] = useState("All Guardians (1,248 Parents)");
+  const [broadcastText, setBroadcastText] = useState("Dear Guardians, please be informed that school will observe a rain / smog emergency holiday tomorrow (Friday, 3rd October). Online classes will be held via LMS.");
+  const [broadcastSentToast, setBroadcastSentToast] = useState("");
+
+  const handleSendBroadcast = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsBroadcastModalOpen(false);
+    setBroadcastSentToast(`WhatsApp & SMS Broadcast successfully dispatched to ${broadcastAudience}!`);
+    setTimeout(() => setBroadcastSentToast(""), 5000);
+  };
+
+  const applyBroadcastTemplate = (type: string) => {
+    if (type === "holiday") {
+      setBroadcastText("🌧️ EMERGENCY NOTICE: Due to heavy rain/weather advisory, all campuses will remain closed tomorrow. Online revision worksheets have been uploaded to student diaries.");
+    } else if (type === "fees") {
+      setBroadcastText("💳 FEE REMINDER: Monthly tuition fee vouchers for October 2026 are due on 10th October. Please clear via bank branch or online student portal to avoid late surcharge.");
+    } else if (type === "exams") {
+      setBroadcastText("📋 EXAMINATION NOTICE: Mid-Term official date sheets have been published. Morning session starts promptly at 08:30 AM. Ensure students bring official roll number slips.");
+    }
+  };
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,10 +174,18 @@ export default function AdminNotices() {
             Broadcast emergency alerts, academic memos, and daily notices to students, faculty, and guardians.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setIsBroadcastModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+          >
+            <MessageSquare size={14} className="text-emerald-200" />
+            <span>⚡ Send WhatsApp / SMS Broadcast</span>
+          </button>
+
           <div className="px-3.5 py-1.5 rounded-lg bg-[#FAF8F5] border border-[#EBE8E2] text-xs font-semibold text-[#706B62] flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            SMS & In-App Gateway Active
+            Twilio & WhatsApp Active
           </div>
         </div>
       </div>
@@ -435,6 +469,131 @@ export default function AdminNotices() {
           </div>
         </div>
       </div>
+
+      {/* Broadcast Sent Notification Toast */}
+      {broadcastSentToast && (
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-[#23201B] text-white border border-[#3D382F] shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <CheckCircle2 size={18} />
+          </div>
+          <div>
+            <div className="text-xs font-bold">Broadcast Dispatch Complete</div>
+            <div className="text-[11px] text-slate-300">{broadcastSentToast}</div>
+          </div>
+        </div>
+      )}
+
+      {/* ── WhatsApp / SMS Emergency Broadcast Modal ── */}
+      {isBroadcastModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-lg p-6 sm:p-8 animate-in zoom-in-95 duration-200">
+            
+            <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                  <MessageSquare size={18} />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-lg text-[#23201B]">SMS & WhatsApp Broadcast Center</h3>
+                  <p className="text-[11px] text-[#706B62]">One-click instant dispatch to parent and faculty phone numbers.</p>
+                </div>
+              </div>
+              <button onClick={() => setIsBroadcastModalOpen(false)} className="text-[#8C847B] hover:text-[#23201B]">
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSendBroadcast} className="space-y-4 text-xs">
+              
+              <div>
+                <label className="block font-bold text-[#23201B] mb-1">Target Phone Audience</label>
+                <select
+                  value={broadcastAudience}
+                  onChange={e => setBroadcastAudience(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs font-bold text-[#23201B]"
+                >
+                  <option>All Guardians (1,248 Parents)</option>
+                  <option>Grade 10 Parents (87 Guardians)</option>
+                  <option>Grade 9 Parents (92 Guardians)</option>
+                  <option>All Teaching & Support Faculty (86 Numbers)</option>
+                  <option>School Bus Transport Guardians (340 Numbers)</option>
+                </select>
+              </div>
+
+              {/* Quick Template Buttons */}
+              <div>
+                <span className="block font-bold text-[#4A453E] mb-1.5">Quick Pakistani School Templates:</span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => applyBroadcastTemplate("holiday")}
+                    className="px-2.5 py-1.5 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9] text-[#996B1E] font-bold text-[11px] hover:bg-[#F3EBD9]"
+                  >
+                    🌧️ Rain / Smog Holiday
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyBroadcastTemplate("exams")}
+                    className="px-2.5 py-1.5 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9] text-[#996B1E] font-bold text-[11px] hover:bg-[#F3EBD9]"
+                  >
+                    📋 Exam Date Sheet
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyBroadcastTemplate("fees")}
+                    className="px-2.5 py-1.5 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9] text-[#996B1E] font-bold text-[11px] hover:bg-[#F3EBD9]"
+                  >
+                    💳 Fee Voucher Due
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="font-bold text-[#23201B]">SMS / WhatsApp Message Text *</label>
+                  <span className="text-[10px] text-[#8C847B]">{broadcastText.length} chars (1 SMS segment)</span>
+                </div>
+                <textarea
+                  rows={4}
+                  required
+                  value={broadcastText}
+                  onChange={e => setBroadcastText(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:outline-none focus:border-[#C4993C] leading-relaxed"
+                />
+              </div>
+
+              {/* Simulation Preview */}
+              <div className="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-2 text-emerald-900 font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  <span>Gateway: WhatsApp Cloud API + SMS GSM Server</span>
+                </div>
+                <span className="font-bold text-emerald-800">100% High Delivery Priority</span>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#EBE5D9]">
+                <button
+                  type="button"
+                  onClick={() => setIsBroadcastModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-[#D9D4CC] font-bold text-[#706B62]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold shadow-md flex items-center gap-1.5"
+                >
+                  <Send size={13} />
+                  <span>Send Broadcast Now</span>
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

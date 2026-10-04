@@ -16,6 +16,7 @@
   --color-text-muted: #8C847B;
   --color-border: #EBE5D9;
 
+  --font-serif: var(--font-serif);
   --font-sora: var(--font-sora);
   --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-dm-mono);
@@ -64,17 +65,17 @@
 
 /* ─── Gradient Utilities ────────────────────────────── */
 @layer utilities {
-  /* Gradient text — blue → purple */
+  /* Gradient text — warm amber / gold */
   .text-gradient {
-    background: linear-gradient(90deg, #3B4FE8, #7C3AED);
+    background: linear-gradient(135deg, #996B1E 0%, #C4993C 50%, #D4A843 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Gradient text — indigo → cyan */
-  .text-gradient-cyan {
-    background: linear-gradient(135deg, #6366F1 0%, #06B6D4 100%);
+  /* Gradient text — deep charcoal */
+  .text-gradient-dark {
+    background: linear-gradient(135deg, #23201B 0%, #4A453E 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -82,22 +83,33 @@
 
   /* Gradient backgrounds */
   .bg-gradient-primary {
-    background: linear-gradient(135deg, #3B4FE8 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, #C4993C 0%, #D4A843 100%);
   }
 
-  .bg-gradient-cyan {
-    background: linear-gradient(135deg, #6366F1 0%, #06B6D4 100%);
+  .bg-gradient-gold {
+    background: linear-gradient(135deg, #F3EBD9 0%, #EADBBA 100%);
   }
 
   .bg-gradient-dark {
-    background: linear-gradient(180deg, #0A0D1A 0%, #0F172A 100%);
+    background: linear-gradient(180deg, #1A1A1A 0%, #24221D 100%);
   }
 
-  /* Animated gradient — used on FinalCTA */
+  /* Animated gradient — warm amber/gold */
   .animate-gradient-shift {
-    background: linear-gradient(135deg, #3B4FE8, #7C3AED, #6366F1, #3B4FE8);
+    background: linear-gradient(135deg, #C4993C, #D4A843, #A37C27, #C4993C);
     background-size: 300% 300%;
     animation: gradientShift 8s ease infinite;
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   /* Floating badges */
