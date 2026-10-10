@@ -82,7 +82,7 @@ class SchoolController extends ApiController
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:20|unique:schools,code',
-            'email' => 'required|email|max:255|unique:schools,email',
+            'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:30',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
@@ -100,7 +100,7 @@ class SchoolController extends ApiController
             'billing_cycle' => 'nullable|in:Monthly,Quarterly,Annually',
             'admin_name' => 'required|string|max:255',
             'admin_email' => 'required|email|max:255|unique:users,email',
-            'admin_password' => 'required|string|min:8',
+            'admin_password' => 'required|string|min:6',
         ]);
 
         $start = $data['contract_start'] ? \Illuminate\Support\Carbon::parse($data['contract_start']) : now();
@@ -111,7 +111,7 @@ class SchoolController extends ApiController
             $school = School::create([
                 'name' => $data['name'],
                 'code' => strtoupper($data['code']),
-                'email' => $data['email'],
+                'email' => $data['email'] ?? $data['admin_email'],
                 'phone' => $data['phone'] ?? null,
                 'city' => $data['city'] ?? null,
                 'state' => $data['state'] ?? null,
