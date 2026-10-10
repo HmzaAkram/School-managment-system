@@ -5,7 +5,7 @@ import Link from "next/link";
 import { 
   Search, Plus, Building2, MapPin, Calendar, 
   CheckCircle2, Clock, AlertCircle, X, Calculator, MessageSquare, Loader2,
-  Edit3, Trash2, Eye
+  Edit3, Trash2, Eye, UserPlus, EyeIcon, EyeOff, ShieldCheck
 } from "lucide-react";
 import { api } from "@/lib/api";
 
@@ -14,9 +14,12 @@ export default function SchoolsPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -64,6 +67,11 @@ export default function SchoolsPage() {
     saasSharePercent: 50,
     contractDurationMonths: 12,
     contractStart: new Date().toISOString().split("T")[0],
+    // School Admin Account Credentials
+    adminFullName: "",
+    adminEmail: "",
+    adminPassword: "",
+    adminPasswordConfirm: "",
   });
 
   // Derived calculations for form
@@ -73,7 +81,32 @@ export default function SchoolsPage() {
 
   const handleCreateContract = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.admin) return;
+    setFormError("");
+
+    if (!formData.name || !formData.admin) {
+      setFormError("School name and principal name are required.");
+      return;
+    }
+    if (!formData.adminFullName.trim()) {
+      setFormError("Admin full name is required.");
+      return;
+    }
+    if (!formData.adminEmail.trim()) {
+      setFormError("Admin email / login username is required.");
+      return;
+    }
+    if (!formData.adminPassword) {
+      setFormError("Admin password is required.");
+      return;
+    }
+    if (formData.adminPassword.length < 6) {
+      setFormError("Password must be at least 6 characters.");
+      return;
+    }
+    if (formData.adminPassword !== formData.adminPasswordConfirm) {
+      setFormError("Passwords do not match.");
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -81,7 +114,6 @@ export default function SchoolsPage() {
       const cleanName = formData.name.toLowerCase().replace(/[^a-z0-9]/g, '') || "school";
       const code = (formData.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 6) || "SCH").toUpperCase() + randNum;
       const schoolEmail = formData.email?.trim() || `${cleanName}${randNum}@school.edu`;
-      const adminEmail = `admin_${randNum}@${cleanName}.edu`;
 
       await api.post("/super-admin/schools", {
         name: formData.name,
@@ -99,12 +131,16 @@ export default function SchoolsPage() {
         school_share_percent: 100 - formData.saasSharePercent,
         saas_share_percent: formData.saasSharePercent,
         billing_cycle: "Monthly",
-        admin_name: formData.admin,
-        admin_email: adminEmail,
-        admin_password: "password123",
+        admin_name: formData.adminFullName.trim(),
+        admin_email: formData.adminEmail.trim(),
+        admin_password: formData.adminPassword,
+        admin_password_confirmation: formData.adminPasswordConfirm,
       });
 
+      const createdEmail = formData.adminEmail.trim();
+
       setIsModalOpen(false);
+      setFormError("");
       setFormData({
         name: "",
         admin: "",
@@ -117,10 +153,24 @@ export default function SchoolsPage() {
         saasSharePercent: 50,
         contractDurationMonths: 12,
         contractStart: new Date().toISOString().split("T")[0],
+        adminFullName: "",
+        adminEmail: "",
+        adminPassword: "",
+        adminPasswordConfirm: "",
       });
+      setShowAdminPassword(false);
+      setSuccessMsg(`School created successfully! Admin login: ${createdEmail}`);
+      setTimeout(() => setSuccessMsg(""), 8000);
       await fetchSchools();
     } catch (err: any) {
-      alert(err?.message || "Failed to create school contract.");
+      // Surface backend validation errors clearly
+      const data = err?.data;
+      if (data?.errors) {
+        const messages = Object.values(data.errors).flat().join(" ");
+        setFormError(messages || err?.message || "Failed to create school contract.");
+      } else {
+        setFormError(err?.message || "Failed to create school contract.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -227,6 +277,14 @@ export default function SchoolsPage() {
       {error && (
         <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
           {error}
+        </div>
+      )}
+
+      {successMsg && (
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <CheckCircle2 size={16} className="flex-shrink-0" />
+          <span>{successMsg}</span>
+          <button onClick={() => setSuccessMsg("")} className="ml-auto text-emerald-500 hover:text-emerald-700"><X size={14} /></button>
         </div>
       )}
 
@@ -443,7 +501,7 @@ export default function SchoolsPage() {
       {/* ── Add New School Contract Modal ── */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-xl p-6 sm:p-8 animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200">
             
             <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-6">
               <div>
@@ -459,6 +517,13 @@ export default function SchoolsPage() {
             </div>
 
             <form onSubmit={handleCreateContract} className="space-y-4">
+
+              {formError && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+                  <AlertCircle size={14} className="flex-shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -479,7 +544,15 @@ export default function SchoolsPage() {
                     required 
                     placeholder="e.g. Dr. Salman Khan"
                     value={formData.admin}
-                    onChange={e => setFormData({...formData, admin: e.target.value})}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setFormData(prev => ({
+                        ...prev,
+                        admin: val,
+                        // Auto-prefill Admin Full Name if the user hasn't manually edited it yet
+                        ...(prev.adminFullName === "" || prev.adminFullName === prev.admin ? { adminFullName: val } : {}),
+                      }));
+                    }}
                     className="w-full p-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:bg-white focus:outline-none focus:border-[#C4993C]"
                   />
                 </div>
@@ -589,10 +662,95 @@ export default function SchoolsPage() {
                 </div>
               </div>
 
+              {/* ── School Admin Account Credentials ── */}
+              <div className="p-4 rounded-2xl bg-[#F5F7FF] border border-[#D9DFF5] space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#4A5899]">
+                  <ShieldCheck size={14} />
+                  <span>School Admin Account Credentials</span>
+                </div>
+                <p className="text-[10px] text-[#706B62] -mt-1">
+                  Create login credentials for the School Admin. They will use these to access the School Admin dashboard.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#706B62] mb-1">Admin Full Name *</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="e.g. Dr. Salman Khan"
+                      value={formData.adminFullName}
+                      onChange={e => setFormData({...formData, adminFullName: e.target.value})}
+                      className="w-full p-2 bg-white border border-[#D9D4CC] rounded-lg text-xs text-[#23201B] focus:outline-none focus:border-[#4A5899]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#706B62] mb-1">Admin Email / Login Username *</label>
+                    <input 
+                      type="email" 
+                      required
+                      placeholder="e.g. admin@schoolname.edu"
+                      value={formData.adminEmail}
+                      onChange={e => setFormData({...formData, adminEmail: e.target.value})}
+                      className="w-full p-2 bg-white border border-[#D9D4CC] rounded-lg text-xs text-[#23201B] focus:outline-none focus:border-[#4A5899]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#706B62] mb-1">Password *</label>
+                    <div className="relative">
+                      <input 
+                        type={showAdminPassword ? "text" : "password"}
+                        required
+                        minLength={6}
+                        placeholder="Min 6 characters"
+                        value={formData.adminPassword}
+                        onChange={e => setFormData({...formData, adminPassword: e.target.value})}
+                        className="w-full p-2 pr-9 bg-white border border-[#D9D4CC] rounded-lg text-xs text-[#23201B] focus:outline-none focus:border-[#4A5899]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8C847B] hover:text-[#23201B]"
+                        tabIndex={-1}
+                      >
+                        {showAdminPassword ? <EyeOff size={13} /> : <EyeIcon size={13} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#706B62] mb-1">Confirm Password *</label>
+                    <input 
+                      type={showAdminPassword ? "text" : "password"}
+                      required
+                      minLength={6}
+                      placeholder="Re-enter password"
+                      value={formData.adminPasswordConfirm}
+                      onChange={e => setFormData({...formData, adminPasswordConfirm: e.target.value})}
+                      className={`w-full p-2 bg-white border rounded-lg text-xs text-[#23201B] focus:outline-none focus:border-[#4A5899] ${
+                        formData.adminPasswordConfirm && formData.adminPassword !== formData.adminPasswordConfirm
+                          ? "border-red-300 bg-red-50/50"
+                          : formData.adminPasswordConfirm && formData.adminPassword === formData.adminPasswordConfirm
+                            ? "border-emerald-300 bg-emerald-50/50"
+                            : "border-[#D9D4CC]"
+                      }`}
+                    />
+                    {formData.adminPasswordConfirm && formData.adminPassword !== formData.adminPasswordConfirm && (
+                      <p className="text-[10px] text-red-500 mt-0.5">Passwords do not match</p>
+                    )}
+                    {formData.adminPasswordConfirm && formData.adminPassword === formData.adminPasswordConfirm && (
+                      <p className="text-[10px] text-emerald-600 mt-0.5 flex items-center gap-1"><CheckCircle2 size={10} /> Passwords match</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex justify-end gap-3 pt-4 border-t border-[#EBE5D9]">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => { setIsModalOpen(false); setFormError(""); }}
                   className="px-4 py-2 border border-[#D9D4CC] text-[#706B62] rounded-xl text-xs font-bold hover:bg-[#FAF8F5]"
                 >
                   Cancel
