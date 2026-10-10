@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bell,
   Send,
@@ -18,146 +18,166 @@ import {
   Paperclip,
   MessageSquare,
   Phone,
-  X
+  X,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 interface NoticeItem {
-  id: string;
+  id: number;
   title: string;
-  recipient: string;
-  priority: "High" | "Normal" | "Important";
-  category: "Academic" | "Event" | "Administrative" | "Urgent";
-  date: string;
   content: string;
+  target_audience: string;
+  priority: string;
+  category?: string;
   pinned: boolean;
-  reads: number;
-  totalRecipients: number;
+  publish_date?: string;
+  created_at?: string;
+  created_by?: string;
 }
 
-const initialNotices: NoticeItem[] = [
-  {
-    id: "NOT-001",
-    title: "Mid-Term Examination Schedule Announced",
-    recipient: "All Users (Teachers & Students)",
-    priority: "Important",
-    category: "Academic",
-    date: "Today, 09:30 AM",
-    content: "The mid-term examination timetable for grades 6 through 12 has been officially published. Please review the schedule and submit any conflict petitions by Friday.",
-    pinned: true,
-    reads: 482,
-    totalRecipients: 520,
-  },
-  {
-    id: "NOT-002",
-    title: "Mandatory Faculty Development Seminar",
-    recipient: "All Teaching Staff",
-    priority: "High",
-    category: "Administrative",
-    date: "Yesterday, 04:15 PM",
-    content: "All academic staff are required to attend the digital curriculum workshop this Thursday at 3:30 PM in Auditorium B. Attendance is mandatory.",
-    pinned: true,
-    reads: 42,
-    totalRecipients: 45,
-  },
-  {
-    id: "NOT-003",
-    title: "Annual Sports Gala 2026 Registrations Open",
-    recipient: "All Students",
-    priority: "Normal",
-    category: "Event",
-    date: "Mar 12, 2026",
-    content: "House captains have begun sign-ups for track and field events, soccer, and chess. Visit the sports department office during recess.",
-    pinned: false,
-    reads: 310,
-    totalRecipients: 475,
-  },
-  {
-    id: "NOT-004",
-    title: "Campus Maintenance & Early Dismissal",
-    recipient: "All Users (Teachers & Students)",
-    priority: "High",
-    category: "Urgent",
-    date: "Mar 08, 2026",
-    content: "Due to scheduled electrical infrastructure maintenance, classes will conclude at 1:00 PM on Friday. School transport will depart promptly at 1:15 PM.",
-    pinned: false,
-    reads: 512,
-    totalRecipients: 520,
-  },
-];
-
 export default function AdminNotices() {
-  const [notices, setNotices] = useState<NoticeItem[]>(initialNotices);
+  const [notices, setNotices] = useState<NoticeItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [recipient, setRecipient] = useState("All Users (Teachers & Students)");
-  const [priority, setPriority] = useState<"Normal" | "Important" | "High">("Normal");
-  const [category, setCategory] = useState<"Academic" | "Event" | "Administrative" | "Urgent">("Academic");
+  const [recipient, setRecipient] = useState<"All" | "Students" | "Teachers" | "Parents">("All");
+  const [priority, setPriority] = useState<"Low" | "Medium" | "High">("Medium");
+  const [category, setCategory] = useState("Academic");
   const [pinNotice, setPinNotice] = useState(false);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [showSuccessToast, setShowSuccessToast] = useState(false);
-  
+  const [submitting, setSubmitting] = useState(false);
+
   // WhatsApp / SMS Broadcast Center Modal State
   const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
-  const [broadcastAudience, setBroadcastAudience] = useState("All Guardians (1,248 Parents)");
-  const [broadcastText, setBroadcastText] = useState("Dear Guardians, please be informed that school will observe a rain / smog emergency holiday tomorrow (Friday, 3rd October). Online classes will be held via LMS.");
+  const [broadcastAudience, setBroadcastAudience] = useState<"All" | "Students" | "Teachers" | "Parents">("Parents");
+  const [broadcastText, setBroadcastText] = useState("Dear Guardians, please be informed that school will observe a holiday tomorrow. Online study materials have been updated in student diaries.");
   const [broadcastSentToast, setBroadcastSentToast] = useState("");
 
-  const handleSendBroadcast = (e: React.FormEvent) => {
+  const fetchNotices = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await apiFetch<any>("/admin/notices?per_page=50");
+      setNotices(res.data || []);
+    } catch (err: any) {
+      console.error("Error loading notices:", err);
+      setError(err?.message || "Failed to load announcements");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotices();
+  }, []);
+
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsBroadcastModalOpen(false);
-    setBroadcastSentToast(`WhatsApp & SMS Broadcast successfully dispatched to ${broadcastAudience}!`);
-    setTimeout(() => setBroadcastSentToast(""), 5000);
+    if (!title.trim() || !content.trim()) return;
+
+    try {
+      setSubmitting(true);
+      await apiFetch("/admin/notices", {
+        method: "POST",
+        body: JSON.stringify({
+          title,
+          content,
+          target_audience: recipient,
+          priority,
+          category,
+          pinned: pinNotice,
+          publish_date: new Date().toISOString().split("T")[0]
+        })
+      });
+
+      setTitle("");
+      setContent("");
+      setPinNotice(false);
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 4000);
+      fetchNotices();
+    } catch (err: any) {
+      alert(err?.message || "Failed to publish announcement");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const togglePin = async (notice: NoticeItem) => {
+    try {
+      await apiFetch(`/admin/notices/${notice.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          pinned: !notice.pinned
+        })
+      });
+      fetchNotices();
+    } catch (err: any) {
+      alert(err?.message || "Failed to update pinned state");
+    }
+  };
+
+  const deleteNotice = async (id: number) => {
+    if (!confirm("Are you sure you want to remove this notice?")) return;
+    try {
+      await apiFetch(`/admin/notices/${id}`, { method: "DELETE" });
+      fetchNotices();
+    } catch (err: any) {
+      alert(err?.message || "Failed to delete notice");
+    }
+  };
+
+  const handleSendBroadcast = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Also post it as an urgent announcement to the database
+      await apiFetch("/admin/notices", {
+        method: "POST",
+        body: JSON.stringify({
+          title: "🚨 Official Broadcast Alert",
+          content: broadcastText,
+          target_audience: broadcastAudience,
+          priority: "High",
+          category: "Urgent",
+          pinned: true,
+          publish_date: new Date().toISOString().split("T")[0]
+        })
+      });
+      setIsBroadcastModalOpen(false);
+      setBroadcastSentToast(`Official Broadcast dispatched to ${broadcastAudience} and posted to notice board!`);
+      setTimeout(() => setBroadcastSentToast(""), 5000);
+      fetchNotices();
+    } catch (err: any) {
+      alert(err?.message || "Failed to dispatch broadcast");
+    }
   };
 
   const applyBroadcastTemplate = (type: string) => {
     if (type === "holiday") {
       setBroadcastText("🌧️ EMERGENCY NOTICE: Due to heavy rain/weather advisory, all campuses will remain closed tomorrow. Online revision worksheets have been uploaded to student diaries.");
     } else if (type === "fees") {
-      setBroadcastText("💳 FEE REMINDER: Monthly tuition fee vouchers for October 2026 are due on 10th October. Please clear via bank branch or online student portal to avoid late surcharge.");
+      setBroadcastText("💳 FEE REMINDER: Monthly tuition fee vouchers for this month are due on the 10th. Please clear via bank branch or online student portal to avoid late surcharge.");
     } else if (type === "exams") {
       setBroadcastText("📋 EXAMINATION NOTICE: Mid-Term official date sheets have been published. Morning session starts promptly at 08:30 AM. Ensure students bring official roll number slips.");
     }
   };
 
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !content.trim()) return;
-
-    const newNotice: NoticeItem = {
-      id: `NOT-${String(notices.length + 1).padStart(3, '0')}`,
-      title,
-      content,
-      recipient,
-      priority,
-      category,
-      date: "Just now",
-      pinned: pinNotice,
-      reads: 1,
-      totalRecipients: recipient.includes("All") ? 520 : recipient.includes("Staff") ? 45 : 475,
-    };
-
-    setNotices([newNotice, ...notices]);
-    setTitle("");
-    setContent("");
-    setPinNotice(false);
-    setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 4000);
-  };
-
-  const togglePin = (id: string) => {
-    setNotices(notices.map(n => n.id === id ? { ...n, pinned: !n.pinned } : n));
-  };
-
-  const deleteNotice = (id: string) => {
-    setNotices(notices.filter(n => n.id !== id));
-  };
-
   const filteredNotices = notices.filter(n => {
-    const matchesSearch = n.title.toLowerCase().includes(search.toLowerCase()) || n.content.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = categoryFilter === "All" || n.category === categoryFilter;
+    const term = search.toLowerCase();
+    const matchesSearch = 
+      (n.title || "").toLowerCase().includes(term) || 
+      (n.content || "").toLowerCase().includes(term);
+    const matchesCategory = categoryFilter === "All" || (n.category || "").toLowerCase() === categoryFilter.toLowerCase();
     return matchesSearch && matchesCategory;
   });
+
+  const pinnedCount = notices.filter(n => n.pinned).length;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500 max-w-7xl mx-auto">
@@ -180,23 +200,37 @@ export default function AdminNotices() {
             className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
           >
             <MessageSquare size={14} className="text-emerald-200" />
-            <span>⚡ Send WhatsApp / SMS Broadcast</span>
+            <span>⚡ Send Broadcast Alert</span>
           </button>
 
           <div className="px-3.5 py-1.5 rounded-lg bg-[#FAF8F5] border border-[#EBE8E2] text-xs font-semibold text-[#706B62] flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Twilio & WhatsApp Active
+            Live Sync Active
           </div>
         </div>
       </div>
 
+      {error && (
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {broadcastSentToast && (
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+          <CheckCircle2 size={16} />
+          <span>{broadcastSentToast}</span>
+        </div>
+      )}
+
       {/* Quick Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Broadcasts", value: notices.length, sub: "This semester", icon: Megaphone, color: "text-[#C4993C]", bg: "bg-[#FDFBF7] border-[#F1EAD9]" },
-          { label: "Pinned Announcements", value: notices.filter(n => n.pinned).length, sub: "Top priority", icon: Pin, color: "text-amber-600", bg: "bg-[#FFFBF2] border-amber-200/60" },
-          { label: "Active Recipients", value: "520", sub: "Teachers & Students", icon: Users, color: "text-emerald-700", bg: "bg-emerald-50/50 border-emerald-200/60" },
-          { label: "Avg. Read Rate", value: "89.4%", sub: "Within 24 hours", icon: CheckCircle2, color: "text-blue-700", bg: "bg-blue-50/50 border-blue-200/60" },
+          { label: "Total Broadcasts", value: notices.length, sub: "Active announcements", icon: Megaphone, color: "text-[#C4993C]", bg: "bg-[#FDFBF7] border-[#F1EAD9]" },
+          { label: "Pinned Announcements", value: pinnedCount, sub: "Priority alerts", icon: Pin, color: "text-amber-600", bg: "bg-[#FFFBF2] border-amber-200/60" },
+          { label: "Active Channels", value: "3", sub: "Portal, Email & Web", icon: Users, color: "text-emerald-700", bg: "bg-emerald-50/50 border-emerald-200/60" },
+          { label: "Database Sync", value: "100%", sub: "Live MySQL connection", icon: CheckCircle2, color: "text-blue-700", bg: "bg-blue-50/50 border-blue-200/60" },
         ].map((stat, i) => (
           <div key={i} className={`p-5 rounded-2xl border ${stat.bg} shadow-sm transition-all hover:-translate-y-0.5`}>
             <div className="flex items-center justify-between mb-3">
@@ -217,7 +251,7 @@ export default function AdminNotices() {
           <div className="flex items-center gap-3">
             <CheckCircle2 className="text-emerald-600" size={20} />
             <p className="text-sm font-semibold text-emerald-900">
-              Notice successfully published and dispatched to target users!
+              Notice successfully published and saved to MySQL!
             </p>
           </div>
           <span className="text-xs text-emerald-700 font-medium">Just now</span>
@@ -234,7 +268,7 @@ export default function AdminNotices() {
             </div>
             <div>
               <h2 className="font-bold text-[#23201B] text-base font-sora">Draft Announcement</h2>
-              <p className="text-xs text-[#8C877D]">Push instant notification to portals and registered mobile numbers.</p>
+              <p className="text-xs text-[#8C877D]">Push instant notification to portals and registered users.</p>
             </div>
           </div>
 
@@ -260,15 +294,13 @@ export default function AdminNotices() {
                 </label>
                 <select
                   value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
+                  onChange={(e) => setRecipient(e.target.value as any)}
                   className="w-full text-xs font-medium border border-[#D9D4CC] rounded-xl text-[#23201B] bg-[#FAF8F5] p-3 outline-none focus:border-[#C4993C] focus:bg-white"
                 >
-                  <option>All Users (Teachers & Students)</option>
-                  <option>All Teaching Staff</option>
-                  <option>All Students</option>
-                  <option>High School (Grades 9-12)</option>
-                  <option>Middle School (Grades 6-8)</option>
-                  <option>Parents & Guardians Only</option>
+                  <option value="All">All Users (Teachers & Students)</option>
+                  <option value="Teachers">All Teaching Staff</option>
+                  <option value="Students">All Students</option>
+                  <option value="Parents">Parents & Guardians</option>
                 </select>
               </div>
 
@@ -278,7 +310,7 @@ export default function AdminNotices() {
                 </label>
                 <select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value as any)}
+                  onChange={(e) => setCategory(e.target.value)}
                   className="w-full text-xs font-medium border border-[#D9D4CC] rounded-xl text-[#23201B] bg-[#FAF8F5] p-3 outline-none focus:border-[#C4993C] focus:bg-white"
                 >
                   <option value="Academic">Academic</option>
@@ -294,7 +326,7 @@ export default function AdminNotices() {
                 Priority Level
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {(["Normal", "Important", "High"] as const).map((p) => (
+                {(["Low", "Medium", "High"] as const).map((p) => (
                   <button
                     key={p}
                     type="button"
@@ -303,7 +335,7 @@ export default function AdminNotices() {
                       priority === p
                         ? p === "High"
                           ? "bg-red-500 text-white border-red-500 shadow-sm"
-                          : p === "Important"
+                          : p === "Medium"
                           ? "bg-amber-600 text-white border-amber-600 shadow-sm"
                           : "bg-[#23201B] text-white border-[#23201B] shadow-sm"
                         : "bg-[#FAF8F5] text-[#706B62] border-[#EBE8E2] hover:bg-white"
@@ -337,22 +369,17 @@ export default function AdminNotices() {
                   onChange={(e) => setPinNotice(e.target.checked)}
                   className="rounded text-[#C4993C] focus:ring-[#C4993C] h-4 w-4"
                 />
-                Pin to top of student & teacher portal
+                Pin to top of portal feed
               </label>
-
-              <button
-                type="button"
-                className="text-xs text-[#8C877D] hover:text-[#23201B] font-medium flex items-center gap-1"
-              >
-                <Paperclip size={13} /> Attach PDF / Circular
-              </button>
             </div>
 
             <button
               type="submit"
+              disabled={submitting}
               className="w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#C4993C] to-[#D4A843] hover:from-[#B3882B] hover:to-[#C4993C] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
             >
-              <Send size={16} /> Broadcast Notice
+              {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+              <span>Broadcast Notice</span>
             </button>
           </form>
         </div>
@@ -390,12 +417,17 @@ export default function AdminNotices() {
           </div>
 
           {/* Notices List */}
-          <div className="space-y-3">
-            {filteredNotices.length === 0 ? (
+          <div className="space-y-3 min-h-[300px]">
+            {loading ? (
+              <div className="py-20 flex flex-col items-center justify-center text-slate-400">
+                <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+                <span>Loading announcements...</span>
+              </div>
+            ) : filteredNotices.length === 0 ? (
               <div className="bg-white rounded-2xl border border-[#EBE8E2] p-12 text-center">
                 <Bell size={32} className="mx-auto text-[#B5AFA6] mb-3 opacity-60" />
                 <h3 className="font-bold text-[#23201B] text-sm">No notices match your filter</h3>
-                <p className="text-xs text-[#8C877D] mt-1">Try resetting the search terms or category selector.</p>
+                <p className="text-xs text-[#8C877D] mt-1">Try resetting the search terms or create a new announcement.</p>
               </div>
             ) : (
               filteredNotices.map((n) => (
@@ -415,20 +447,22 @@ export default function AdminNotices() {
                       <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                         n.priority === "High"
                           ? "bg-red-100 text-red-700"
-                          : n.priority === "Important"
+                          : n.priority === "Medium"
                           ? "bg-amber-100 text-amber-800"
                           : "bg-slate-100 text-slate-700"
                       }`}>
                         {n.priority}
                       </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FAF8F5] border border-[#EBE8E2] text-[#706B62]">
-                        {n.category}
-                      </span>
+                      {n.category && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FAF8F5] border border-[#EBE8E2] text-[#706B62]">
+                          {n.category}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => togglePin(n.id)}
+                        onClick={() => togglePin(n)}
                         title={n.pinned ? "Unpin notice" : "Pin notice"}
                         className={`p-1.5 rounded-lg text-xs transition-colors ${
                           n.pinned ? "text-amber-600 bg-amber-50" : "text-[#8C877D] hover:bg-slate-100"
@@ -452,16 +486,17 @@ export default function AdminNotices() {
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-[#F1EAD9] text-xs text-[#8C877D]">
                     <div className="flex items-center gap-4">
                       <span className="flex items-center gap-1 font-medium text-[#4A453E]">
-                        <Users size={12} className="text-[#C4993C]" /> {n.recipient}
+                        <Users size={12} className="text-[#C4993C]" /> {n.target_audience}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock size={12} /> {n.date}
+                        <Clock size={12} /> {n.publish_date || (n.created_at ? new Date(n.created_at).toLocaleDateString() : "Active")}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 font-semibold text-[#4A453E]">
-                      <CheckCircle2 size={13} className="text-emerald-600" />
-                      <span>{n.reads} / {n.totalRecipients} read</span>
-                    </div>
+                    {n.created_by && (
+                      <span className="text-[10px] font-semibold text-[#8C877D]">
+                        By: {n.created_by}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))
@@ -470,130 +505,97 @@ export default function AdminNotices() {
         </div>
       </div>
 
-      {/* Broadcast Sent Notification Toast */}
-      {broadcastSentToast && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-[#23201B] text-white border border-[#3D382F] shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-            <CheckCircle2 size={18} />
-          </div>
-          <div>
-            <div className="text-xs font-bold">Broadcast Dispatch Complete</div>
-            <div className="text-[11px] text-slate-300">{broadcastSentToast}</div>
-          </div>
-        </div>
-      )}
-
-      {/* ── WhatsApp / SMS Emergency Broadcast Modal ── */}
+      {/* Broadcast Modal */}
       {isBroadcastModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-lg p-6 sm:p-8 animate-in zoom-in-95 duration-200">
-            
-            <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-5">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                  <MessageSquare size={18} />
-                </div>
-                <div>
-                  <h3 className="font-serif font-bold text-lg text-[#23201B]">SMS & WhatsApp Broadcast Center</h3>
-                  <p className="text-[11px] text-[#706B62]">One-click instant dispatch to parent and faculty phone numbers.</p>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-[#EBE8E2] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-[#EBE8E2] flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold font-sora text-[#23201B]">Dispatch Broadcast Alert</h2>
+                <p className="text-xs text-[#706B62] mt-1">
+                  Send high-priority notification to community portals
+                </p>
               </div>
-              <button onClick={() => setIsBroadcastModalOpen(false)} className="text-[#8C847B] hover:text-[#23201B]">
-                <X size={18} />
+              <button 
+                onClick={() => setIsBroadcastModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-50"
+              >
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSendBroadcast} className="space-y-4 text-xs">
-              
+            <form onSubmit={handleSendBroadcast} className="p-6 space-y-4">
               <div>
-                <label className="block font-bold text-[#23201B] mb-1">Target Phone Audience</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Target Audience</label>
                 <select
                   value={broadcastAudience}
-                  onChange={e => setBroadcastAudience(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs font-bold text-[#23201B]"
+                  onChange={e => setBroadcastAudience(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
                 >
-                  <option>All Guardians (1,248 Parents)</option>
-                  <option>Grade 10 Parents (87 Guardians)</option>
-                  <option>Grade 9 Parents (92 Guardians)</option>
-                  <option>All Teaching & Support Faculty (86 Numbers)</option>
-                  <option>School Bus Transport Guardians (340 Numbers)</option>
+                  <option value="Parents">Parents & Guardians</option>
+                  <option value="Students">All Students</option>
+                  <option value="Teachers">All Teaching Faculty</option>
+                  <option value="All">All School Members</option>
                 </select>
               </div>
 
-              {/* Quick Template Buttons */}
               <div>
-                <span className="block font-bold text-[#4A453E] mb-1.5">Quick Pakistani School Templates:</span>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Quick Templates</label>
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => applyBroadcastTemplate("holiday")}
-                    className="px-2.5 py-1.5 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9] text-[#996B1E] font-bold text-[11px] hover:bg-[#F3EBD9]"
+                  <button 
+                    type="button" 
+                    onClick={() => applyBroadcastTemplate('holiday')}
+                    className="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium"
                   >
-                    🌧️ Rain / Smog Holiday
+                    Emergency Holiday
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => applyBroadcastTemplate("exams")}
-                    className="px-2.5 py-1.5 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9] text-[#996B1E] font-bold text-[11px] hover:bg-[#F3EBD9]"
+                  <button 
+                    type="button" 
+                    onClick={() => applyBroadcastTemplate('fees')}
+                    className="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium"
                   >
-                    📋 Exam Date Sheet
+                    Fee Due Reminder
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => applyBroadcastTemplate("fees")}
-                    className="px-2.5 py-1.5 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9] text-[#996B1E] font-bold text-[11px] hover:bg-[#F3EBD9]"
+                  <button 
+                    type="button" 
+                    onClick={() => applyBroadcastTemplate('exams')}
+                    className="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium"
                   >
-                    💳 Fee Voucher Due
+                    Date Sheet Release
                   </button>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="font-bold text-[#23201B]">SMS / WhatsApp Message Text *</label>
-                  <span className="text-[10px] text-[#8C847B]">{broadcastText.length} chars (1 SMS segment)</span>
-                </div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Alert Message *</label>
                 <textarea
-                  rows={4}
                   required
+                  rows={4}
                   value={broadcastText}
                   onChange={e => setBroadcastText(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:outline-none focus:border-[#C4993C] leading-relaxed"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm resize-none"
                 />
               </div>
 
-              {/* Simulation Preview */}
-              <div className="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl flex items-center justify-between text-[11px]">
-                <div className="flex items-center gap-2 text-emerald-900 font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  <span>Gateway: WhatsApp Cloud API + SMS GSM Server</span>
-                </div>
-                <span className="font-bold text-emerald-800">100% High Delivery Priority</span>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#EBE5D9]">
-                <button
-                  type="button"
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <button 
+                  type="button" 
                   onClick={() => setIsBroadcastModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-[#D9D4CC] font-bold text-[#706B62]"
+                  className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-50"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold shadow-md flex items-center gap-1.5"
+                <button 
+                  type="submit" 
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2 rounded-xl text-sm font-semibold shadow flex items-center gap-2"
                 >
-                  <Send size={13} />
-                  <span>Send Broadcast Now</span>
+                  <Send size={16} /> Dispatch Broadcast
                 </button>
               </div>
-
             </form>
-
           </div>
         </div>
       )}
-
     </div>
   );
 }

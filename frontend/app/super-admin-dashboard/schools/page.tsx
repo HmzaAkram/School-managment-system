@@ -1,17 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { mockSchools, SchoolContract } from "@/lib/mock-data";
+import { useEffect, useState } from "react";
 import { 
-  Search, Plus, Filter, Building2, MapPin, Mail, Phone, Calendar, 
-  CheckCircle2, Clock, AlertCircle, X, Calculator, ShieldCheck, ChevronRight, MessageSquare
+  Search, Plus, Building2, MapPin, Calendar, 
+  CheckCircle2, Clock, AlertCircle, X, Calculator, MessageSquare, Loader2
 } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function SchoolsPage() {
-  const [schools, setSchools] = useState<SchoolContract[]>(mockSchools);
+  const [schools, setSchools] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchSchools = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.get("/super-admin/schools?per_page=100");
+      setSchools(res?.data || []);
+    } catch (err: any) {
+      setError(err?.message || "Failed to load schools from database.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSchools();
+  }, []);
 
   // New Contract Form State
   const [formData, setFormData] = useState({
@@ -25,7 +45,7 @@ export default function SchoolsPage() {
     perStudentFee: 20,
     saasSharePercent: 50,
     contractDurationMonths: 12,
-    contractStart: "2026-10-01",
+    contractStart: new Date().toISOString().split("T")[0],
   });
 
   // Derived calculations for form
@@ -33,66 +53,76 @@ export default function SchoolsPage() {
   const monthlySaaSRevenue = formData.students * saasFeePerStudent;
   const totalContractValue = monthlySaaSRevenue * formData.contractDurationMonths;
 
-  const handleCreateContract = (e: React.FormEvent) => {
+  const handleCreateContract = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.admin) return;
 
-    const startDate = new Date(formData.contractStart);
-    const endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + formData.contractDurationMonths);
-    const contractEndFormatted = endDate.toISOString().split("T")[0];
+    setSubmitting(true);
+    try {
+      const randNum = Math.floor(100 + Math.random() * 900);
+      const cleanName = formData.name.toLowerCase().replace(/[^a-z0-9]/g, '') || "school";
+      const code = (formData.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 6) || "SCH").toUpperCase() + randNum;
+      const schoolEmail = formData.email?.trim() || `${cleanName}${randNum}@school.edu`;
+      const adminEmail = `admin_${randNum}@${cleanName}.edu`;
 
-    const newContract: SchoolContract = {
-      id: `SCH-00${schools.length + 1}`,
-      name: formData.name,
-      admin: formData.admin,
-      phone: formData.phone || "+92 300 0000000",
-      email: formData.email || `${formData.name.toLowerCase().replace(/\s+/g, "")}@school.edu`,
-      location: formData.location,
-      students: Number(formData.students),
-      teachers: Number(formData.teachers),
-      perStudentFee: Number(formData.perStudentFee),
-      schoolSharePercent: 100 - Number(formData.saasSharePercent),
-      saasSharePercent: Number(formData.saasSharePercent),
-      saasFeePerStudent: saasFeePerStudent,
-      monthlySaaSRevenue: monthlySaaSRevenue,
-      contractDurationMonths: Number(formData.contractDurationMonths),
-      contractStart: formData.contractStart,
-      contractEnd: contractEndFormatted,
-      monthsElapsed: 1,
-      totalContractValue: totalContractValue,
-      totalPaidAmount: monthlySaaSRevenue,
-      totalPendingAmount: totalContractValue - monthlySaaSRevenue,
-      currentMonthStatus: "Paid",
-      status: "Active",
-    };
+      await api.post("/super-admin/schools", {
+        name: formData.name,
+        code,
+        email: schoolEmail,
+        phone: formData.phone || "+92 300 0000000",
+        principal_name: formData.admin,
+        city: formData.location.split(",")[0]?.trim() || "Lahore",
+        state: formData.location.split(",")[1]?.trim() || "Punjab",
+        plan: "Standard",
+        contract_amount: totalContractValue,
+        contract_start: formData.contractStart,
+        contract_duration_months: formData.contractDurationMonths,
+        per_student_fee: formData.perStudentFee,
+        school_share_percent: 100 - formData.saasSharePercent,
+        saas_share_percent: formData.saasSharePercent,
+        billing_cycle: "Monthly",
+        admin_name: formData.admin,
+        admin_email: adminEmail,
+        admin_password: "password123",
+      });
 
-    setSchools([newContract, ...schools]);
-    setIsModalOpen(false);
-    setFormData({
-      name: "",
-      admin: "",
-      phone: "",
-      email: "",
-      location: "Lahore, Punjab",
-      students: 1000,
-      teachers: 60,
-      perStudentFee: 20,
-      saasSharePercent: 50,
-      contractDurationMonths: 12,
-      contractStart: "2026-10-01",
-    });
+      setIsModalOpen(false);
+      setFormData({
+        name: "",
+        admin: "",
+        phone: "",
+        email: "",
+        location: "Lahore, Punjab",
+        students: 1000,
+        teachers: 60,
+        perStudentFee: 20,
+        saasSharePercent: 50,
+        contractDurationMonths: 12,
+        contractStart: new Date().toISOString().split("T")[0],
+      });
+      await fetchSchools();
+    } catch (err: any) {
+      alert(err?.message || "Failed to create school contract.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const filteredSchools = schools.filter(school => {
-    const matchesSearch = 
-      school.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      school.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      school.admin.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredSchools = schools.filter((school) => {
+    const nameMatch = (school.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const locMatch = ((school.city || "") + " " + (school.state || "")).toLowerCase().includes(searchTerm.toLowerCase());
+    const adminMatch = (school.principal_name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = nameMatch || locMatch || adminMatch;
     
-    const matchesStatus = statusFilter === "all" || school.status.toLowerCase() === statusFilter.toLowerCase();
+    const status = (school.status || "Active").toLowerCase();
+    const matchesStatus = statusFilter === "all" || status === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
+
+  const totalManagedStudents = schools.reduce((a, s) => a + Number(s.students_count || 0), 0);
+  const totalContractAmt = schools.reduce((a, s) => a + Number(s.contract_amount || 0), 0);
+  const totalPaidAmt = schools.reduce((a, s) => a + Number(s.paid_amount || 0), 0);
+  const now = new Date();
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -104,7 +134,7 @@ export default function SchoolsPage() {
             School Contracts & Revenue Shares
           </h1>
           <p className="text-[#706B62] text-sm">
-            Manage annual school deals, student capacity tiers, and 50/50 revenue split terms.
+            Manage school deals, student capacity tiers, and revenue split terms connected to MySQL.
           </p>
         </div>
         
@@ -117,6 +147,12 @@ export default function SchoolsPage() {
         </button>
       </div>
 
+      {error && (
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+          {error}
+        </div>
+      )}
+
       {/* ── Summary Ribbon ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white p-4 rounded-2xl border border-[#EBE5D9] shadow-xs">
         <div>
@@ -126,19 +162,19 @@ export default function SchoolsPage() {
         <div>
           <span className="text-[10px] font-bold text-[#8C847B] uppercase tracking-wider block">Managed Students</span>
           <div className="font-serif font-bold text-xl text-[#23201B]">
-            {schools.reduce((a, s) => a + s.students, 0).toLocaleString()}
+            {totalManagedStudents.toLocaleString()}
           </div>
         </div>
         <div>
-          <span className="text-[10px] font-bold text-[#8C847B] uppercase tracking-wider block">Total Monthly SaaS</span>
+          <span className="text-[10px] font-bold text-[#8C847B] uppercase tracking-wider block">Total Realized Revenue</span>
           <div className="font-serif font-bold text-xl text-emerald-700">
-            PKR {schools.reduce((a, s) => a + s.monthlySaaSRevenue, 0).toLocaleString()}
+            PKR {totalPaidAmt.toLocaleString()}
           </div>
         </div>
         <div>
           <span className="text-[10px] font-bold text-[#8C847B] uppercase tracking-wider block">Annual Contract Pipeline</span>
           <div className="font-serif font-bold text-xl text-[#996B1E]">
-            PKR {(schools.reduce((a, s) => a + s.totalContractValue, 0) / 1000000).toFixed(2)}M
+            PKR {(totalContractAmt / 1000000).toFixed(2)}M
           </div>
         </div>
       </div>
@@ -160,7 +196,7 @@ export default function SchoolsPage() {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            {["all", "active", "pending renewal"].map((st) => (
+            {["all", "active", "pending"].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
@@ -178,124 +214,141 @@ export default function SchoolsPage() {
 
         {/* Table View */}
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-[#FAF8F5] border-b border-[#EBE5D9] text-[#706B62]">
-                <th className="text-left py-3.5 px-5 font-bold uppercase tracking-wider">Institution</th>
-                <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Students</th>
-                <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Revenue Split</th>
-                <th className="text-right py-3.5 px-4 font-bold uppercase tracking-wider">Monthly MRR</th>
-                <th className="text-center py-3.5 px-4 font-bold uppercase tracking-wider">Contract Progress (1 Year)</th>
-                <th className="text-right py-3.5 px-4 font-bold uppercase tracking-wider">Paid / Total Deal</th>
-                <th className="text-right py-3.5 px-5 font-bold uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#F2EFE9]">
-              {filteredSchools.map(school => {
-                const progressPercent = Math.min(100, Math.round((school.monthsElapsed / school.contractDurationMonths) * 100));
+          {loading ? (
+            <div className="py-16 text-center text-[#706B62]">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-[#C4993C]" />
+              <p className="text-xs">Loading real schools from database...</p>
+            </div>
+          ) : (
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-[#FAF8F5] border-b border-[#EBE5D9] text-[#706B62]">
+                  <th className="text-left py-3.5 px-5 font-bold uppercase tracking-wider">Institution</th>
+                  <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Students</th>
+                  <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Revenue Split</th>
+                  <th className="text-right py-3.5 px-4 font-bold uppercase tracking-wider">Plan / Tier</th>
+                  <th className="text-center py-3.5 px-4 font-bold uppercase tracking-wider">Contract Progress</th>
+                  <th className="text-right py-3.5 px-4 font-bold uppercase tracking-wider">Paid / Total Deal</th>
+                  <th className="text-right py-3.5 px-5 font-bold uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F2EFE9]">
+                {filteredSchools.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-[#8C847B]">
+                      No schools found in database matching criteria.
+                    </td>
+                  </tr>
+                ) : filteredSchools.map((school) => {
+                  const start = school.contract_start ? new Date(school.contract_start) : null;
+                  const end = school.contract_end ? new Date(school.contract_end) : null;
+                  const durationMonths = start && end ? Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30))) : 12;
+                  const monthsElapsed = start ? Math.max(0, Math.min(durationMonths, Math.round((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30)))) : 0;
+                  const progressPercent = Math.min(100, Math.round((monthsElapsed / durationMonths) * 100));
 
-                return (
-                  <tr key={school.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
-                    
-                    {/* School & Admin */}
-                    <td className="py-4 px-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#FAF3E5] flex items-center justify-center text-[#C4993C] font-bold flex-shrink-0">
-                          <Building2 size={18} />
-                        </div>
-                        <div>
-                          <div className="font-bold text-sm text-[#23201B]">{school.name}</div>
-                          <div className="text-[11px] text-[#706B62] flex items-center gap-2 mt-0.5">
-                            <span>{school.admin}</span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1"><MapPin size={10} /> {school.location}</span>
+                  return (
+                    <tr key={school.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                      
+                      {/* School & Admin */}
+                      <td className="py-4 px-5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#FAF3E5] flex items-center justify-center text-[#C4993C] font-bold flex-shrink-0">
+                            <Building2 size={18} />
+                          </div>
+                          <div>
+                            <div className="font-bold text-sm text-[#23201B]">{school.name}</div>
+                            <div className="text-[11px] text-[#706B62] flex items-center gap-2 mt-0.5">
+                              <span>{school.principal_name || "School Principal"}</span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1"><MapPin size={10} /> {[school.city, school.state].filter(Boolean).join(", ") || "Pakistan"}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Students */}
-                    <td className="py-4 px-3 text-center">
-                      <span className="font-bold text-sm text-[#23201B]">{school.students.toLocaleString()}</span>
-                      <span className="block text-[10px] text-[#8C847B]">{school.teachers} faculty</span>
-                    </td>
+                      {/* Students */}
+                      <td className="py-4 px-3 text-center">
+                        <span className="font-bold text-sm text-[#23201B]">{(school.students_count ?? 0).toLocaleString()}</span>
+                        <span className="block text-[10px] text-[#8C847B]">{school.teachers_count ?? 0} faculty</span>
+                      </td>
 
-                    {/* Revenue Split */}
-                    <td className="py-4 px-3 text-center">
-                      <div className="inline-block p-1.5 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9]">
-                        <div className="font-bold text-[11px] text-[#996B1E]">
-                          Rs. {school.perStudentFee} / student
+                      {/* Revenue Split */}
+                      <td className="py-4 px-3 text-center">
+                        <div className="inline-block p-1.5 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9]">
+                          <div className="font-bold text-[11px] text-[#996B1E]">
+                            PKR {Number(school.per_student_fee || 20)} / student
+                          </div>
+                          <div className="text-[10px] text-[#706B62] font-mono">
+                            {Number(school.saas_share_percent || 50)}% SaaS share
+                          </div>
                         </div>
-                        <div className="text-[10px] text-[#706B62] font-mono">
-                          {school.saasSharePercent}% SaaS (Rs. {school.saasFeePerStudent})
+                      </td>
+
+                      {/* Plan / Tier */}
+                      <td className="py-4 px-4 text-right">
+                        <span className="px-2.5 py-1 rounded-md bg-[#FAF3E5] text-[#996B1E] font-bold text-[11px] border border-[#EBE5D9]">
+                          {school.plan || "Standard"}
+                        </span>
+                        <span className="block text-[10px] text-[#8C847B] mt-1 font-mono">{school.code}</span>
+                      </td>
+
+                      {/* Contract Timeline (Months Elapsed) */}
+                      <td className="py-4 px-4">
+                        <div className="w-40 mx-auto">
+                          <div className="flex justify-between text-[10px] font-bold mb-1 text-[#4A453E]">
+                            <span>Month {monthsElapsed} of {durationMonths}</span>
+                            <span>{progressPercent}%</span>
+                          </div>
+                          <div className="h-2 w-full bg-[#EBE5D9] rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-[#C4993C] to-[#D4A843] rounded-full"
+                              style={{ width: `${progressPercent}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-[9px] text-[#8C847B] mt-1">
+                            <span>{school.contract_start ? String(school.contract_start).slice(0, 10) : "—"}</span>
+                            <span>{school.contract_end ? String(school.contract_end).slice(0, 10) : "—"}</span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Monthly SaaS Revenue */}
-                    <td className="py-4 px-4 text-right">
-                      <div className="font-mono font-bold text-sm text-[#23201B]">
-                        PKR {school.monthlySaaSRevenue.toLocaleString()}
-                      </div>
-                      <span className="text-[10px] text-[#8C847B]">per month</span>
-                    </td>
-
-                    {/* Contract Timeline (Months Elapsed) */}
-                    <td className="py-4 px-4">
-                      <div className="w-40 mx-auto">
-                        <div className="flex justify-between text-[10px] font-bold mb-1 text-[#4A453E]">
-                          <span>Month {school.monthsElapsed} of {school.contractDurationMonths}</span>
-                          <span>{progressPercent}%</span>
+                      {/* Paid / Total */}
+                      <td className="py-4 px-4 text-right">
+                        <div className="font-mono font-bold text-xs text-emerald-700">
+                          PKR {Number(school.paid_amount || 0).toLocaleString()}
                         </div>
-                        <div className="h-2 w-full bg-[#EBE5D9] rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gradient-to-r from-[#C4993C] to-[#D4A843] rounded-full"
-                            style={{ width: `${progressPercent}%` }}
-                          />
+                        <div className="text-[10px] text-[#8C847B]">
+                          of PKR {Number(school.contract_amount || 0).toLocaleString()}
                         </div>
-                        <div className="flex justify-between text-[9px] text-[#8C847B] mt-1">
-                          <span>{school.contractStart}</span>
-                          <span>{school.contractEnd}</span>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-4 px-5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <a
+                            href={`https://wa.me/923152123010?text=Hello%20${encodeURIComponent(school.principal_name || school.name)}%2C%20this%20is%20regarding%20your%20Skoolms%20SaaS%20Contract.`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg border border-[#D9D4CC] bg-white text-[#23201B] hover:bg-[#FAF8F5] transition-all shadow-xs"
+                            title="Contact School via WhatsApp"
+                          >
+                            <MessageSquare size={13} className="text-[#C4993C]" />
+                          </a>
+                          <button
+                            className="px-2.5 py-1 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9] text-[#996B1E] font-bold text-[11px] hover:bg-[#F3EBD9]"
+                            onClick={() => alert(`School: ${school.name}\nCode: ${school.code}\nEmail: ${school.email}\nPhone: ${school.phone || "N/A"}\nContract Total: PKR ${Number(school.contract_amount || 0).toLocaleString()}\nPaid: PKR ${Number(school.paid_amount || 0).toLocaleString()}`)}
+                          >
+                            Details
+                          </button>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Paid / Total */}
-                    <td className="py-4 px-4 text-right">
-                      <div className="font-mono font-bold text-xs text-emerald-700">
-                        PKR {school.totalPaidAmount.toLocaleString()}
-                      </div>
-                      <div className="text-[10px] text-[#8C847B]">
-                        of PKR {school.totalContractValue.toLocaleString()}
-                      </div>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="py-4 px-5 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <a
-                          href={`https://wa.me/923152123010?text=Hello%20${encodeURIComponent(school.admin)}%20(${encodeURIComponent(school.name)})%2C%20this%20is%20regarding%20your%20Skoolms%20SaaS%20Contract%20Billing.`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 rounded-lg border border-[#D9D4CC] bg-white text-[#23201B] hover:bg-[#FAF8F5] transition-all shadow-xs"
-                          title="Contact School via WhatsApp"
-                        >
-                          <MessageSquare size={13} className="text-[#C4993C]" />
-                        </a>
-                        <button
-                          className="px-2.5 py-1 rounded-lg bg-[#FAF3E5] border border-[#EBE5D9] text-[#996B1E] font-bold text-[11px] hover:bg-[#F3EBD9]"
-                          onClick={() => alert(`Contract ID: ${school.id}\nMonthly Revenue: PKR ${school.monthlySaaSRevenue}\nDuration: ${school.contractDurationMonths} Months\nEnds: ${school.contractEnd}`)}
-                        >
-                          Details
-                        </button>
-                      </div>
-                    </td>
-
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
 
       </div>
@@ -308,7 +361,7 @@ export default function SchoolsPage() {
             <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-6">
               <div>
                 <h3 className="font-serif font-bold text-xl text-[#23201B]">New School Contract Agreement</h3>
-                <p className="text-xs text-[#706B62]">Configure per-student fee, 50/50 revenue split, and contract timeline.</p>
+                <p className="text-xs text-[#706B62]">Saves directly into MySQL database and activates school instance.</p>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -383,7 +436,7 @@ export default function SchoolsPage() {
                     <input
                       type="number"
                       required
-                      min={50}
+                      min={10}
                       value={formData.students}
                       onChange={e => setFormData({ ...formData, students: Number(e.target.value) })}
                       className="w-full px-3 py-2 bg-white border border-[#D9D4CC] rounded-lg text-xs font-bold text-[#23201B]"
@@ -395,7 +448,7 @@ export default function SchoolsPage() {
                     <input
                       type="number"
                       required
-                      min={10}
+                      min={5}
                       value={formData.perStudentFee}
                       onChange={e => setFormData({ ...formData, perStudentFee: Number(e.target.value) })}
                       className="w-full px-3 py-2 bg-white border border-[#D9D4CC] rounded-lg text-xs font-bold text-[#23201B]"
@@ -466,9 +519,11 @@ export default function SchoolsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-xl bg-[#23201B] hover:bg-[#3D382F] text-white text-xs font-bold shadow-md"
+                  disabled={submitting}
+                  className="px-6 py-2 rounded-xl bg-[#23201B] hover:bg-[#3D382F] text-white text-xs font-bold shadow-md disabled:opacity-60 flex items-center gap-2"
                 >
-                  Save Contract & Activate
+                  {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Save Contract & Activate</span>
                 </button>
               </div>
 

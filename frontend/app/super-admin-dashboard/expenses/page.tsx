@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { mockExpenses, SuperAdminExpense } from "@/lib/mock-data";
+import { useEffect, useState } from "react";
 import { 
-  Receipt, Plus, Search, Filter, Trash2, CheckCircle2, 
-  Calendar, Server, MessageSquare, Code, Users, DollarSign, X, TrendingDown
+  Receipt, Plus, Search, Trash2, CheckCircle2, 
+  Server, MessageSquare, Code, Loader2, X
 } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function ExpensesPage() {
-  const [expenses, setExpenses] = useState<SuperAdminExpense[]>(mockExpenses);
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,59 +18,85 @@ export default function ExpensesPage() {
   // Form State
   const [formData, setFormData] = useState({
     title: "",
-    category: "Hosting & Cloud Infrastructure" as SuperAdminExpense["category"],
+    category: "Hosting & Cloud Infrastructure",
     amount: 10000,
     date: new Date().toISOString().split("T")[0],
-    paymentMethod: "Credit Card" as SuperAdminExpense["paymentMethod"],
+    paymentMethod: "Credit Card",
     notes: "",
   });
 
-  const handleAddExpense = (e: React.FormEvent) => {
+  const loadExpenses = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("/super-admin/expenses?per_page=100");
+      setExpenses(res?.data || []);
+    } catch (err: any) {
+      console.error("Failed to load expenses:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadExpenses();
+  }, []);
+
+  const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.amount) return;
 
-    const newExp: SuperAdminExpense = {
-      id: `EXP-${100 + expenses.length + 1}`,
-      title: formData.title,
-      category: formData.category,
-      amount: Number(formData.amount),
-      date: formData.date,
-      status: "Paid",
-      paymentMethod: formData.paymentMethod,
-      notes: formData.notes || "Operational expenditure",
-    };
+    setSubmitting(true);
+    try {
+      await api.post("/super-admin/expenses", {
+        title: formData.title,
+        category: formData.category,
+        amount: Number(formData.amount),
+        expense_date: formData.date,
+        payment_method: formData.paymentMethod,
+        notes: formData.notes || "Operational expenditure",
+        status: "Paid",
+      });
 
-    setExpenses([newExp, ...expenses]);
-    setIsModalOpen(false);
-    setFormData({
-      title: "",
-      category: "Hosting & Cloud Infrastructure",
-      amount: 10000,
-      date: new Date().toISOString().split("T")[0],
-      paymentMethod: "Credit Card",
-      notes: "",
-    });
+      setIsModalOpen(false);
+      setFormData({
+        title: "",
+        category: "Hosting & Cloud Infrastructure",
+        amount: 10000,
+        date: new Date().toISOString().split("T")[0],
+        paymentMethod: "Credit Card",
+        notes: "",
+      });
+      await loadExpenses();
+    } catch (err: any) {
+      alert(err?.message || "Failed to record expense.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleDeleteExpense = (id: string) => {
-    setExpenses(expenses.filter(e => e.id !== id));
+  const handleDeleteExpense = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this expense record?")) return;
+    try {
+      await api.del(`/super-admin/expenses/${id}`);
+      await loadExpenses();
+    } catch (err: any) {
+      alert(err?.message || "Failed to delete expense.");
+    }
   };
 
   const filteredExpenses = expenses.filter(exp => {
     const matchesSearch = 
-      exp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exp.notes.toLowerCase().includes(searchTerm.toLowerCase());
+      (exp.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (exp.notes || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === "all" || exp.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
-  const totalExpenseAmount = expenses.reduce((acc, curr) => acc + curr.amount, 0);
-
-  // Category totals
-  const hostingTotal = expenses.filter(e => e.category === 'Hosting & Cloud Infrastructure').reduce((a, b) => a + b.amount, 0);
-  const smsTotal = expenses.filter(e => e.category === 'SMS & WhatsApp Gateway').reduce((a, b) => a + b.amount, 0);
-  const devTotal = expenses.filter(e => e.category === 'Dev & Engineering').reduce((a, b) => a + b.amount, 0);
-  const opsTotal = expenses.filter(e => e.category === 'Operations & Support' || e.category === 'Sales & Marketing').reduce((a, b) => a + b.amount, 0);
+  const totalExpenseAmount = expenses.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+  const hostingTotal = expenses.filter(e => e.category === 'Hosting & Cloud Infrastructure').reduce((a, b) => a + Number(b.amount || 0), 0);
+  const smsTotal = expenses.filter(e => e.category === 'SMS & WhatsApp Gateway').reduce((a, b) => a + Number(b.amount || 0), 0);
+  const devTotal = expenses.filter(e => e.category === 'Dev & Engineering').reduce((a, b) => a + Number(b.amount || 0), 0);
+  const opsTotal = expenses.filter(e => e.category === 'Operations & Support' || e.category === 'Sales & Marketing').reduce((a, b) => a + Number(b.amount || 0), 0);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -80,7 +108,7 @@ export default function ExpensesPage() {
             Operational Expenses & Costs
           </h1>
           <p className="text-[#706B62] text-sm">
-            Track and log SaaS platform infrastructure, SMS gateways, development, and team costs.
+            Track and log SaaS platform infrastructure, SMS gateways, development, and team costs from database.
           </p>
         </div>
 
@@ -179,6 +207,7 @@ export default function ExpensesPage() {
               { id: "SMS & WhatsApp Gateway", label: "SMS / WhatsApp" },
               { id: "Dev & Engineering", label: "Dev Team" },
               { id: "Sales & Marketing", label: "Marketing" },
+              { id: "Operations & Support", label: "Operations" },
             ].map((cat) => (
               <button
                 key={cat.id}
@@ -197,81 +226,94 @@ export default function ExpensesPage() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-[#FAF8F5] border-b border-[#EBE5D9] text-[#706B62]">
-                <th className="text-left py-3.5 px-5 font-bold uppercase tracking-wider">Expense Item</th>
-                <th className="text-left py-3.5 px-4 font-bold uppercase tracking-wider">Category</th>
-                <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Date</th>
-                <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Payment Mode</th>
-                <th className="text-right py-3.5 px-4 font-bold uppercase tracking-wider">Amount (PKR)</th>
-                <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Status</th>
-                <th className="text-right py-3.5 px-5 font-bold uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#F2EFE9]">
-              {filteredExpenses.map((exp) => (
-                <tr key={exp.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
-                  
-                  <td className="py-4 px-5">
-                    <div className="font-bold text-sm text-[#23201B]">{exp.title}</div>
-                    <div className="text-[11px] text-[#706B62] mt-0.5">{exp.notes}</div>
-                  </td>
-
-                  <td className="py-4 px-4">
-                    <span className="px-2.5 py-1 rounded-md bg-[#FAF3E5] text-[#996B1E] font-bold text-[11px] border border-[#EBE5D9]">
-                      {exp.category}
-                    </span>
-                  </td>
-
-                  <td className="py-4 px-3 text-center text-[#706B62] font-mono">
-                    {exp.date}
-                  </td>
-
-                  <td className="py-4 px-3 text-center font-semibold text-[#4A453E]">
-                    {exp.paymentMethod}
-                  </td>
-
-                  <td className="py-4 px-4 text-right">
-                    <span className="font-mono font-bold text-sm text-red-600">
-                      - PKR {exp.amount.toLocaleString()}
-                    </span>
-                  </td>
-
-                  <td className="py-4 px-3 text-center">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <CheckCircle2 size={11} />
-                      <span>{exp.status}</span>
-                    </span>
-                  </td>
-
-                  <td className="py-4 px-5 text-right">
-                    <button
-                      onClick={() => handleDeleteExpense(exp.id)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                      title="Delete Entry"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </td>
-
+          {loading ? (
+            <div className="py-16 text-center text-[#706B62]">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-[#C4993C]" />
+              <p className="text-xs">Loading operational expenses from database...</p>
+            </div>
+          ) : (
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-[#FAF8F5] border-b border-[#EBE5D9] text-[#706B62]">
+                  <th className="text-left py-3.5 px-5 font-bold uppercase tracking-wider">Expense Item</th>
+                  <th className="text-left py-3.5 px-4 font-bold uppercase tracking-wider">Category</th>
+                  <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Date</th>
+                  <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Payment Mode</th>
+                  <th className="text-right py-3.5 px-4 font-bold uppercase tracking-wider">Amount (PKR)</th>
+                  <th className="text-center py-3.5 px-3 font-bold uppercase tracking-wider">Status</th>
+                  <th className="text-right py-3.5 px-5 font-bold uppercase tracking-wider">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#F2EFE9]">
+                {filteredExpenses.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-[#8C847B]">
+                      No expense records found in database.
+                    </td>
+                  </tr>
+                ) : filteredExpenses.map((exp) => (
+                  <tr key={exp.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                    
+                    <td className="py-4 px-5">
+                      <div className="font-bold text-sm text-[#23201B]">{exp.title}</div>
+                      <div className="text-[11px] text-[#706B62] mt-0.5">{exp.notes || "—"}</div>
+                    </td>
+
+                    <td className="py-4 px-4">
+                      <span className="px-2.5 py-1 rounded-md bg-[#FAF3E5] text-[#996B1E] font-bold text-[11px] border border-[#EBE5D9]">
+                        {exp.category}
+                      </span>
+                    </td>
+
+                    <td className="py-4 px-3 text-center text-[#706B62] font-mono">
+                      {String(exp.expense_date || "").slice(0, 10)}
+                    </td>
+
+                    <td className="py-4 px-3 text-center font-semibold text-[#4A453E]">
+                      {exp.payment_method || "Direct"}
+                    </td>
+
+                    <td className="py-4 px-4 text-right">
+                      <span className="font-mono font-bold text-sm text-red-600">
+                        - PKR {Number(exp.amount || 0).toLocaleString()}
+                      </span>
+                    </td>
+
+                    <td className="py-4 px-3 text-center">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <CheckCircle2 size={11} />
+                        <span>{exp.status || "Paid"}</span>
+                      </span>
+                    </td>
+
+                    <td className="py-4 px-5 text-right">
+                      <button
+                        onClick={() => handleDeleteExpense(exp.id)}
+                        className="p-1.5 rounded-lg text-[#8C847B] hover:text-red-600 hover:bg-red-50 transition-colors"
+                        title="Delete Expense"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
       </div>
 
       {/* ── Add Expense Modal ── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-lg p-6 sm:p-8 animate-in zoom-in-95 duration-200">
             
             <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-6">
               <div>
-                <h3 className="font-serif font-bold text-xl text-[#23201B]">Log Operational Expense</h3>
-                <p className="text-xs text-[#706B62]">Add server, SMS, or operational platform cost.</p>
+                <h3 className="font-serif font-bold text-xl text-[#23201B]">Record Operational Expense</h3>
+                <p className="text-xs text-[#706B62]">Saves directly into MySQL expenses table.</p>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -284,26 +326,26 @@ export default function ExpensesPage() {
             <form onSubmit={handleAddExpense} className="space-y-4">
               
               <div>
-                <label className="block text-xs font-bold text-[#23201B] mb-1">Expense Description *</label>
+                <label className="block text-xs font-bold text-[#23201B] mb-1">Expense Title / Vendor *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. AWS Postgres Aurora Cluster & Edge Compute"
+                  placeholder="e.g. AWS Multi-AZ Database Hosting"
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:outline-none focus:border-[#C4993C]"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#23201B] mb-1">Category</label>
+                  <label className="block text-xs font-bold text-[#23201B] mb-1">Category *</label>
                   <select
                     value={formData.category}
-                    onChange={e => setFormData({ ...formData, category: e.target.value as any })}
-                    className="w-full px-3 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] font-medium"
+                    onChange={e => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] font-bold focus:outline-none focus:border-[#C4993C]"
                   >
-                    <option value="Hosting & Cloud Infrastructure">Hosting & Servers</option>
+                    <option value="Hosting & Cloud Infrastructure">Hosting & Cloud Infrastructure</option>
                     <option value="SMS & WhatsApp Gateway">SMS & WhatsApp Gateway</option>
                     <option value="Dev & Engineering">Dev & Engineering</option>
                     <option value="Sales & Marketing">Sales & Marketing</option>
@@ -320,18 +362,18 @@ export default function ExpensesPage() {
                     min={1}
                     value={formData.amount}
                     onChange={e => setFormData({ ...formData, amount: Number(e.target.value) })}
-                    className="w-full px-3 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs font-bold text-[#23201B]"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs font-mono font-bold text-[#23201B] focus:outline-none focus:border-[#C4993C]"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#23201B] mb-1">Payment Method</label>
                   <select
                     value={formData.paymentMethod}
-                    onChange={e => setFormData({ ...formData, paymentMethod: e.target.value as any })}
-                    className="w-full px-3 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] font-medium"
+                    onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] font-bold focus:outline-none focus:border-[#C4993C]"
                   >
                     <option value="Credit Card">Credit Card</option>
                     <option value="Bank Transfer">Bank Transfer</option>
@@ -341,21 +383,22 @@ export default function ExpensesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#23201B] mb-1">Date</label>
+                  <label className="block text-xs font-bold text-[#23201B] mb-1">Expense Date</label>
                   <input
                     type="date"
+                    required
                     value={formData.date}
                     onChange={e => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B]"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] font-bold focus:outline-none focus:border-[#C4993C]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#23201B] mb-1">Notes / Receipt details</label>
+                <label className="block text-xs font-bold text-[#23201B] mb-1">Notes / Description</label>
                 <textarea
                   rows={2}
-                  placeholder="Optional memo or invoice reference..."
+                  placeholder="e.g. Monthly cloud server nodes renewal for Pakistan region"
                   value={formData.notes}
                   onChange={e => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full px-3.5 py-2 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:outline-none focus:border-[#C4993C]"
@@ -372,9 +415,11 @@ export default function ExpensesPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-xl bg-[#23201B] hover:bg-[#3D382F] text-white text-xs font-bold shadow-md"
+                  disabled={submitting}
+                  className="px-6 py-2 rounded-xl bg-[#23201B] hover:bg-[#3D382F] text-white text-xs font-bold shadow-md disabled:opacity-60 flex items-center gap-2"
                 >
-                  Save Expense
+                  {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Save Expense</span>
                 </button>
               </div>
 

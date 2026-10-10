@@ -8,7 +8,7 @@ const containerVariants = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const cardVariants = {
+const cardVariants: any = {
   hidden: { opacity: 0, y: 50 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
 };

@@ -8,8 +8,8 @@ import gsap from 'gsap';
  * On mousemove: button follows cursor (30% offset).
  * On mouseleave: snaps back with elastic easing.
  */
-export function useMagneticButton() {
-  const ref = useRef<HTMLButtonElement>(null);
+export function useMagneticButton<T extends HTMLElement = HTMLButtonElement>() {
+  const ref = useRef<T>(null);
 
   useEffect(() => {
     const el = ref.current;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Settings,
   Building,
@@ -12,29 +12,120 @@ import {
   Mail,
   Phone,
   Globe,
-  Upload
+  Upload,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState("general");
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Form State
-  const [schoolName, setSchoolName] = useState("Oakridge International Academy");
-  const [tagline, setTagline] = useState("Excellence in Global Holistic Education");
-  const [email, setEmail] = useState("admissions@oakridge.skoolms.edu");
-  const [phone, setPhone] = useState("+1 (555) 349-8201");
-  const [address, setAddress] = useState("742 Evergreen Terrace, Springfield");
+  const [schoolName, setSchoolName] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [website, setWebsite] = useState("");
   const [academicSession, setAcademicSession] = useState("2025 - 2026");
   const [gradingSystem, setGradingSystem] = useState("letter");
   const [smsGateway, setSmsGateway] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        setLoading(true);
+        setError(null);
+        const [profileRes, settingsRes] = await Promise.allSettled([
+          apiFetch<any>("/admin/profile"),
+          apiFetch<any>("/admin/settings")
+        ]);
+
+        if (profileRes.status === "fulfilled") {
+          const p = profileRes.value;
+          setSchoolName(p.name || "");
+          setTagline(p.tagline || "");
+          setEmail(p.email || "");
+          setPhone(p.phone || "");
+          setAddress(p.address || "");
+          setCity(p.city || "");
+          setWebsite(p.website || "");
+        }
+
+        if (settingsRes.status === "fulfilled") {
+          const s = settingsRes.value.settings || {};
+          if (s.academic_session) setAcademicSession(s.academic_session);
+          if (s.grading_system) setGradingSystem(s.grading_system);
+          if (s.sms_gateway !== undefined) setSmsGateway(s.sms_gateway === "true" || s.sms_gateway === true);
+          if (s.email_alerts !== undefined) setEmailAlerts(s.email_alerts === "true" || s.email_alerts === true);
+        }
+      } catch (err: any) {
+        console.error("Failed to load settings:", err);
+        setError(err?.message || "Failed to load school settings");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      await Promise.all([
+        apiFetch("/admin/profile", {
+          method: "PUT",
+          body: JSON.stringify({
+            name: schoolName,
+            tagline,
+            email,
+            phone,
+            address,
+            city,
+            website
+          })
+        }),
+        apiFetch("/admin/settings", {
+          method: "PUT",
+          body: JSON.stringify({
+            settings: {
+              academic_session: academicSession,
+              grading_system: gradingSystem,
+              sms_gateway: smsGateway ? "true" : "false",
+              email_alerts: emailAlerts ? "true" : "false"
+            }
+          })
+        })
+      ]);
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      console.error("Failed to save settings:", err);
+      setError(err?.message || "Failed to save settings");
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="py-24 flex flex-col items-center justify-center text-slate-400">
+        <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+        <span>Loading institutional configuration...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500 max-w-5xl mx-auto">
@@ -58,6 +149,13 @@ export default function AdminSettings() {
           </div>
         )}
       </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-[#EBE8E2] pb-2 overflow-x-auto">
@@ -86,27 +184,14 @@ export default function AdminSettings() {
       <form onSubmit={handleSave} className="bg-white rounded-2xl border border-[#EBE8E2] p-8 shadow-sm space-y-6">
         {activeTab === "general" && (
           <div className="space-y-6 animate-in fade-in">
-            <div className="flex items-center gap-6 pb-6 border-b border-[#EBE8E2]">
-              <div className="w-20 h-20 rounded-2xl bg-[#FAF8F5] border-2 border-dashed border-[#D9D4CC] flex flex-col items-center justify-center text-[#8C877D] text-xs">
-                <Upload size={20} className="mb-1 text-[#C4993C]" />
-                Logo
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-[#23201B] font-sora">Institutional Crest & Emblem</h3>
-                <p className="text-xs text-[#8C877D] mt-0.5">Recommended 400x400 PNG or SVG transparent background.</p>
-                <button type="button" className="mt-2 px-3 py-1.5 rounded-lg border border-[#D9D4CC] text-xs font-semibold text-[#4A453E] hover:bg-[#FAF8F5]">
-                  Upload New Crest
-                </button>
-              </div>
-            </div>
-
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-[#4A453E] uppercase tracking-wider mb-1.5">
-                  School Name
+                  School Name *
                 </label>
                 <input
                   type="text"
+                  required
                   value={schoolName}
                   onChange={(e) => setSchoolName(e.target.value)}
                   className="w-full text-sm border border-[#D9D4CC] rounded-xl text-[#23201B] bg-[#FAF8F5] p-3 outline-none focus:border-[#C4993C] focus:bg-white"
@@ -158,16 +243,30 @@ export default function AdminSettings() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[#4A453E] uppercase tracking-wider mb-1.5">
-                Physical Campus Address
-              </label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full text-sm border border-[#D9D4CC] rounded-xl text-[#23201B] bg-[#FAF8F5] p-3 outline-none focus:border-[#C4993C] focus:bg-white"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-[#4A453E] uppercase tracking-wider mb-1.5">
+                  Physical Campus Address
+                </label>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full text-sm border border-[#D9D4CC] rounded-xl text-[#23201B] bg-[#FAF8F5] p-3 outline-none focus:border-[#C4993C] focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#4A453E] uppercase tracking-wider mb-1.5">
+                  City
+                </label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full text-sm border border-[#D9D4CC] rounded-xl text-[#23201B] bg-[#FAF8F5] p-3 outline-none focus:border-[#C4993C] focus:bg-white"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -184,8 +283,8 @@ export default function AdminSettings() {
                   onChange={(e) => setAcademicSession(e.target.value)}
                   className="w-full text-sm border border-[#D9D4CC] rounded-xl text-[#23201B] bg-[#FAF8F5] p-3 outline-none focus:border-[#C4993C] focus:bg-white"
                 >
-                  <option>2025 - 2026</option>
-                  <option>2026 - 2027</option>
+                  <option value="2025 - 2026">2025 - 2026</option>
+                  <option value="2026 - 2027">2026 - 2027</option>
                 </select>
               </div>
 
@@ -204,25 +303,6 @@ export default function AdminSettings() {
                 </select>
               </div>
             </div>
-
-            <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#EBE8E2]">
-              <h4 className="font-bold text-xs text-[#23201B] uppercase tracking-wider mb-1">
-                Attendance Defaulter Warning Threshold
-              </h4>
-              <p className="text-xs text-[#706B62] mb-3">
-                Students dropping below this percentage automatically trigger parental SMS notifications.
-              </p>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  defaultValue={75}
-                  min={50}
-                  max={90}
-                  className="w-24 text-sm font-bold border border-[#D9D4CC] rounded-xl text-[#23201B] bg-white p-2.5 outline-none text-center"
-                />
-                <span className="text-xs font-bold text-[#4A453E]">% Minimum Attendance</span>
-              </div>
-            </div>
           </div>
         )}
 
@@ -230,7 +310,7 @@ export default function AdminSettings() {
           <div className="space-y-5 animate-in fade-in">
             <div className="flex items-center justify-between p-4 rounded-xl border border-[#EBE8E2] bg-[#FAF8F5]">
               <div>
-                <h4 className="font-bold text-sm text-[#23201B]">Direct Twilio SMS Dispatch</h4>
+                <h4 className="font-bold text-sm text-[#23201B]">SMS Notification Dispatch</h4>
                 <p className="text-xs text-[#8C877D]">Instant SMS alerts for absences, fees, and closures.</p>
               </div>
               <input
@@ -244,7 +324,7 @@ export default function AdminSettings() {
             <div className="flex items-center justify-between p-4 rounded-xl border border-[#EBE8E2] bg-[#FAF8F5]">
               <div>
                 <h4 className="font-bold text-sm text-[#23201B]">Daily Email Summary Digest</h4>
-                <p className="text-xs text-[#8C877D]">Dispatches report cards, payment receipts, and principal letters.</p>
+                <p className="text-xs text-[#8C877D]">Dispatches report cards, payment receipts, and memos.</p>
               </div>
               <input
                 type="checkbox"
@@ -260,9 +340,9 @@ export default function AdminSettings() {
           <div className="space-y-4 animate-in fade-in">
             <div className="p-4 rounded-xl border border-[#EBE8E2] bg-[#FAF8F5]">
               <h4 className="font-bold text-sm text-[#23201B] mb-1">Two-Factor Authentication (2FA) for Staff</h4>
-              <p className="text-xs text-[#8C877D] mb-3">Enforce Google Authenticator or SMS 2FA for all teachers and admins.</p>
+              <p className="text-xs text-[#8C877D] mb-3">Enforce credentials protection for all teachers and admins.</p>
               <span className="px-3 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">
-                Enforced by Super Admin
+                Active & Enforced
               </span>
             </div>
           </div>
@@ -272,9 +352,11 @@ export default function AdminSettings() {
         <div className="pt-4 border-t border-[#EBE8E2] flex justify-end">
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#C4993C] to-[#D4A843] text-white text-xs font-bold hover:from-[#B3882B] hover:to-[#C4993C] transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+            disabled={submitting}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#C4993C] to-[#D4A843] text-white text-xs font-bold hover:from-[#B3882B] hover:to-[#C4993C] transition-all flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50"
           >
-            <Save size={15} /> Save Changes
+            {submitting ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+            <span>Save Changes</span>
           </button>
         </div>
       </form>

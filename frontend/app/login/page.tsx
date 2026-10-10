@@ -115,7 +115,7 @@ export default function Login() {
             Demo Credentials
           </p>
           <div className="text-white/80 text-xs font-mono">
-            {role === 'super-admin' ? 'superadmin@skoolms.com' : `${role === 'super-admin' ? '' : role}@greenwood.com`}<br />password123
+            {role === 'super-admin' ? 'superadmin@skoolms.com' : `${role}@greenwood.com`}<br />password123
           </div>
         </div>
       </div>

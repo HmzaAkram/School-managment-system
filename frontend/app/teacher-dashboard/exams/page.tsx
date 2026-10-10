@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Calendar,
   Clock,
@@ -16,338 +16,305 @@ import {
   Save,
   X,
   Sparkles,
-  Check
+  Loader2,
+  AlertCircle
 } from "lucide-react";
-
-interface Exam {
-  id: string;
-  title: string;
-  className: string;
-  subject: string;
-  date: string;
-  time: string;
-  room: string;
-  candidates: number;
-  status: "Scheduled" | "Grading Ready" | "Published";
-  topics: string;
-}
-
-interface StudentGradeRow {
-  rollNo: string;
-  name: string;
-  theory: number;    // out of 75
-  practical: number; // out of 15
-  assignment: number;// out of 10
-}
-
-const initialStudentGrades: StudentGradeRow[] = [
-  { rollNo: "10-A-01", name: "Ali Hassan", theory: 70, practical: 14, assignment: 10 },
-  { rollNo: "10-A-02", name: "Ayesha Khan", theory: 68, practical: 13, assignment: 9 },
-  { rollNo: "10-A-03", name: "Omar Sheikh", theory: 65, practical: 14, assignment: 9 },
-  { rollNo: "10-A-04", name: "Zara Qureshi", theory: 62, practical: 12, assignment: 8 },
-  { rollNo: "10-A-05", name: "Bilal Nawaz", theory: 72, practical: 15, assignment: 10 },
-  { rollNo: "10-A-06", name: "Hamza Malik", theory: 58, practical: 11, assignment: 8 },
-  { rollNo: "10-A-07", name: "Maryam Tariq", theory: 71, practical: 14, assignment: 10 },
-  { rollNo: "10-A-08", name: "Usman Ghani", theory: 64, practical: 13, assignment: 9 },
-  { rollNo: "10-A-09", name: "Fatima Noor", theory: 69, practical: 14, assignment: 9 },
-  { rollNo: "10-A-10", name: "Zubair Ahmed", theory: 55, practical: 10, assignment: 7 },
-];
-
-const mockExams: Exam[] = [
-  { id: "EX-01", title: "Term 2 Mid-Term Mathematics Assessment", className: "Grade 10-A", subject: "Advanced Mathematics", date: "Oct 28, 2026", time: "09:00 - 11:30 AM", room: "Examination Hall A", candidates: 45, status: "Scheduled", topics: "Quadratic Equations, Complex Numbers, Trigonometry" },
-  { id: "EX-02", title: "Term 2 Mid-Term Mathematics Assessment", className: "Grade 10-B", subject: "Advanced Mathematics", date: "Oct 29, 2026", time: "09:00 - 11:30 AM", room: "Examination Hall B", candidates: 42, status: "Scheduled", topics: "Quadratic Equations, Complex Numbers, Trigonometry" },
-  { id: "EX-03", title: "Diagnostic Geometry & Circle Theorems Quiz", className: "Grade 9-A", subject: "Pure Mathematics", date: "Oct 20, 2026", time: "10:00 - 11:00 AM", room: "Room 103", candidates: 48, status: "Grading Ready", topics: "Angles, Tangents, Chord Properties" },
-  { id: "EX-04", title: "Monthly Algebra Speed Test 3", className: "Grade 10-A", subject: "Advanced Mathematics", date: "Oct 12, 2026", time: "08:45 - 09:30 AM", room: "Room 101", candidates: 45, status: "Published", topics: "Polynomial Division & Roots Factorization" },
-];
+import { apiFetch } from "@/lib/api";
 
 export default function TeacherExams() {
+  const [examGroups, setExamGroups] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [filter, setFilter] = useState("All");
+
+  // Mark Sheet Modal
   const [isGridModalOpen, setIsGridModalOpen] = useState(false);
-  const [selectedExamTitle, setSelectedExamTitle] = useState("Term 2 Mid-Term Mathematics Assessment (Grade 10-A)");
-  const [gradesData, setGradesData] = useState<StudentGradeRow[]>(initialStudentGrades);
+  const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
+  const [markSheetData, setMarkSheetData] = useState<any>(null);
+  const [loadingSheet, setLoadingSheet] = useState(false);
+  const [submittingMarks, setSubmittingMarks] = useState(false);
+  const [enteredScores, setEnteredScores] = useState<Record<number, string>>({});
   const [saveSuccessToast, setSaveSuccessToast] = useState(false);
 
-  const handleGradeChange = (index: number, field: "theory" | "practical" | "assignment", value: number) => {
-    const updated = [...gradesData];
-    updated[index][field] = Math.max(0, Number(value));
-    setGradesData(updated);
+  const fetchExams = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await apiFetch<any>("/teacher/exams");
+      setExamGroups(Array.isArray(res) ? res : (res.data || []));
+    } catch (err: any) {
+      console.error("Error loading exams:", err);
+      setError(err?.message || "Failed to load examination schedules");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getCalculatedStats = (row: StudentGradeRow) => {
-    const total = row.theory + row.practical + row.assignment;
-    let grade = "F";
-    let gpa = "0.0";
-    if (total >= 90) { grade = "A+"; gpa = "4.0"; }
-    else if (total >= 80) { grade = "A"; gpa = "3.7"; }
-    else if (total >= 70) { grade = "B"; gpa = "3.0"; }
-    else if (total >= 60) { grade = "C"; gpa = "2.0"; }
-    else if (total >= 50) { grade = "D"; gpa = "1.0"; }
-    return { total, grade, gpa };
+  useEffect(() => {
+    fetchExams();
+  }, []);
+
+  const openMarkSheet = async (schedule: any) => {
+    setSelectedSchedule(schedule);
+    setIsGridModalOpen(true);
+    setLoadingSheet(true);
+    try {
+      const res = await apiFetch<any>(
+        `/teacher/marks/mark-sheet?exam_id=${schedule.exam_id}&class_id=${schedule.class_id || 1}&subject_id=${schedule.subject_id || 1}`
+      );
+      setMarkSheetData(res);
+      const initialMap: Record<number, string> = {};
+      (res.marks || []).forEach((m: any) => {
+        if (m.marks_obtained !== null && m.marks_obtained !== undefined) {
+          initialMap[m.student_id] = String(m.marks_obtained);
+        }
+      });
+      setEnteredScores(initialMap);
+    } catch (err: any) {
+      console.error("Failed to load mark sheet:", err);
+    } finally {
+      setLoadingSheet(false);
+    }
   };
 
-  const handleSaveGrades = (e: React.FormEvent) => {
+  const handleSaveGrades = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsGridModalOpen(false);
-    setSaveSuccessToast(true);
-    setTimeout(() => setSaveSuccessToast(false), 4000);
+    if (!selectedSchedule || !markSheetData) return;
+
+    try {
+      setSubmittingMarks(true);
+      const marksPayload = Object.entries(enteredScores).map(([studentId, score]) => ({
+        student_id: parseInt(studentId),
+        marks_obtained: parseFloat(score) || 0,
+        total_marks: markSheetData.subject?.total_marks || 100
+      }));
+
+      await apiFetch("/teacher/marks", {
+        method: "POST",
+        body: JSON.stringify({
+          exam_id: selectedSchedule.exam_id,
+          class_id: selectedSchedule.class_id || 1,
+          subject_id: selectedSchedule.subject_id || 1,
+          marks: marksPayload
+        })
+      });
+
+      setIsGridModalOpen(false);
+      setSaveSuccessToast(true);
+      setTimeout(() => setSaveSuccessToast(false), 4000);
+      fetchExams();
+    } catch (err: any) {
+      alert(err?.message || "Failed to save marks");
+    } finally {
+      setSubmittingMarks(false);
+    }
   };
 
-  const filteredExams = mockExams.filter(e => filter === "All" || e.status === filter);
+  const allSchedules = examGroups.flatMap(g => g.schedules || []);
+  const filteredSchedules = allSchedules.filter(s => {
+    if (filter === "All") return true;
+    return (s.exam_status || "").toLowerCase() === filter.toLowerCase();
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-500 max-w-7xl mx-auto">
-      
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#EBE8E2] pb-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-[#8C877D] uppercase tracking-wider mb-1">
             <span>Teacher Portal</span>
             <span>/</span>
-            <span className="text-[#C4993C]">Assessments & Marks Entry</span>
+            <span className="text-[#C4993C]">Examinations</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-[#23201B] font-sora">Exams & Gradebook Hub</h1>
+          <h1 className="text-3xl font-extrabold text-[#23201B] font-sora">Exam Roster & Grading Portal</h1>
           <p className="text-sm text-[#706B62] mt-1">
-            Track midterm testing schedules, enter rubric scores, and enter bulk class marks rapidly.
+            Track exam schedules for your subject specializations, invigilation duties, and record student marks.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsGridModalOpen(true)}
-            className="px-5 py-2.5 rounded-xl bg-[#23201B] hover:bg-[#3D382F] text-white text-xs font-bold transition-all shadow-md flex items-center gap-2"
-          >
-            <Edit3 size={15} className="text-[#D4A843]" />
-            <span>⚡ Quick Excel Marks Grid</span>
-          </button>
-        </div>
+        <button 
+          onClick={() => window.print()}
+          className="px-4 py-2.5 rounded-xl border border-[#D9D4CC] bg-white text-[#23201B] text-xs font-bold hover:bg-[#FAF8F5] transition-all flex items-center gap-2 shadow-sm"
+        >
+          <Download size={14} /> Print Schedule Dossier
+        </button>
       </div>
 
       {saveSuccessToast && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs font-bold animate-in fade-in">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 size={16} />
-            <span>Marks submitted and published to student gradebook transcripts successfully!</span>
-          </div>
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 size={16} />
+          <span>Marks recorded and submitted successfully to academic database!</span>
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#EBE8E2] pb-2">
-        {["All", "Scheduled", "Grading Ready", "Published"].map((t) => (
+      {error && (
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 border-b border-[#EBE8E2] pb-3">
+        {["All", "Upcoming", "Ongoing", "Completed"].map((st) => (
           <button
-            key={t}
-            onClick={() => setFilter(t)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              filter === t
+            key={st}
+            onClick={() => setFilter(st)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              filter === st
                 ? "bg-[#23201B] text-white shadow-sm"
                 : "text-[#706B62] hover:bg-[#FAF8F5] hover:text-[#23201B]"
             }`}
           >
-            {t}
+            {st}
           </button>
         ))}
       </div>
 
-      {/* Exam Cards Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {filteredExams.map((exam) => (
-          <div
-            key={exam.id}
-            className="bg-white rounded-2xl border border-[#EBE8E2] p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-6"
-          >
-            <div className="space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  exam.status === "Scheduled" ? "bg-blue-50 text-blue-700 border border-blue-200" :
-                  exam.status === "Grading Ready" ? "bg-amber-50 text-amber-800 border border-amber-200" :
-                  "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                }`}>
-                  {exam.status}
-                </span>
-                <span className="font-mono text-xs text-[#8C877D]">{exam.id}</span>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-lg text-[#23201B] font-sora">{exam.title}</h3>
-                <p className="text-xs text-[#C4993C] font-semibold mt-0.5">{exam.className} • {exam.subject}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs text-[#706B62] bg-[#FAF8F5] p-3.5 rounded-xl border border-[#EBE8E2]">
-                <div className="flex items-center gap-2">
-                  <Calendar size={14} className="text-[#C4993C]" />
-                  <span>{exam.date}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock size={14} className="text-[#C4993C]" />
-                  <span>{exam.time}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin size={14} className="text-[#C4993C]" />
-                  <span>{exam.room}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users size={14} className="text-[#C4993C]" />
-                  <span>{exam.candidates} Candidates</span>
-                </div>
-              </div>
-
-              <div>
-                <span className="text-[11px] font-bold text-[#8C877D] uppercase tracking-wider block mb-1">Topics Tested</span>
-                <p className="text-xs text-[#5C564D] leading-relaxed">{exam.topics}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-4 border-t border-[#EBE8E2]">
-              <button 
-                onClick={() => alert(`Downloading seating arrangement and roll sheet for ${exam.id}`)}
-                className="text-xs font-semibold text-[#706B62] hover:text-[#23201B] flex items-center gap-1"
-              >
-                <Download size={13} /> Seating Plan
-              </button>
-              
-              <button 
-                onClick={() => {
-                  setSelectedExamTitle(`${exam.title} (${exam.className})`);
-                  setIsGridModalOpen(true);
-                }}
-                className="px-4 py-2 rounded-xl bg-[#23201B] hover:bg-[#3D382F] text-white text-xs font-bold shadow-xs flex items-center gap-1.5"
-              >
-                <Edit3 size={13} className="text-[#C4993C]" />
-                <span>Enter Class Marks</span>
-              </button>
-            </div>
+      {/* Schedules List */}
+      <div className="space-y-4">
+        {loading ? (
+          <div className="py-24 flex flex-col items-center justify-center text-slate-400">
+            <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+            <span>Loading exam schedule rosters...</span>
           </div>
-        ))}
-      </div>
-
-      {/* ── Quick Excel-Like Marks Entry Modal ── */}
-      {isGridModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-4xl p-6 sm:p-8 animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col justify-between">
-            
-            <div>
-              <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded-md bg-[#FAF3E5] text-[#996B1E] font-bold text-[10px] uppercase">
-                      Fast Spreadsheet Input
-                    </span>
-                  </div>
-                  <h3 className="font-serif font-bold text-xl text-[#23201B] mt-1">{selectedExamTitle}</h3>
-                  <p className="text-xs text-[#706B62]">Theory (75) + Practical (15) + Assignment (10) = Total 100 Marks</p>
+        ) : filteredSchedules.length === 0 ? (
+          <div className="p-12 text-center bg-white rounded-2xl border border-[#EBE8E2] text-slate-500 text-sm">
+            No examination schedules found for your subjects.
+          </div>
+        ) : (
+          filteredSchedules.map((ex) => (
+            <div
+              key={ex.id}
+              className="bg-white rounded-2xl border border-[#EBE8E2] shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-all"
+            >
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                  <h3 className="font-bold text-lg text-[#23201B] font-sora">{ex.exam}</h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 uppercase">
+                    {ex.term || "Term Paper"}
+                  </span>
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                    ex.exam_status === "Completed" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"
+                  }`}>
+                    {ex.exam_status || "Scheduled"}
+                  </span>
                 </div>
-                <button onClick={() => setIsGridModalOpen(false)} className="text-[#8C847B] hover:text-[#23201B]">
-                  <X size={20} />
+
+                <div className="flex flex-wrap items-center gap-4 text-xs text-[#706B62]">
+                  <span className="font-semibold text-[#C4993C]">
+                    {ex.subject} ({ex.subject_code || "Paper"})
+                  </span>
+                  <span>Class: {ex.class} {ex.section ? `(${ex.section})` : ""}</span>
+                  <span className="flex items-center gap-1">
+                    <Calendar size={12} /> {ex.date}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock size={12} /> {ex.start_time} - {ex.end_time}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MapPin size={12} /> {ex.room || "Exam Hall"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => openMarkSheet(ex)}
+                  className="px-4 py-2 rounded-xl bg-[#23201B] hover:bg-[#3D382F] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <Edit3 size={13} className="text-[#D4A843]" />
+                  <span>Enter / View Marks</span>
                 </button>
               </div>
+            </div>
+          ))
+        )}
+      </div>
 
-              {/* Excel Table Grid */}
-              <div className="overflow-x-auto max-h-[50vh] border border-[#EBE5D9] rounded-2xl">
-                <table className="w-full text-xs">
-                  <thead className="sticky top-0 bg-[#FAF8F5] border-b border-[#EBE5D9] text-[#706B62]">
-                    <tr>
-                      <th className="text-left py-3 px-4 font-bold uppercase">Roll #</th>
-                      <th className="text-left py-3 px-4 font-bold uppercase">Student Name</th>
-                      <th className="text-center py-3 px-3 font-bold uppercase">Theory (/75)</th>
-                      <th className="text-center py-3 px-3 font-bold uppercase">Practical (/15)</th>
-                      <th className="text-center py-3 px-3 font-bold uppercase">Assignment (/10)</th>
-                      <th className="text-center py-3 px-3 font-bold uppercase">Total (/100)</th>
-                      <th className="text-center py-3 px-3 font-bold uppercase">Grade</th>
-                      <th className="text-center py-3 px-3 font-bold uppercase">GPA</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#F2EFE9] bg-white">
-                    {gradesData.map((row, idx) => {
-                      const { total, grade, gpa } = getCalculatedStats(row);
-
-                      return (
-                        <tr key={row.rollNo} className="hover:bg-[#FAF8F5]/80">
-                          <td className="py-2.5 px-4 font-mono font-bold text-[#996B1E]">{row.rollNo}</td>
-                          <td className="py-2.5 px-4 font-bold text-[#23201B]">{row.name}</td>
-                          
-                          <td className="py-2.5 px-3 text-center">
-                            <input
-                              type="number"
-                              min={0}
-                              max={75}
-                              value={row.theory}
-                              onChange={e => handleGradeChange(idx, "theory", Number(e.target.value))}
-                              className="w-16 px-2 py-1 text-center font-mono font-bold bg-[#FAF8F5] border border-[#D9D4CC] rounded-lg focus:outline-none focus:border-[#C4993C]"
-                            />
-                          </td>
-
-                          <td className="py-2.5 px-3 text-center">
-                            <input
-                              type="number"
-                              min={0}
-                              max={15}
-                              value={row.practical}
-                              onChange={e => handleGradeChange(idx, "practical", Number(e.target.value))}
-                              className="w-16 px-2 py-1 text-center font-mono font-bold bg-[#FAF8F5] border border-[#D9D4CC] rounded-lg focus:outline-none focus:border-[#C4993C]"
-                            />
-                          </td>
-
-                          <td className="py-2.5 px-3 text-center">
-                            <input
-                              type="number"
-                              min={0}
-                              max={10}
-                              value={row.assignment}
-                              onChange={e => handleGradeChange(idx, "assignment", Number(e.target.value))}
-                              className="w-16 px-2 py-1 text-center font-mono font-bold bg-[#FAF8F5] border border-[#D9D4CC] rounded-lg focus:outline-none focus:border-[#C4993C]"
-                            />
-                          </td>
-
-                          <td className="py-2.5 px-3 text-center font-mono font-bold text-sm text-emerald-700">
-                            {total}
-                          </td>
-
-                          <td className="py-2.5 px-3 text-center">
-                            <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold text-xs">
-                              {grade}
-                            </span>
-                          </td>
-
-                          <td className="py-2.5 px-3 text-center font-mono font-bold text-[#706B62]">
-                            {gpa}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+      {/* Mark Sheet Modal */}
+      {isGridModalOpen && selectedSchedule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-2xl border border-[#EBE8E2] p-6 max-w-2xl w-full shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-[#EBE8E2]">
+              <div>
+                <h3 className="font-bold text-[#23201B] text-lg font-sora">
+                  Record Marks: {selectedSchedule.exam}
+                </h3>
+                <p className="text-xs text-[#706B62]">
+                  {selectedSchedule.subject} • Class: {selectedSchedule.class}
+                </p>
               </div>
+              <button onClick={() => setIsGridModalOpen(false)} className="text-[#8C877D] hover:text-[#23201B]">
+                <X size={20} />
+              </button>
             </div>
 
-            {/* Bottom Controls */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 mt-4 border-t border-[#EBE5D9]">
-              <div className="text-xs text-[#706B62]">
-                Auto-computing Class Average: <strong>89.2% (Grade A+)</strong> • 10 of 10 Students Graded
-              </div>
+            <form onSubmit={handleSaveGrades} className="overflow-y-auto flex-1 space-y-4">
+              {loadingSheet ? (
+                <div className="py-16 flex flex-col items-center justify-center text-slate-400">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+                  <span>Loading candidate list...</span>
+                </div>
+              ) : !markSheetData || markSheetData.marks?.length === 0 ? (
+                <div className="py-16 text-center text-slate-500 text-xs">
+                  No students registered in this class.
+                </div>
+              ) : (
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-[#FAF8F5] border-b border-[#EBE8E2] text-[#706B62]">
+                      <th className="text-left py-2 px-3">Student Name</th>
+                      <th className="text-left py-2 px-3">Roll No</th>
+                      <th className="text-right py-2 px-3">
+                        Marks Obtained (Max: {markSheetData.subject?.total_marks || 100})
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#EBE8E2]">
+                    {markSheetData.marks.map((m: any) => (
+                      <tr key={m.student_id}>
+                        <td className="py-2.5 px-3 font-semibold text-[#23201B]">{m.student_name}</td>
+                        <td className="py-2.5 px-3 text-[#706B62] font-mono">{m.roll_number || m.student_id}</td>
+                        <td className="py-2.5 px-3 text-right">
+                          <input
+                            type="number"
+                            min="0"
+                            max={markSheetData.subject?.total_marks || 100}
+                            value={enteredScores[m.student_id] ?? ""}
+                            onChange={(e) => setEnteredScores({ ...enteredScores, [m.student_id]: e.target.value })}
+                            placeholder="0"
+                            className="w-24 px-2.5 py-1.5 border border-[#D9D4CC] rounded-lg text-right font-bold text-xs"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
 
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <div className="flex justify-end gap-3 pt-3 border-t border-[#EBE8E2]">
                 <button
                   type="button"
                   onClick={() => setIsGridModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-[#D9D4CC] text-xs font-bold text-[#706B62] hover:bg-[#FAF8F5]"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#706B62] hover:bg-[#FAF8F5]"
                 >
                   Cancel
                 </button>
                 <button
-                  type="button"
-                  onClick={handleSaveGrades}
-                  className="px-6 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md flex items-center gap-1.5"
+                  type="submit"
+                  disabled={submittingMarks}
+                  className="px-6 py-2 rounded-xl bg-[#23201B] text-white text-xs font-bold hover:bg-[#3D382F] transition-all flex items-center gap-2"
                 >
-                  <Save size={14} />
-                  <span>Publish All Marks</span>
+                  {submittingMarks && <Loader2 size={14} className="animate-spin" />}
+                  Save All Marks
                 </button>
               </div>
-            </div>
-
+            </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }

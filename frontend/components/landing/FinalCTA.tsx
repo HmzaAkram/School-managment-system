@@ -14,7 +14,7 @@ const trustItems = [
 
 export default function FinalCTA() {
   const sectionRef = useRef<HTMLElement>(null);
-  const primaryBtnRef = useMagneticButton();
+  const primaryBtnRef = useMagneticButton<HTMLAnchorElement>();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
