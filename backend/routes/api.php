@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Admin\SchoolSettingController;
 use App\Http\Controllers\Api\Admin\StudentController;
 use App\Http\Controllers\Api\Admin\TeacherController;
 use App\Http\Controllers\Api\Admin\TimetableController;
+use App\Http\Controllers\Api\AiAssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Student\StudentDashboardController;
@@ -47,6 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/me', [AuthController::class, 'updateProfile']);
     Route::post('/me/password', [AuthController::class, 'changePassword']);
+
+    Route::post('/ai-assistant/chat', [AiAssistantController::class, 'chat'])->middleware('throttle:10,1');
 
     // ── Notifications (all roles) ──
     Route::prefix('notifications')->group(function () {

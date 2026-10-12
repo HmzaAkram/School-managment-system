@@ -19,6 +19,7 @@ import {
   Bus,
   BarChart3,
   Settings,
+  Sparkles,
 } from "lucide-react";
 
 const navItems = [
@@ -32,6 +33,7 @@ const navItems = [
   { label: 'Fees',           href: '/admin-dashboard/fees',       icon: <CreditCard size={18} /> },
   { label: 'Notices',        href: '/admin-dashboard/notices',    icon: <BellRing size={18} /> },
   { label: 'Reports',        href: '/admin-dashboard/reports',    icon: <BarChart3 size={18} /> },
+  { label: 'AI Assistant',   href: '/admin-dashboard/ai-assistant', icon: <Sparkles size={18} /> },
   { label: 'Settings',       href: '/admin-dashboard/settings',   icon: <Settings size={18} /> },
 ];
 

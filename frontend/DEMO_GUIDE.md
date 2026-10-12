@@ -73,13 +73,18 @@ The system comes pre-populated with demo data:
 Each user role has access to multiple tabs for different functionalities:
 
 **Admin Dashboard:**
-- Overview | Teachers | Students | Classes | Fees | Attendance
+- Overview | Teachers | Students | Classes | Fees | Attendance | AI Assistant
 
 **Teacher Dashboard:**
-- Overview | My Classes | Assignments | Exams | Performance | Attendance
+- Overview | My Classes | Assignments | Exams | Performance | Attendance | AI Assistant
 
-**Student Dashboard:**
-- Overview | My Classes | Grades | Attendance | Assignments | Fees
+**Student / Parent Dashboard:**
+- Overview | My Classes | Grades | Attendance | Assignments | Fees | AI Assistant
+
+**Super Admin Dashboard:**
+- Dashboard | Schools | Payments | Expenses | Ledger | Reports | AI Assistant
+
+The AI Assistant uses the authenticated user's role to retrieve permitted SchoolMS records. Configure `GEMINI_API_KEY` in `backend/.env` to enable Gemini responses; the key must not be added to frontend configuration.
 
 ## Pages
 

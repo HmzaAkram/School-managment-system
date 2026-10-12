@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { LayoutDashboard, BookOpen, BarChart2, CheckSquare, FileText, CreditCard, Book } from "lucide-react";
+import { LayoutDashboard, BookOpen, BarChart2, CheckSquare, FileText, CreditCard, Book, Sparkles } from "lucide-react";
 
 const navItems = [
   { label: 'Overview',     href: '/student-dashboard',             icon: <LayoutDashboard size={18} /> },
@@ -13,6 +13,7 @@ const navItems = [
   { label: 'Assignments',  href: '/student-dashboard/assignments', icon: <FileText size={18} /> },
   { label: 'Diaries',      href: '/student-dashboard/diaries',     icon: <Book size={18} /> },
   { label: 'Fees',         href: '/student-dashboard/fees',        icon: <CreditCard size={18} /> },
+  { label: 'AI Assistant', href: '/student-dashboard/ai-assistant', icon: <Sparkles size={18} /> },
 ];
 
 export default function DashboardLayoutClient({ children }: { children: React.ReactNode }) {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { LayoutDashboard, Building2, CreditCard, Receipt, BookOpen, BarChart3, HelpCircle, Settings } from "lucide-react";
+import { LayoutDashboard, Building2, CreditCard, Receipt, BookOpen, BarChart3, HelpCircle, Settings, Sparkles } from "lucide-react";
 
 const navItems = [
   { label: 'Dashboard',      href: '/super-admin-dashboard',          icon: <LayoutDashboard size={18} /> },
@@ -13,6 +13,7 @@ const navItems = [
   { label: 'Ledger',         href: '/super-admin-dashboard/ledger',   icon: <BookOpen size={18} /> },
   { label: 'Reports',        href: '/super-admin-dashboard/reports',  icon: <BarChart3 size={18} /> },
   { label: 'Support Queries',href: '/super-admin-dashboard/support',  icon: <HelpCircle size={18} /> },
+  { label: 'AI Assistant',   href: '/super-admin-dashboard/ai-assistant', icon: <Sparkles size={18} /> },
   { label: 'Settings',       href: '/super-admin-dashboard/settings', icon: <Settings size={18} /> },
 ];
 
