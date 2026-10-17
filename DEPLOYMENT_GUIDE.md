@@ -88,16 +88,20 @@ GEMINI_API_KEY=""
 
 ---
 
-## 4. Database Migration in Production (Railway)
+## 4. Database Migration & Clean Seeding in Production (Railway)
 
-When deploying to Railway for the first time or after adding new migrations:
+When deploying to Railway for the first time or setting up a clean database:
 1. In Railway, click on your Laravel service $\rightarrow$ Open the **Railway CLI** or **Web Terminal**.
 2. Run:
    ```bash
    php artisan migrate --force
    php artisan db:seed --force
    ```
-*(This creates all tables including the new school logos longtext column and seed data).*
+> **What this does:**
+> * `php artisan migrate --force` creates all tables (including schools, contracts, attendance, fees, etc.).
+> * `php artisan db:seed --force` creates **ONLY the Super Admin account** (`superadmin@skoolms.com` / `password123`).
+> * No demo schools, dummy students, or mock contracts are created. You can immediately log into the Super Admin panel and start creating your real schools and contracts.
+> *(Note: If you ever want the full demo dataset for testing, run `php artisan db:seed --class=DemoDataSeeder --force`).*
 
 ---
 
