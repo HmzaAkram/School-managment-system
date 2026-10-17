@@ -6,6 +6,8 @@ import {
   Server, MessageSquare, Code, Loader2, X
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -14,6 +16,7 @@ export default function ExpensesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  useBodyScrollLock(isModalOpen);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -307,7 +310,7 @@ export default function ExpensesPage() {
 
       {/* ── Add Expense Modal ── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-lg p-6 sm:p-8 animate-in zoom-in-95 duration-200">
             
             <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-6">
@@ -426,7 +429,7 @@ export default function ExpensesPage() {
             </form>
 
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

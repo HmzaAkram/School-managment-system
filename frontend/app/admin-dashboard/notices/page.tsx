@@ -23,6 +23,8 @@ import {
   AlertCircle
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 interface NoticeItem {
   id: number;
@@ -55,6 +57,7 @@ export default function AdminNotices() {
 
   // WhatsApp / SMS Broadcast Center Modal State
   const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
+  useBodyScrollLock(isBroadcastModalOpen);
   const [broadcastAudience, setBroadcastAudience] = useState<"All" | "Students" | "Teachers" | "Parents">("Parents");
   const [broadcastText, setBroadcastText] = useState("Dear Guardians, please be informed that school will observe a holiday tomorrow. Online study materials have been updated in student diaries.");
   const [broadcastSentToast, setBroadcastSentToast] = useState("");
@@ -507,7 +510,7 @@ export default function AdminNotices() {
 
       {/* Broadcast Modal */}
       {isBroadcastModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-[#EBE8E2] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-[#EBE8E2] flex items-center justify-between">
               <div>
@@ -594,7 +597,7 @@ export default function AdminNotices() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

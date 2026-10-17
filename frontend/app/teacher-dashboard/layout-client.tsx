@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { api, getStoredUser } from "@/lib/api";
 import { LayoutDashboard, BookOpen, FileText, Calendar, TrendingUp, CheckSquare, Book, MessageSquare, Sparkles } from "lucide-react";
 
 const navItems = [
@@ -21,16 +22,25 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [userName, setUserName] = useState('Teacher');
+  const [school, setSchool] = useState<any>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    let user: any = null;
-    try { user = JSON.parse(localStorage.getItem('user') || 'null'); } catch {}
+    const user = getStoredUser();
     if (!token || !user || user.role !== 'teacher') {
       router.push('/login');
     } else {
       setUserName(user.name || 'Teacher');
+      setSchool(user.school || null);
       setIsAuthorized(true);
+
+      api.get('/auth/me').then((res: any) => {
+        if (res?.user?.school) {
+          setSchool(res.user.school);
+          const updated = { ...user, ...res.user };
+          localStorage.setItem('user', JSON.stringify(updated));
+        }
+      }).catch(() => {});
     }
   }, [router]);
 
@@ -54,7 +64,14 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
   }
 
   return (
-    <DashboardLayout role="teacher" userName={userName} userInitials={userName.slice(0, 2).toUpperCase()} navItems={navItems} onLogout={handleLogout}>
+    <DashboardLayout
+      role="teacher"
+      userName={userName}
+      userInitials={userName.slice(0, 2).toUpperCase()}
+      navItems={navItems}
+      onLogout={handleLogout}
+      school={school}
+    >
       {children}
     </DashboardLayout>
   );

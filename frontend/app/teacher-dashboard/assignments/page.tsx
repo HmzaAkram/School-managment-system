@@ -18,6 +18,8 @@ import {
   Check
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 interface AssignmentItem {
   id: number;
@@ -61,6 +63,7 @@ export default function TeacherAssignments() {
 
   // Submissions Modal State
   const [viewingAssignment, setViewingAssignment] = useState<any>(null);
+  useBodyScrollLock(modalOpen || Boolean(viewingAssignment));
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   const [gradingScore, setGradingScore] = useState<Record<number, string>>({});
@@ -349,7 +352,7 @@ export default function TeacherAssignments() {
 
       {/* New Assignment Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-2xl border border-[#EBE8E2] p-6 max-w-lg w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#EBE8E2]">
               <h3 className="font-bold text-[#23201B] text-base font-sora">Create New Assignment</h3>
@@ -460,12 +463,12 @@ export default function TeacherAssignments() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Submissions Modal */}
       {viewingAssignment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-2xl border border-[#EBE8E2] p-6 max-w-3xl w-full shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-[#EBE8E2]">
               <div>
@@ -546,7 +549,7 @@ export default function TeacherAssignments() {
               )}
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

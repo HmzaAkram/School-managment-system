@@ -59,6 +59,6 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 # AI Assistant
 
-Set `GEMINI_API_KEY` in the backend `.env` file to enable Gemini responses. The model can be changed with `GEMINI_MODEL` (defaults to `gemini-3.8-flash`). The key is only read by Laravel and must not be added to frontend environment variables.
+Set `GEMINI_API_KEY` in the backend `.env` file to enable Gemini responses. The model can be changed with `GEMINI_MODEL` (defaults to `gemini-2.0-flash` for compatibility with the Google Generative Language API). The key is only read by Laravel and must not be added to frontend environment variables.
 
 The assistant endpoint uses the authenticated Sanctum user to select a fixed, role-scoped set of database queries. Conversation history is held only in the browser for the current chat and is not persisted by the API.

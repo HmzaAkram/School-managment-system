@@ -103,6 +103,20 @@ class AiAssistantTest extends TestCase
         ])->assertStatus(503)->assertJsonPath('message', 'The configured Gemini model is unavailable. Please ask your administrator to check GEMINI_MODEL.');
     }
 
+    public function test_default_gemini_model_uses_a_supported_generation_model(): void
+    {
+        config(['services.gemini.key' => 'test-key', 'services.gemini.model' => null]);
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::response([
+            'candidates' => [['content' => ['parts' => [['text' => 'Active schools count is known.']]]]],
+        ])]);
+
+        $this->actingAs($this->user('super_admin'))->postJson('/api/ai-assistant/chat', [
+            'message' => 'How many schools are currently active?',
+        ])->assertOk();
+
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/models/gemini-3.8-flash:generateContent'));
+    }
+
     public function test_gemini_high_demand_error_is_reported_as_retryable(): void
     {
         Http::fake(['generativelanguage.googleapis.com/*' => Http::response([

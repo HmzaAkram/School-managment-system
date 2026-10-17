@@ -82,6 +82,7 @@ class SchoolController extends ApiController
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:20|unique:schools,code',
+            'logo' => 'nullable|string',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:30',
             'city' => 'nullable|string|max:100',
@@ -111,6 +112,7 @@ class SchoolController extends ApiController
             $school = School::create([
                 'name' => $data['name'],
                 'code' => strtoupper($data['code']),
+                'logo' => $data['logo'] ?? null,
                 'email' => $data['email'] ?? $data['admin_email'],
                 'phone' => $data['phone'] ?? null,
                 'city' => $data['city'] ?? null,
@@ -210,7 +212,7 @@ class SchoolController extends ApiController
             'address' => 'nullable|string',
             'website' => 'nullable|string|max:255',
             'tagline' => 'nullable|string|max:255',
-            'logo' => 'nullable|string|max:255',
+            'logo' => 'nullable|string',
             'principal_name' => 'nullable|string|max:255',
             'status' => 'sometimes|required|in:Active,Inactive,Suspended',
             'subscription_status' => 'sometimes|required|in:Active,Expired,Trial,Cancelled',

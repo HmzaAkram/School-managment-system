@@ -7,6 +7,8 @@ import {
   Plus, X, Building2, Receipt, Calendar, Wallet, Check
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 export default function PaymentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +23,7 @@ export default function PaymentsPage() {
 
   // Record Payment Modal State
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  useBodyScrollLock(isRecordModalOpen);
   const [paymentForm, setPaymentForm] = useState({
     school_id: "",
     amount: "",
@@ -543,7 +546,7 @@ export default function PaymentsPage() {
 
       {/* ── Record Payment Modal ── */}
       {isRecordModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-xl p-6 sm:p-8 animate-in zoom-in-95 duration-200">
             
             <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-6">
@@ -717,7 +720,7 @@ export default function PaymentsPage() {
 
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

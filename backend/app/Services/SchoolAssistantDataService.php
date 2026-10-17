@@ -62,14 +62,14 @@ class SchoolAssistantDataService
         [$from, $to] = $this->period($text);
         $periodName = Carbon::parse($from)->translatedFormat('F Y');
 
-        if (preg_match('/\b(revenue|income|received|collected|payments?|transactions?)\b/', $text)) {
+        if (preg_match('/\b(revenue|income|received|collected|payments?|transactions?|kamai|pese|pesay|kitne paise|wasooli)\b/i', $text)) {
             $query = SchoolPayment::whereBetween('payment_date', [$from, $to]);
             $completed = (clone $query)->where('status', 'Completed');
             $data = [
                 'metric' => 'SchoolMS platform subscription and contract payments; excludes school fee payments.',
             ];
 
-            if (preg_match('/\b(recent|latest|show|list|transactions?)\b/', $text)) {
+            if (preg_match('/\b(recent|latest|show|list|transactions?|details|akhri)\b/i', $text)) {
                 $data['recent_transactions'] = SchoolPayment::with('school:id,name')
                     ->latest('payment_date')->limit(10)->get(['school_id', 'transaction_id', 'amount', 'payment_date', 'status'])
                     ->map(fn (SchoolPayment $payment) => [
@@ -88,14 +88,9 @@ class SchoolAssistantDataService
             return $this->supported($data);
         }
 
-        if (preg_match('/\b(active|currently|how many)\b/', $text) && preg_match('/\bschools?\b/', $text)) {
-            return $this->supported([
-                'active_schools' => School::where('status', 'Active')->count(),
-            ]);
-        }
-
-        if (preg_match('/\b(contract|overdue|pending|outstanding|due)\b/', $text)) {
-            $contracts = SchoolContract::with('school:id,name')
+        if (preg_match('/\b(contract|contracts|overdue|pending|outstanding|due|dues|unpaid|baki|baqi|arrears)\b/i', $text)
+            || (preg_match('/\b(kon|kaun|konsa|kaunsa|which|list|what|show|batao|naam)\b/i', $text) && preg_match('/\b(pending|due|overdue|unpaid|baki|arrear)\b/i', $text))) {
+            $contracts = SchoolContract::with('school:id,name,code,status')
                 ->where(function (Builder $query) {
                     $query->where('balance_due', '>', 0)->orWhere('total_pending_amount', '>', 0);
                 })
@@ -103,6 +98,7 @@ class SchoolAssistantDataService
 
             $rows = $contracts->map(fn (SchoolContract $contract) => [
                 'school' => $contract->school?->name,
+                'school_code' => $contract->school?->code,
                 'contract' => $contract->contract_number,
                 'outstanding_amount' => (float) ($contract->total_pending_amount ?: $contract->balance_due),
                 'payment_status' => $contract->current_month_status,
@@ -118,14 +114,65 @@ class SchoolAssistantDataService
                     'transaction' => $payment->transaction_id,
                 ])->all();
 
+            // Also include schools with pending balance directly
+            $pendingSchools = School::where('pending_amount', '>', 0)
+                ->get(['id', 'name', 'code', 'pending_amount', 'contract_amount', 'status'])
+                ->map(fn (School $s) => [
+                    'school' => $s->name,
+                    'school_code' => $s->code,
+                    'pending_amount' => (float) $s->pending_amount,
+                    'status' => $s->status,
+                ])->all();
+
             return $this->supported([
+                'pending_schools' => $pendingSchools,
                 'pending_contracts' => $rows,
                 'pending_payments' => $pendingPayments,
                 'contract_count' => count($rows),
             ]);
         }
 
-        return $this->unsupported();
+        if (preg_match('/\b(active|currently|how many|total|all|list|registered|kitne|tamam)\b/i', $text) && preg_match('/\b(schools?|institutions?|school)\b/i', $text)) {
+            $allSchools = School::get(['id', 'name', 'code', 'status', 'city', 'plan', 'contract_amount', 'pending_amount']);
+            return $this->supported([
+                'active_schools' => School::where('status', 'Active')->count(),
+                'total_schools' => $allSchools->count(),
+                'schools' => $allSchools->map(fn (School $s) => [
+                    'name' => $s->name,
+                    'code' => $s->code,
+                    'status' => $s->status,
+                    'city' => $s->city,
+                    'pending_amount' => (float) $s->pending_amount,
+                ])->all(),
+            ]);
+        }
+
+        // Contextual fallback for super admin so natural queries are never rigidly blocked
+        $allSchools = School::get(['id', 'name', 'code', 'status', 'city', 'pending_amount', 'contract_amount']);
+        $contracts = SchoolContract::with('school:id,name')
+            ->where(function (Builder $query) {
+                $query->where('balance_due', '>', 0)->orWhere('total_pending_amount', '>', 0);
+            })
+            ->get(['school_id', 'contract_number', 'balance_due', 'total_pending_amount', 'current_month_status']);
+
+        return $this->supported([
+            'platform_overview' => [
+                'total_schools_count' => $allSchools->count(),
+                'active_schools_count' => $allSchools->where('status', 'Active')->count(),
+                'schools_summary' => $allSchools->take(25)->map(fn ($s) => [
+                    'name' => $s->name,
+                    'code' => $s->code,
+                    'status' => $s->status,
+                    'pending_amount' => (float) $s->pending_amount,
+                ])->values()->all(),
+                'pending_contracts' => $contracts->take(25)->map(fn ($c) => [
+                    'school' => $c->school?->name,
+                    'contract' => $c->contract_number,
+                    'outstanding_amount' => (float) ($c->total_pending_amount ?: $c->balance_due),
+                    'status' => $c->current_month_status,
+                ])->values()->all(),
+            ],
+        ]);
     }
 
     private function schoolAdminData(User $user, string $text): array
@@ -137,16 +184,16 @@ class SchoolAssistantDataService
         $schoolId = $user->school_id;
         [$from, $to] = $this->period($text);
 
-        if (preg_match('/\b(student|enrollment|enrolled|students)\b/', $text)) {
+        if (preg_match('/\b(student|enrollment|enrolled|students|bache|bachay|dakhla|taadad)\b/i', $text)) {
             return $this->supported([
                 'active_student_count' => Student::where('school_id', $schoolId)->where('status', 'Active')->count(),
             ]);
         }
 
-        if (preg_match('/\b(attendance|absent|present)\b/', $text)) {
+        if (preg_match('/\b(attendance|absent|present|haziri|ghair hazir|chutti)\b/i', $text)) {
             $date = Carbon::today()->toDateString();
             $query = Attendance::where('school_id', $schoolId)->whereDate('date', $date);
-            if (preg_match('/\bteacher|staff\b/', $text)) {
+            if (preg_match('/\bteacher|staff|asatza\b/i', $text)) {
                 $records = (clone $query)->whereNotNull('teacher_id');
 
                 return $this->supported([
@@ -167,14 +214,14 @@ class SchoolAssistantDataService
             ]);
         }
 
-        if (preg_match('/\b(expense|expenses|spending|spent)\b/', $text)) {
+        if (preg_match('/\b(expense|expenses|spending|spent|kharcha|kharchay)\b/i', $text)) {
             $total = Expense::where('school_id', $schoolId)->whereBetween('expense_date', [$from, $to])->sum('amount');
 
             return $this->supported(['period' => ['from' => $from, 'to' => $to], 'school_expense_total' => round((float) $total, 2)]);
         }
 
-        if (preg_match('/\b(fee|fees|collection|collected|revenue|outstanding|pending|defaulter)\b/', $text)) {
-            if (preg_match('/\b(student|students|who|which|list|names|outstanding)\b/', $text) && preg_match('/\b(pending|outstanding|fee|fees|who|which|list|defaulter)\b/', $text)) {
+        if (preg_match('/\b(fee|fees|collection|collected|revenue|outstanding|pending|defaulter|baki|baqi|arrear|arrears)\b/i', $text)) {
+            if (preg_match('/\b(student|students|who|which|list|names|outstanding|kon|kaun|kis|bache|bachay)\b/i', $text) && preg_match('/\b(pending|outstanding|fee|fees|who|which|list|defaulter|baki|baqi)\b/i', $text)) {
                 $invoices = FeeInvoice::with('student:id,first_name,last_name,roll_number,roll_no')
                     ->where('school_id', $schoolId)->get(['student_id', 'title', 'amount', 'paid_amount', 'due_date']);
                 $outstanding = $invoices->map(fn (FeeInvoice $invoice) => [
@@ -188,7 +235,7 @@ class SchoolAssistantDataService
                 return $this->supported(['students_with_outstanding_fees' => $outstanding, 'records_limited_to' => 30]);
             }
 
-            if (preg_match('/\b(collected|collection|revenue|received)\b/', $text)) {
+            if (preg_match('/\b(collected|collection|revenue|received|jama|wasooli)\b/i', $text)) {
                 $total = FeePayment::where('school_id', $schoolId)->where('status', 'Completed')
                     ->whereBetween('payment_date', [$from, $to])->sum('amount');
 
@@ -206,7 +253,14 @@ class SchoolAssistantDataService
             ]);
         }
 
-        return $this->unsupported();
+        // Contextual fallback for school admin
+        return $this->supported([
+            'school_overview' => [
+                'active_students' => Student::where('school_id', $schoolId)->where('status', 'Active')->count(),
+                'teachers_count' => Teacher::where('school_id', $schoolId)->where('status', 'Active')->count(),
+                'classes_count' => SchoolClass::where('school_id', $schoolId)->count(),
+            ],
+        ]);
     }
 
     private function teacherData(User $user, string $text): array

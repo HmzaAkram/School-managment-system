@@ -14,6 +14,13 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
+export interface SchoolInfo {
+  id?: number | string;
+  name?: string;
+  code?: string;
+  logo?: string | null;
+}
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
   role: "admin" | "teacher" | "student";
@@ -21,6 +28,7 @@ interface DashboardLayoutProps {
   userInitials: string;
   navItems: NavItem[];
   onLogout: () => void;
+  school?: SchoolInfo | null;
 }
 
 const roleColors = {
@@ -32,23 +40,40 @@ const roleColors = {
 const roleLabels = { admin: "Administrator", teacher: "Teacher", student: "Student" };
 
 export default function DashboardLayout({
-  children, role, userName, userInitials, navItems, onLogout,
+  children, role, userName, userInitials, navItems, onLogout, school,
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
   const colors = roleColors[role];
 
+  const schoolDisplayName = school?.name || "Skoolms";
+  const schoolShortBadge = school?.code ? school.code.slice(0, 4).toUpperCase() : "SK";
+
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-[#1A1A1A] text-white">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${colors.gradient} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
-          SK
-        </div>
-        <div>
-          <div className="font-sora font-bold text-white text-sm">Skoolms</div>
-          <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${colors.badge} font-mono uppercase tracking-wide mt-0.5 inline-block`}>
+        {school?.logo ? (
+          <img
+            src={school.logo}
+            alt={schoolDisplayName}
+            className="w-10 h-10 rounded-xl object-cover shadow-md border border-white/15 bg-white/10 flex-shrink-0"
+            onError={(e) => {
+              // Fallback to text badge if image fails to load
+              (e.currentTarget as HTMLElement).style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${colors.gradient} flex items-center justify-center text-white font-bold text-xs tracking-wider shadow-md flex-shrink-0`}>
+            {schoolShortBadge}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="font-sora font-bold text-white text-sm truncate leading-tight" title={schoolDisplayName}>
+            {schoolDisplayName}
+          </div>
+          <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${colors.badge} font-mono uppercase tracking-wide mt-1 inline-block`}>
             {roleLabels[role]}
           </div>
         </div>

@@ -8,6 +8,8 @@ import {
   FileText, Shield, Edit3, Printer, MessageSquare, Plus, Check, Loader2
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -24,6 +26,7 @@ export default function StudentDetailPage({ params }: Props) {
   const [isFeeModalOpen, setIsFeeModalOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [paymentAmount, setPaymentAmount] = useState(8500);
+  useBodyScrollLock(isFeeModalOpen);
 
   const loadStudent = async () => {
     setLoading(true);
@@ -433,7 +436,7 @@ export default function StudentDetailPage({ params }: Props) {
 
       {/* ── Collect Fee Modal ── */}
       {isFeeModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95">
             <h3 className="font-serif font-bold text-xl text-[#23201B] mb-1">Collect Tuition Fee</h3>
             <p className="text-xs text-[#706B62] mb-4">Student: {studentName} ({className})</p>
@@ -477,7 +480,7 @@ export default function StudentDetailPage({ params }: Props) {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

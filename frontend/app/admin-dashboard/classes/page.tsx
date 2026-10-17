@@ -7,6 +7,8 @@ import {
   BookOpen, Clock, Calendar, Loader2, AlertCircle, X, Check, Edit2, Trash2 
 } from "lucide-react";
 import Link from "next/link";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 interface ClassItem {
   id: number;
@@ -46,6 +48,7 @@ export default function AdminClasses() {
     class_teacher_id: "",
     status: "Active"
   });
+  useBodyScrollLock(showModal);
 
   const fetchData = async () => {
     try {
@@ -227,7 +230,7 @@ export default function AdminClasses() {
 
       {/* Create Class Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div>
@@ -319,7 +322,7 @@ export default function AdminClasses() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

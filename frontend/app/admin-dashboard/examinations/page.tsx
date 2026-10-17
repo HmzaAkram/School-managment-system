@@ -18,6 +18,8 @@ import {
   X
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 interface ExamScheduleItem {
   id: number;
@@ -58,6 +60,7 @@ export default function AdminExaminations() {
     description: "",
     status: "Upcoming"
   });
+  useBodyScrollLock(showModal);
 
   const fetchData = async () => {
     try {
@@ -294,7 +297,7 @@ export default function AdminExaminations() {
 
       {/* Schedule New Exam Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div>
@@ -383,7 +386,7 @@ export default function AdminExaminations() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

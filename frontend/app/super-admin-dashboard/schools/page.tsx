@@ -1,13 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { 
   Search, Plus, Building2, MapPin, Calendar, 
   CheckCircle2, Clock, AlertCircle, X, Calculator, MessageSquare, Loader2,
-  Edit3, Trash2, Eye, UserPlus, EyeIcon, EyeOff, ShieldCheck
+  Edit3, Trash2, Eye, UserPlus, EyeIcon, EyeOff, ShieldCheck,
+  Upload, Image as ImageIcon, Sparkles
 } from "lucide-react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { api } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
+
+function generateShortCode(schoolName: string): string {
+  const clean = schoolName.trim().replace(/[^a-zA-Z0-9\s]/g, "");
+  if (!clean) return "";
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length > 1) {
+    return words.map(w => w[0]).join("").slice(0, 6).toUpperCase();
+  }
+  return clean.slice(0, 4).toUpperCase();
+}
 
 export default function SchoolsPage() {
   const [schools, setSchools] = useState<any[]>([]);
@@ -20,6 +34,22 @@ export default function SchoolsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const schoolContractTriggerRef = useRef<HTMLButtonElement>(null);
+  const schoolContractDialogRef = useRef<HTMLDivElement>(null);
+
+  const handleSchoolContractOpenChange = (open: boolean) => {
+    setIsModalOpen(open);
+  };
+
+  const restoreSchoolContractFocus = (event: Event) => {
+    event.preventDefault();
+    schoolContractTriggerRef.current?.focus({ preventScroll: true });
+  };
+
+  const focusSchoolContractDialog = (event: Event) => {
+    event.preventDefault();
+    schoolContractDialogRef.current?.focus({ preventScroll: true });
+  };
 
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -36,6 +66,8 @@ export default function SchoolsPage() {
     contract_amount: 0,
     paid_amount: 0,
   });
+
+  useBodyScrollLock(isModalOpen || isEditModalOpen);
 
   const fetchSchools = async () => {
     setLoading(true);
@@ -57,6 +89,9 @@ export default function SchoolsPage() {
   // New Contract Form State
   const [formData, setFormData] = useState({
     name: "",
+    code: "",
+    logo: "",
+    isCodeManual: false,
     admin: "",
     phone: "",
     email: "",
@@ -112,12 +147,14 @@ export default function SchoolsPage() {
     try {
       const randNum = Math.floor(100 + Math.random() * 900);
       const cleanName = formData.name.toLowerCase().replace(/[^a-z0-9]/g, '') || "school";
-      const code = (formData.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 6) || "SCH").toUpperCase() + randNum;
+      const shortCode = (formData.code.trim() || generateShortCode(formData.name) || "SCH").toUpperCase().slice(0, 16);
+      const code = shortCode;
       const schoolEmail = formData.email?.trim() || `${cleanName}${randNum}@school.edu`;
 
       await api.post("/super-admin/schools", {
         name: formData.name,
         code,
+        logo: formData.logo || null,
         email: schoolEmail,
         phone: formData.phone || "+92 300 0000000",
         principal_name: formData.admin,
@@ -143,6 +180,9 @@ export default function SchoolsPage() {
       setFormError("");
       setFormData({
         name: "",
+        code: "",
+        logo: "",
+        isCodeManual: false,
         admin: "",
         phone: "",
         email: "",
@@ -180,6 +220,8 @@ export default function SchoolsPage() {
     setEditingSchool(school);
     setEditFormData({
       name: school.name || "",
+      code: school.code || "",
+      logo: school.logo || "",
       principal_name: school.principal_name || "",
       phone: school.phone || "",
       email: school.email || "",
@@ -201,6 +243,8 @@ export default function SchoolsPage() {
     try {
       await api.put(`/super-admin/schools/${editingSchool.id}`, {
         name: editFormData.name,
+        code: editFormData.code,
+        logo: editFormData.logo,
         principal_name: editFormData.principal_name,
         phone: editFormData.phone,
         email: editFormData.email,
@@ -266,7 +310,8 @@ export default function SchoolsPage() {
         </div>
         
         <button 
-          onClick={() => setIsModalOpen(true)}
+          ref={schoolContractTriggerRef}
+          onClick={() => handleSchoolContractOpenChange(true)}
           className="bg-[#23201B] hover:bg-[#3D382F] text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md hover:shadow-lg transition-all flex items-center gap-2"
         >
           <Plus size={15} />
@@ -386,11 +431,29 @@ export default function SchoolsPage() {
                       {/* School & Admin */}
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-[#FAF3E5] flex items-center justify-center text-[#C4993C] font-bold flex-shrink-0">
-                            <Building2 size={18} />
-                          </div>
+                          {school.logo ? (
+                            <img
+                              src={school.logo}
+                              alt={school.name}
+                              className="w-10 h-10 rounded-xl object-cover border border-[#EBE5D9] shadow-xs flex-shrink-0 bg-white"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-[#FAF3E5] border border-[#EBE5D9] flex items-center justify-center text-[#996B1E] font-bold text-xs tracking-wider flex-shrink-0">
+                              {school.code ? school.code.slice(0, 4) : <Building2 size={18} />}
+                            </div>
+                          )}
                           <div>
-                            <div className="font-bold text-sm text-[#23201B]">{school.name}</div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-[#23201B]">{school.name}</span>
+                              {school.code && (
+                                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-[#FAF3E5] text-[#996B1E] border border-[#EBE5D9]">
+                                  {school.code}
+                                </span>
+                              )}
+                            </div>
                             <div className="text-[11px] text-[#706B62] flex items-center gap-2 mt-0.5">
                               <span>{school.principal_name || "School Principal"}</span>
                               <span>•</span>
@@ -499,24 +562,46 @@ export default function SchoolsPage() {
       </div>
 
       {/* ── Add New School Contract Modal ── */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200">
-            
-            <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-6">
+      <DialogPrimitive.Root
+        open={isModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsModalOpen(false);
+          }
+        }}
+      >
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/55 backdrop-blur-[2px]" />
+          <DialogPrimitive.Content
+            ref={schoolContractDialogRef}
+            tabIndex={-1}
+            className="school-contract-dialog z-[60] rounded-3xl border border-[#EBE5D9] bg-white shadow-2xl outline-none"
+            onOpenAutoFocus={focusSchoolContractDialog}
+            onCloseAutoFocus={restoreSchoolContractFocus}
+          >
+            <div className="flex shrink-0 items-center justify-between border-b border-[#EBE5D9] px-6 pb-4 pt-6 sm:px-8 sm:pt-8">
               <div>
-                <h3 className="font-serif font-bold text-xl text-[#23201B]">New School Contract Agreement</h3>
-                <p className="text-xs text-[#706B62]">Saves directly into MySQL database and activates school instance.</p>
+                <DialogPrimitive.Title className="font-serif font-bold text-xl text-[#23201B]">
+                  New School Contract Agreement
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Description className="text-xs text-[#706B62]">
+                  Saves directly into MySQL database and activates school instance.
+                </DialogPrimitive.Description>
               </div>
               <button 
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => handleSchoolContractOpenChange(false)}
                 className="p-2 text-[#8C847B] hover:text-[#23201B] rounded-xl hover:bg-[#FAF8F5]"
+                aria-label="Close school contract form"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateContract} className="space-y-4">
+            <form onSubmit={handleCreateContract} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div
+                data-lenis-prevent
+                className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-6 py-4 sm:px-8"
+              >
 
               {formError && (
                 <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
@@ -525,37 +610,199 @@ export default function SchoolsPage() {
                 </div>
               )}
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+              {/* ── School Name & Short Form ── */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2">
                   <label className="block text-xs font-bold text-[#4A453E] mb-1">School Name *</label>
                   <input 
                     type="text" 
                     required 
                     placeholder="e.g. Oakridge Grammar School"
                     value={formData.name}
-                    onChange={e => setFormData({...formData, name: e.target.value})}
-                    className="w-full p-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:bg-white focus:outline-none focus:border-[#C4993C]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#4A453E] mb-1">Principal / Admin Name *</label>
-                  <input 
-                    type="text" 
-                    required 
-                    placeholder="e.g. Dr. Salman Khan"
-                    value={formData.admin}
                     onChange={e => {
                       const val = e.target.value;
+                      const autoCode = generateShortCode(val);
                       setFormData(prev => ({
                         ...prev,
-                        admin: val,
-                        // Auto-prefill Admin Full Name if the user hasn't manually edited it yet
-                        ...(prev.adminFullName === "" || prev.adminFullName === prev.admin ? { adminFullName: val } : {}),
+                        name: val,
+                        ...(!prev.isCodeManual ? { code: autoCode } : {}),
                       }));
                     }}
                     className="w-full p-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:bg-white focus:outline-none focus:border-[#C4993C]"
                   />
                 </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-[#4A453E]">Short Form *</label>
+                    <span className="text-[10px] text-[#996B1E] font-semibold">Sidebar</span>
+                  </div>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      required 
+                      maxLength={10}
+                      placeholder="e.g. OGS"
+                      value={formData.code}
+                      onChange={e => setFormData({
+                        ...formData,
+                        code: e.target.value.toUpperCase().replace(/[^A-Z0-9\-]/g, ''),
+                        isCodeManual: true,
+                      })}
+                      className="w-full p-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs font-mono font-bold tracking-wider text-[#23201B] focus:bg-white focus:outline-none focus:border-[#C4993C] uppercase"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, code: generateShortCode(prev.name), isCodeManual: false }))}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#FAF3E5] text-[#996B1E] hover:bg-[#F3EBD9]"
+                      title="Regenerate from name"
+                    >
+                      Auto
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── School Brand Logo & Live Sidebar Preview ── */}
+              <div className="p-4 rounded-2xl bg-[#FFFDF9] border border-[#EBE5D9] space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#996B1E]">
+                    <ImageIcon size={14} />
+                    <span>School Logo & Brand Identity</span>
+                  </div>
+                  <span className="text-[10px] text-[#706B62]">
+                    Appears in school admin, teacher & student panels
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                  {/* Upload button & preview */}
+                  <div className="sm:col-span-5 flex items-center gap-3">
+                    <div className="relative w-16 h-16 rounded-2xl border-2 border-dashed border-[#D9D4CC] bg-white flex items-center justify-center overflow-hidden flex-shrink-0 group hover:border-[#C4993C] transition-colors">
+                      {formData.logo ? (
+                        <>
+                          <img src={formData.logo} alt="School Logo" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, logo: "" }))}
+                            className="absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-[10px] font-bold"
+                          >
+                            <X size={14} />
+                          </button>
+                        </>
+                      ) : (
+                        <label className="cursor-pointer w-full h-full flex flex-col items-center justify-center p-1 text-center text-[#8C847B] hover:text-[#C4993C]">
+                          <Upload size={16} className="mb-0.5" />
+                          <span className="text-[8px] font-bold leading-none">Upload</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={e => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                if (file.size > 2 * 1024 * 1024) {
+                                  setFormError("Logo image size should be less than 2MB.");
+                                  return;
+                                }
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                  setFormData(prev => ({ ...prev, logo: reader.result as string }));
+                                  setFormError("");
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <label className="block text-[10px] font-bold text-[#706B62] mb-1">
+                        Logo File / Image
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#D9D4CC] text-xs font-bold text-[#4A453E] hover:border-[#C4993C] cursor-pointer shadow-2xs">
+                        <Upload size={12} />
+                        <span>Choose Image</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.size > 2 * 1024 * 1024) {
+                                setFormError("Logo image size should be less than 2MB.");
+                                return;
+                              }
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                setFormData(prev => ({ ...prev, logo: reader.result as string }));
+                                setFormError("");
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                      {formData.logo && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, logo: "" }))}
+                          className="block text-[10px] text-red-600 hover:underline mt-1 font-semibold"
+                        >
+                          Remove logo
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Panel Sidebar Mock Preview */}
+                  <div className="sm:col-span-7 bg-[#1A1A1A] p-2.5 rounded-2xl border border-white/10 flex items-center gap-2.5">
+                    {formData.logo ? (
+                      <img
+                        src={formData.logo}
+                        alt="Logo Preview"
+                        className="w-9 h-9 rounded-xl object-cover border border-white/15 bg-white/10 flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C4993C] to-[#D4A843] flex items-center justify-center text-white font-bold text-xs tracking-wider flex-shrink-0 shadow-md">
+                        {formData.code || "SK"}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="font-sora font-bold text-white text-xs truncate">
+                        {formData.name || "Your School Name"}
+                      </div>
+                      <div className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100/10 text-amber-400 font-mono uppercase tracking-wide mt-0.5 inline-block">
+                        School Admin
+                      </div>
+                    </div>
+                    <span className="text-[9px] text-white/40 font-mono hidden md:inline-block">
+                      Panel Preview
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#4A453E] mb-1">Principal / Admin Name *</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="e.g. Dr. Salman Khan"
+                  value={formData.admin}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setFormData(prev => ({
+                      ...prev,
+                      admin: val,
+                      // Auto-prefill Admin Full Name if the user hasn't manually edited it yet
+                      ...(prev.adminFullName === "" || prev.adminFullName === prev.admin ? { adminFullName: val } : {}),
+                    }));
+                  }}
+                  className="w-full p-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:bg-white focus:outline-none focus:border-[#C4993C]"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -714,7 +961,6 @@ export default function SchoolsPage() {
                         type="button"
                         onClick={() => setShowAdminPassword(!showAdminPassword)}
                         className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8C847B] hover:text-[#23201B]"
-                        tabIndex={-1}
                       >
                         {showAdminPassword ? <EyeOff size={13} /> : <EyeIcon size={13} />}
                       </button>
@@ -747,10 +993,12 @@ export default function SchoolsPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-[#EBE5D9]">
+              </div>
+
+              <div className="flex shrink-0 justify-end gap-3 border-t border-[#EBE5D9] bg-white px-6 py-4 sm:px-8">
                 <button
                   type="button"
-                  onClick={() => { setIsModalOpen(false); setFormError(""); }}
+                  onClick={() => { handleSchoolContractOpenChange(false); setFormError(""); }}
                   className="px-4 py-2 border border-[#D9D4CC] text-[#706B62] rounded-xl text-xs font-bold hover:bg-[#FAF8F5]"
                 >
                   Cancel
@@ -766,13 +1014,13 @@ export default function SchoolsPage() {
               </div>
 
             </form>
-          </div>
-        </div>
-      )}
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
 
       {/* ── Edit School Modal ── */}
       {isEditModalOpen && editingSchool && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-xl p-6 sm:p-8 animate-in zoom-in-95 duration-200">
             
             <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-6">
@@ -790,8 +1038,8 @@ export default function SchoolsPage() {
 
             <form onSubmit={handleUpdateSchool} className="space-y-4">
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2">
                   <label className="block text-xs font-bold text-[#4A453E] mb-1">School Name *</label>
                   <input 
                     type="text" 
@@ -802,14 +1050,81 @@ export default function SchoolsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#4A453E] mb-1">Principal / Admin Name</label>
+                  <label className="block text-xs font-bold text-[#4A453E] mb-1">Short Form *</label>
                   <input 
                     type="text" 
-                    value={editFormData.principal_name}
-                    onChange={e => setEditFormData({...editFormData, principal_name: e.target.value})}
-                    className="w-full p-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:bg-white focus:outline-none focus:border-[#C4993C]"
+                    maxLength={10}
+                    placeholder="e.g. OGS"
+                    value={editFormData.code}
+                    onChange={e => setEditFormData({...editFormData, code: e.target.value.toUpperCase().replace(/[^A-Z0-9\-]/g, '')})}
+                    className="w-full p-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs font-mono font-bold uppercase tracking-wider text-[#23201B] focus:bg-white focus:outline-none focus:border-[#C4993C]"
                   />
                 </div>
+              </div>
+
+              {/* Logo upload in Edit Modal */}
+              <div className="p-3 rounded-2xl bg-[#FFFDF9] border border-[#EBE5D9] flex items-center gap-3">
+                <div className="relative w-14 h-14 rounded-xl border border-dashed border-[#D9D4CC] bg-white flex items-center justify-center overflow-hidden flex-shrink-0 group">
+                  {editFormData.logo ? (
+                    <>
+                      <img src={editFormData.logo} alt="Logo" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setEditFormData({...editFormData, logo: ""})}
+                        className="absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px]"
+                      >
+                        <X size={12} />
+                      </button>
+                    </>
+                  ) : (
+                    <label className="cursor-pointer w-full h-full flex flex-col items-center justify-center text-[#8C847B] hover:text-[#C4993C]">
+                      <Upload size={14} />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = () => setEditFormData({...editFormData, logo: reader.result as string});
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold text-[#4A453E]">School Logo</div>
+                  <p className="text-[10px] text-[#706B62]">Upload a PNG, JPG, or SVG to appear in dashboards.</p>
+                </div>
+                <label className="px-3 py-1.5 rounded-xl bg-white border border-[#D9D4CC] text-xs font-bold text-[#4A453E] hover:border-[#C4993C] cursor-pointer shadow-2xs">
+                  Browse
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => setEditFormData({...editFormData, logo: reader.result as string});
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#4A453E] mb-1">Principal / Admin Name</label>
+                <input 
+                  type="text" 
+                  value={editFormData.principal_name}
+                  onChange={e => setEditFormData({...editFormData, principal_name: e.target.value})}
+                  className="w-full p-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs text-[#23201B] focus:bg-white focus:outline-none focus:border-[#C4993C]"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -911,7 +1226,7 @@ export default function SchoolsPage() {
 
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

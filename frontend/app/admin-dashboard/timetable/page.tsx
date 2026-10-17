@@ -16,6 +16,8 @@ import {
   X
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -43,6 +45,7 @@ export default function AdminTimetable() {
     room: "Room 101",
     type: "Lecture"
   });
+  useBodyScrollLock(showModal);
 
   // Load classes, teachers, subjects
   useEffect(() => {
@@ -330,7 +333,7 @@ export default function AdminTimetable() {
 
       {/* Add Period Slot Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-[#EBE8E2] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-[#EBE8E2] flex items-center justify-between">
               <div>
@@ -464,7 +467,7 @@ export default function AdminTimetable() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

@@ -7,6 +7,8 @@ import {
   Loader2, AlertCircle, Trash2
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 interface FeePaymentItem {
   id: number;
@@ -62,6 +64,7 @@ export default function AdminFees() {
   const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
+  useBodyScrollLock(isCollectFeeModalOpen || isAddExpenseModalOpen);
 
   // Collect Fee Form
   const [feeForm, setFeeForm] = useState({
@@ -504,7 +507,7 @@ export default function AdminFees() {
 
       {/* ── Collect Fee Modal ── */}
       {isCollectFeeModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-[#EBE5D9]">
               <h3 className="font-serif font-bold text-xl text-[#23201B]">Collect Student Tuition Fee</h3>
@@ -601,12 +604,12 @@ export default function AdminFees() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* ── Add Expense Modal ── */}
       {isAddExpenseModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-[#EBE5D9]">
               <h3 className="font-serif font-bold text-xl text-[#23201B]">Record School Expense</h3>
@@ -709,7 +712,7 @@ export default function AdminFees() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

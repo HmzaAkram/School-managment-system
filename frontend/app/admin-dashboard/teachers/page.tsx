@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 import { 
   Search, Filter, Plus, Download, Eye, Edit, Trash2, 
   BookOpen, Mail, Phone, Calendar, Loader2, AlertCircle, X, Check
@@ -49,6 +51,7 @@ export default function AdminTeachers() {
 
   // Add Teacher Modal
   const [showAddModal, setShowAddModal] = useState(false);
+  useBodyScrollLock(showAddModal);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -340,7 +343,7 @@ export default function AdminTeachers() {
 
       {/* Add Teacher Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
           <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div>
@@ -485,7 +488,7 @@ export default function AdminTeachers() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

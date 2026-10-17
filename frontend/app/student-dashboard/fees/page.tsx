@@ -7,6 +7,8 @@ import {
   Receipt, X, Check, Printer, Building2, Loader2
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 interface InvoicePayment {
   id: number;
@@ -82,6 +84,7 @@ export default function StudentFees() {
   const [paidSuccess, setPaidSuccess] = useState(false);
   const [isChallanModalOpen, setIsChallanModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<FeeInvoiceItem | null>(null);
+  useBodyScrollLock(Boolean(payModal) || isChallanModalOpen);
 
   const loadFeeData = async () => {
     try {
@@ -363,7 +366,7 @@ export default function StudentFees() {
 
       {/* ── 3-Fold Bank Challan Modal Template (Standard Pakistani Voucher) ── */}
       {isChallanModalOpen && activeInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-5xl p-6 sm:p-8 animate-in zoom-in-95 max-h-[92vh] flex flex-col justify-between">
             <div className="flex items-center justify-between pb-3 border-b border-[#EBE5D9] mb-4">
               <div>
@@ -459,12 +462,12 @@ export default function StudentFees() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Pay Modal */}
       {payModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-2xl border border-[#EBE8E2] p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#EBE8E2]">
               <div>
@@ -532,7 +535,7 @@ export default function StudentFees() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

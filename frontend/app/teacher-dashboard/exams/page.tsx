@@ -20,6 +20,8 @@ import {
   AlertCircle
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 export default function TeacherExams() {
   const [examGroups, setExamGroups] = useState<any[]>([]);
@@ -36,6 +38,7 @@ export default function TeacherExams() {
   const [submittingMarks, setSubmittingMarks] = useState(false);
   const [enteredScores, setEnteredScores] = useState<Record<number, string>>({});
   const [saveSuccessToast, setSaveSuccessToast] = useState(false);
+  useBodyScrollLock(isGridModalOpen);
 
   const fetchExams = async () => {
     try {
@@ -235,7 +238,7 @@ export default function TeacherExams() {
 
       {/* Mark Sheet Modal */}
       {isGridModalOpen && selectedSchedule && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-2xl border border-[#EBE8E2] p-6 max-w-2xl w-full shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-[#EBE8E2]">
               <div>
@@ -313,7 +316,7 @@ export default function TeacherExams() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

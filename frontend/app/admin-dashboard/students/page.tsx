@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Search, Filter, Plus, Download, Upload, Eye, Edit, Trash2, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 export default function AdminStudents() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,6 +15,7 @@ export default function AdminStudents() {
   const [totalStudents, setTotalStudents] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  useBodyScrollLock(isModalOpen);
   const [submitting, setSubmitting] = useState(false);
 
   // New Student Form
@@ -260,7 +263,7 @@ export default function AdminStudents() {
 
       {/* Add Student Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-lg p-6 sm:p-8 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
               <div>
@@ -397,7 +400,7 @@ export default function AdminStudents() {
               </div>
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

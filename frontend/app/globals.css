@@ -63,6 +63,25 @@
   }
 }
 
+@layer components {
+  [class~='fixed'][class~='inset-0'][class~='z-50'][class~='items-center'][class~='justify-center'] {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  body:has([class~='fixed'][class~='inset-0'][class~='z-50'][class~='items-center'][class~='justify-center']) {
+    overflow: hidden;
+  }
+}
+
 /* ─── Gradient Utilities ────────────────────────────── */
 @layer utilities {
   /* Gradient text — warm amber / gold */
@@ -133,4 +152,53 @@
   0%   { transform: translateY(0px); }
   50%  { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
+}
+
+[class~='fixed'][class~='inset-0'][class~='z-50'][class~='items-center'][class~='justify-center'] {
+  align-items: safe center;
+}
+
+[class~='fixed'][class~='inset-0'][class~='z-50'][class~='items-center'][class~='justify-center'] > * {
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+[class~='fixed'][class~='inset-0'][class~='z-50'][class~='items-center'][class~='justify-center'] > *:has(> form) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+[class~='fixed'][class~='inset-0'][class~='z-50'][class~='items-center'][class~='justify-center'] > *:has(> form) > form {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+[class~='fixed'][class~='inset-0'][class~='z-50'][class~='items-center'][class~='justify-center'] > *:has(> form) > form > :last-child:has(button[type='submit']) {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background-color: white;
+}
+
+[class~='fixed'][class~='inset-0'][class~='z-50'][class~='items-center'][class~='justify-center'] > *:has(> form) > :first-child:not(form) {
+  flex-shrink: 0;
+}
+
+.school-contract-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(calc(100vw - 32px), 576px);
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
 }

@@ -37,6 +37,8 @@ import {
   CartesianGrid
 } from "recharts";
 import { api } from "@/lib/api";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 export default function SchoolProfilePage() {
   const params = useParams();
@@ -51,6 +53,7 @@ export default function SchoolProfilePage() {
 
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  useBodyScrollLock(isEditModalOpen);
   const [submitting, setSubmitting] = useState(false);
   const [editFormData, setEditFormData] = useState({
     name: "",
@@ -515,7 +518,7 @@ export default function SchoolProfilePage() {
 
       {/* ── Edit School Modal ── */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
+        <ModalPortal className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl border border-[#EBE5D9] shadow-2xl w-full max-w-xl p-6 sm:p-8 animate-in zoom-in-95 duration-200">
             
             <div className="flex items-center justify-between pb-4 border-b border-[#EBE5D9] mb-6">
@@ -654,7 +657,7 @@ export default function SchoolProfilePage() {
 
             </form>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>
