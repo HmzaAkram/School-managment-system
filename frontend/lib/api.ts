@@ -1,4 +1,6 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const cleanedUrl = rawApiUrl.trim().replace(/\/+$/, '');
+const API_BASE = cleanedUrl.endsWith('/api') ? cleanedUrl : `${cleanedUrl}/api`;
 
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -24,7 +26,8 @@ export function clearAuth() {
 
 export async function apiFetch<T = any>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
-  const res = await fetch(`${API_BASE}${path}`, {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const res = await fetch(`${API_BASE}${cleanPath}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
