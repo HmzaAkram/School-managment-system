@@ -6,11 +6,11 @@ import { Phone, ArrowUpRight, Sparkles, Check, BarChart3, Users, Clock, Award, C
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
-// Dynamically import 3D Educational Object with SSR disabled for optimal Next.js rendering
-const Hero3DObject = dynamic(() => import("./Hero3DObject"), {
+// Dynamically import 3D HeroOrbit with SSR disabled for optimal Next.js rendering
+const HeroOrbit = dynamic(() => import("./HeroOrbit"), {
   ssr: false,
   loading: () => (
-    <div className="w-full max-w-[500px] aspect-square flex items-center justify-center">
+    <div className="w-full max-w-[540px] aspect-square flex items-center justify-center">
       <div className="w-16 h-16 rounded-2xl bg-[#EBE5D9] animate-pulse flex items-center justify-center text-[#C4993C]">
         <Sparkles size={24} className="animate-spin" />
       </div>
@@ -54,13 +54,32 @@ export default function Hero() {
         style={{ background: "radial-gradient(circle, rgba(196,153,60,0.2) 0%, rgba(250,248,245,0) 70%)" }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
+      {/* ── 3D Animation as FULL Background ── */}
+      <div
+        id="hero-3d-wrap"
+        className="absolute inset-0 w-full h-full overflow-visible"
+        style={{ zIndex: 1 }}
+      >
+        <HeroOrbit />
+      </div>
+
+      {/* ── Gradient overlay for text readability (left side) ── */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          zIndex: 2,
+          background:
+            "linear-gradient(to right, rgba(250,248,245,0.92) 0%, rgba(250,248,245,0.82) 35%, rgba(250,248,245,0.45) 60%, rgba(250,248,245,0.08) 80%, transparent 100%)",
+        }}
+      />
+
+      <div className="max-w-7xl mx-auto px-6 relative w-full" style={{ zIndex: 3 }}>
         
-        {/* ── Main Editorial Split Layout (Reference Aesthetic) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center min-h-[520px] mb-16">
+        {/* ── Main Hero Content (overlaid on 3D background) ── */}
+        <div className="flex items-center min-h-[580px] lg:min-h-[620px] mb-16">
           
           {/* Left Column: Editorial Typography & Schooling CTAs */}
-          <div className="lg:col-span-7 flex flex-col items-start text-left">
+          <div className="max-w-2xl flex flex-col items-start text-left">
             
             {/* Overline Tag */}
             <div
@@ -98,7 +117,7 @@ export default function Hero() {
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4 mb-8 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-4 mb-8 w-full sm:w-auto pointer-events-auto">
               <a
                 href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
                 target="_blank"
@@ -128,11 +147,6 @@ export default function Hero() {
                 <span>Zero Server Maintenance Required</span>
               </div>
             </div>
-          </div>
-
-          {/* Right Column: 3D Educational Object (Knowledge Book, Graduation Cap, Diploma & Star Badge) */}
-          <div id="hero-3d-wrap" className="lg:col-span-5 flex items-center justify-center relative">
-            <Hero3DObject />
           </div>
         </div>
 
