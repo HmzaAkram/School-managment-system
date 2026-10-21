@@ -56,6 +56,8 @@ export default function SchoolsPage() {
   const [editingSchool, setEditingSchool] = useState<any>(null);
   const [editFormData, setEditFormData] = useState({
     name: "",
+    code: "",
+    logo: "",
     principal_name: "",
     phone: "",
     email: "",

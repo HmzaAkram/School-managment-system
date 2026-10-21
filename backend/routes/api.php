@@ -107,6 +107,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Students
         Route::get('/students', [StudentController::class, 'index']);
         Route::post('/students', [StudentController::class, 'store']);
+        Route::post('/students/promote', [StudentController::class, 'promote']);
         Route::get('/students/{id}', [StudentController::class, 'show']);
         Route::put('/students/{id}', [StudentController::class, 'update']);
         Route::delete('/students/{id}', [StudentController::class, 'destroy']);

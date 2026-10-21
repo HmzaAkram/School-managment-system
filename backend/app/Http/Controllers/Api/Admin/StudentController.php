@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ApiController;
 use App\Models\Diary;
 use App\Models\FeeInvoice;
 use App\Models\ParentModel;
+use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\StudentLeave;
 use App\Models\User;
@@ -128,6 +129,7 @@ class StudentController extends ApiController
             'father_phone' => 'nullable|string|max:30',
             'father_email' => 'nullable|email',
             'mother_name' => 'nullable|string|max:255',
+            'opening_balance' => 'nullable|numeric|min:0',
         ]);
 
         $student = DB::transaction(function () use ($data, $schoolId) {
@@ -173,6 +175,25 @@ class StudentController extends ApiController
                 ]);
             }
 
+            // Record opening balance invoice if provided
+            if (! empty($data['opening_balance']) && (float) $data['opening_balance'] > 0) {
+                FeeInvoice::create([
+                    'school_id' => $schoolId,
+                    'student_id' => $student->id,
+                    'fee_structure_id' => null,
+                    'invoice_number' => 'BAL-'.now()->format('Ymd').'-'.str_pad((string) $student->id, 4, '0', STR_PAD_LEFT),
+                    'title' => 'Opening Balance / Previous Arrears',
+                    'amount' => (float) $data['opening_balance'],
+                    'paid_amount' => 0,
+                    'discount_amount' => 0,
+                    'fine_amount' => 0,
+                    'due_date' => now()->toDateString(),
+                    'status' => 'Unpaid',
+                    'month' => now()->format('F Y'),
+                    'notes' => 'Opening balance brought forward at admission.',
+                ]);
+            }
+
             return $student;
         });
 
@@ -183,6 +204,81 @@ class StudentController extends ApiController
             'message' => 'Student enrolled successfully',
             'student' => $student->load(['user', 'class', 'section', 'parents']),
         ], 201);
+    }
+
+    public function promote(Request $request)
+    {
+        $schoolId = $this->requireSchoolId($request);
+
+        $data = $request->validate([
+            'current_class_id' => 'required|exists:classes,id',
+            'target_class_id' => 'nullable|exists:classes,id',
+            'action' => 'required|in:promote,passout,custom',
+            'student_ids' => 'required|array|min:1',
+            'student_ids.*' => 'exists:student_profiles,id',
+            'student_actions' => 'nullable|array',
+        ]);
+
+        $currentClass = SchoolClass::where('school_id', $schoolId)->findOrFail($data['current_class_id']);
+        $targetClass = !empty($data['target_class_id'])
+            ? SchoolClass::where('school_id', $schoolId)->find($data['target_class_id'])
+            : null;
+
+        $studentActions = $data['student_actions'] ?? [];
+        $generalAction = $data['action'];
+
+        $promoted = 0;
+        $graduated = 0;
+        $retained = 0;
+
+        DB::transaction(function () use (
+            $schoolId, $data, $studentActions, $generalAction, $targetClass,
+            &$promoted, &$graduated, &$retained
+        ) {
+            $students = Student::where('school_id', $schoolId)
+                ->where('class_id', $data['current_class_id'])
+                ->whereIn('id', $data['student_ids'])
+                ->get();
+
+            foreach ($students as $student) {
+                $act = $studentActions[$student->id] ?? ($generalAction === 'custom' ? 'promote' : $generalAction);
+
+                if ($act === 'passout' || $act === 'graduate') {
+                    $student->update([
+                        'status' => 'Graduated',
+                    ]);
+                    $graduated++;
+                } elseif ($act === 'retain') {
+                    $retained++;
+                } elseif ($act === 'promote' && $targetClass) {
+                    $student->update([
+                        'class_id' => $targetClass->id,
+                        'section_id' => null,
+                        'status' => 'Active',
+                    ]);
+                    $promoted++;
+                }
+            }
+        });
+
+        $this->log($request, 'promoted_students', SchoolClass::class, $currentClass->id, [
+            'promoted' => $promoted,
+            'graduated' => $graduated,
+            'retained' => $retained,
+            'target_class' => $targetClass?->name,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Academic progression executed: {$promoted} promoted, {$graduated} graduated (pass out), {$retained} retained.",
+            'promoted' => $promoted,
+            'graduated' => $graduated,
+            'retained' => $retained,
+            'target_class' => $targetClass ? [
+                'id' => $targetClass->id,
+                'name' => $targetClass->name,
+            ] : null,
+        ]);
     }
 
     public function show(Request $request, $id)

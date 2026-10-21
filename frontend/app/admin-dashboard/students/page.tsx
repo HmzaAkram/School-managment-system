@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Filter, Plus, Download, Upload, Eye, Edit, Trash2, Loader2, X } from "lucide-react";
+import { Search, Filter, Plus, Download, Upload, Eye, Edit, Trash2, Loader2, X, GraduationCap } from "lucide-react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
@@ -30,6 +30,7 @@ export default function AdminStudents() {
     gender: "Male",
     phone: "",
     father_name: "",
+    opening_balance: "0",
   });
 
   const loadStudents = async () => {
@@ -62,7 +63,10 @@ export default function AdminStudents() {
 
     setSubmitting(true);
     try {
-      await api.post("/admin/students", formData);
+      await api.post("/admin/students", {
+        ...formData,
+        opening_balance: parseFloat(formData.opening_balance) || 0,
+      });
       setIsModalOpen(false);
       setFormData({
         first_name: "",
@@ -75,6 +79,7 @@ export default function AdminStudents() {
         gender: "Male",
         phone: "",
         father_name: "",
+        opening_balance: "0",
       });
       await loadStudents();
     } catch (err: any) {
@@ -109,6 +114,12 @@ export default function AdminStudents() {
           <p className="text-slate-500 text-sm">Manage {totalStudents} enrolled students fetched from MySQL database.</p>
         </div>
         <div className="flex items-center gap-2">
+          <Link 
+            href="/admin-dashboard/classes"
+            className="bg-white text-slate-700 px-4 py-2 rounded-xl font-semibold text-sm border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-2"
+          >
+            <GraduationCap size={16} className="text-primary" /> Promote Students
+          </Link>
           <button 
             onClick={() => window.print()}
             className="bg-white text-slate-700 px-4 py-2 rounded-xl font-semibold text-sm border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-2"
@@ -224,9 +235,16 @@ export default function AdminStudents() {
                         </div>
                       </td>
                       <td className="py-4 px-6">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${feeStatus === 'Paid' ? 'bg-emerald-50 text-emerald-700' : feeStatus === 'Pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'}`}>
-                          {feeStatus}
-                        </span>
+                        <div className="flex flex-col items-start gap-1">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${feeStatus === 'Paid' ? 'bg-emerald-50 text-emerald-700' : feeStatus === 'Pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'}`}>
+                            {feeStatus}
+                          </span>
+                          {student.fees && Number(student.fees.due) > 0 && (
+                            <Link href="/admin-dashboard/fees" className="text-[11px] font-bold text-red-600 hover:underline">
+                              Due: PKR {Number(student.fees.due).toLocaleString()}
+                            </Link>
+                          )}
+                        </div>
                       </td>
                       <td className="py-4 px-6">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${student.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
@@ -379,6 +397,25 @@ export default function AdminStudents() {
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-primary"
                   />
                 </div>
+              </div>
+
+              {/* Opening Balance / Arrears */}
+              <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200">
+                <label className="block text-xs font-bold text-amber-900 mb-1">
+                  Opening Balance / Previous Arrears (PKR)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="50"
+                  placeholder="0"
+                  value={formData.opening_balance}
+                  onChange={e => setFormData({ ...formData, opening_balance: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-white border border-amber-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-600"
+                />
+                <p className="text-[11px] text-amber-700 mt-1">
+                  If this new student has previous remaining dues, enter the amount. An unpaid invoice will be recorded in the Fees & Payments section automatically.
+                </p>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">

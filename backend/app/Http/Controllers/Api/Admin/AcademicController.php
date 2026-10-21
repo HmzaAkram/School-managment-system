@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Models\FeeStructure;
 use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Subject;
@@ -18,7 +19,7 @@ class AcademicController extends ApiController
         $schoolId = $this->requireSchoolId($request);
 
         $query = SchoolClass::where('school_id', $schoolId)
-            ->with(['sections', 'subjects', 'classTeacher'])
+            ->with(['sections', 'subjects', 'classTeacher', 'fees'])
             ->withCount('students');
 
         if ($request->filled('status')) {
@@ -52,6 +53,7 @@ class AcademicController extends ApiController
             $classes->map(function (SchoolClass $c) use ($rates) {
                 $row = $rates->get($c->id);
                 $total = (int) ($row->total ?? 0);
+                $monthlyFee = (float) ($c->fees->where('frequency', 'Monthly')->where('is_active', true)->first()?->amount ?? 0);
 
                 return [
                     'id' => $c->id,
@@ -65,6 +67,7 @@ class AcademicController extends ApiController
                     'status' => $c->status,
                     'description' => $c->description,
                     'academic_year_id' => $c->academic_year_id,
+                    'monthly_fee' => $monthlyFee,
                     'students_count' => $c->students_count,
                     'sections_count' => $c->sections_count,
                     'subjects_count' => $c->subjects_count,
@@ -100,6 +103,7 @@ class AcademicController extends ApiController
             'room' => 'nullable|string|max:255',
             'academic_year_id' => 'nullable|exists:academic_years,id',
             'class_teacher_id' => 'nullable|exists:users,id',
+            'monthly_fee' => 'nullable|numeric|min:0',
         ]);
 
         $class = SchoolClass::create([
@@ -124,6 +128,22 @@ class AcademicController extends ApiController
             'name' => 'Section '.$class->section,
             'capacity' => $class->capacity,
         ]);
+
+        // Automatically create monthly tuition fee structure if provided.
+        if (!empty($data['monthly_fee']) && (float) $data['monthly_fee'] > 0) {
+            FeeStructure::create([
+                'school_id' => $schoolId,
+                'class_id' => $class->id,
+                'academic_year_id' => $class->academic_year_id,
+                'name' => 'Monthly Tuition - '.$class->name,
+                'amount' => (float) $data['monthly_fee'],
+                'frequency' => 'Monthly',
+                'due_day' => 10,
+                'description' => 'Monthly fee for '.$class->name,
+                'status' => 'Active',
+                'is_active' => true,
+            ]);
+        }
 
         $this->log($request, 'created', SchoolClass::class, $class->id, $class->toArray());
 
@@ -151,7 +171,14 @@ class AcademicController extends ApiController
             'academic_year_id' => 'nullable|exists:academic_years,id',
             'class_teacher_id' => 'nullable|exists:users,id',
             'status' => 'sometimes|in:Active,Archived',
+            'monthly_fee' => 'nullable|numeric|min:0',
         ]);
+
+        $monthlyFee = null;
+        if (array_key_exists('monthly_fee', $data)) {
+            $monthlyFee = $data['monthly_fee'];
+            unset($data['monthly_fee']);
+        }
 
         $old = $class->only(array_keys($data));
         $class->update($data);
@@ -160,6 +187,35 @@ class AcademicController extends ApiController
             $class->teachers()->syncWithoutDetaching([
                 $class->class_teacher_id => ['is_class_teacher' => true],
             ]);
+        }
+
+        if ($monthlyFee !== null) {
+            $feeAmount = (float) $monthlyFee;
+            $structure = FeeStructure::where('school_id', $schoolId)
+                ->where('class_id', $class->id)
+                ->where('frequency', 'Monthly')
+                ->first();
+
+            if ($structure) {
+                $structure->update([
+                    'amount' => $feeAmount,
+                    'is_active' => $feeAmount > 0,
+                    'status' => $feeAmount > 0 ? 'Active' : 'Inactive',
+                ]);
+            } elseif ($feeAmount > 0) {
+                FeeStructure::create([
+                    'school_id' => $schoolId,
+                    'class_id' => $class->id,
+                    'academic_year_id' => $class->academic_year_id,
+                    'name' => 'Monthly Tuition - '.$class->name,
+                    'amount' => $feeAmount,
+                    'frequency' => 'Monthly',
+                    'due_day' => 10,
+                    'description' => 'Monthly fee for '.$class->name,
+                    'status' => 'Active',
+                    'is_active' => true,
+                ]);
+            }
         }
 
         $this->log($request, 'updated', SchoolClass::class, $class->id, $data, $old);

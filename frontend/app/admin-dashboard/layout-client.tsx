@@ -54,7 +54,7 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
       setSchool(user.school || null);
       setIsAuthorized(true);
 
-      api.get('/auth/me').then((res: any) => {
+      api.get('/me').then((res: any) => {
         if (res?.user?.school) {
           setSchool(res.user.school);
           const updated = { ...user, ...res.user };

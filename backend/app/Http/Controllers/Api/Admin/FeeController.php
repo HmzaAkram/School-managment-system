@@ -178,59 +178,121 @@ class FeeController extends ApiController
         $schoolId = $this->requireSchoolId($request);
 
         $data = $request->validate([
-            'fee_structure_id' => 'required|exists:fee_structures,id',
+            'fee_structure_id' => 'nullable',
             'month' => 'required|string|max:30',
             'due_date' => 'required|date',
-            'class_id' => 'nullable|exists:classes,id',
+            'class_id' => 'nullable',
             'section_id' => 'nullable|exists:sections,id',
         ]);
 
-        $structure = FeeStructure::where('school_id', $schoolId)->findOrFail($data['fee_structure_id']);
+        $created = 0;
 
-        $students = Student::where('school_id', $schoolId)->where('status', 'Active')
-            ->when($structure->class_id, fn ($q) => $q->where('class_id', $structure->class_id))
-            ->when($data['class_id'] ?? null, fn ($q) => $q->where('class_id', $data['class_id']))
-            ->when($data['section_id'] ?? null, fn ($q) => $q->where('section_id', $data['section_id']))
-            ->get();
+        if (! empty($data['fee_structure_id']) && is_numeric($data['fee_structure_id'])) {
+            $structure = FeeStructure::where('school_id', $schoolId)->findOrFail($data['fee_structure_id']);
 
-        $created = DB::transaction(function () use ($students, $structure, $schoolId, $data) {
-            $count = 0;
+            $students = Student::where('school_id', $schoolId)->where('status', 'Active')
+                ->when($structure->class_id, fn ($q) => $q->where('class_id', $structure->class_id))
+                ->when(! empty($data['class_id']) && is_numeric($data['class_id']), fn ($q) => $q->where('class_id', $data['class_id']))
+                ->when($data['section_id'] ?? null, fn ($q) => $q->where('section_id', $data['section_id']))
+                ->get();
 
-            foreach ($students as $student) {
-                $exists = FeeInvoice::where('school_id', $schoolId)
-                    ->where('student_id', $student->id)
-                    ->where('fee_structure_id', $structure->id)
-                    ->where('month', $data['month'])
-                    ->exists();
+            $created = DB::transaction(function () use ($students, $structure, $schoolId, $data) {
+                $count = 0;
 
-                if ($exists) {
-                    continue;
+                foreach ($students as $student) {
+                    $exists = FeeInvoice::where('school_id', $schoolId)
+                        ->where('student_id', $student->id)
+                        ->where('fee_structure_id', $structure->id)
+                        ->where('month', $data['month'])
+                        ->exists();
+
+                    if ($exists) {
+                        continue;
+                    }
+
+                    FeeInvoice::create([
+                        'school_id' => $schoolId,
+                        'student_id' => $student->id,
+                        'fee_structure_id' => $structure->id,
+                        'invoice_number' => 'INV-'.now()->format('Ymd').'-'.str_pad((string) (FeeInvoice::where('school_id', $schoolId)->count() + 1), 5, '0', STR_PAD_LEFT),
+                        'title' => $structure->name.' - '.$data['month'],
+                        'amount' => $structure->amount,
+                        'paid_amount' => 0,
+                        'discount_amount' => 0,
+                        'fine_amount' => 0,
+                        'due_date' => $data['due_date'],
+                        'status' => 'Unpaid',
+                        'month' => $data['month'],
+                    ]);
+
+                    $count++;
                 }
 
-                FeeInvoice::create([
-                    'school_id' => $schoolId,
-                    'student_id' => $student->id,
-                    'fee_structure_id' => $structure->id,
-                    'invoice_number' => 'INV-'.now()->format('Ymd').'-'.str_pad((string) ($count + 1), 4, '0', STR_PAD_LEFT),
-                    'title' => $structure->name.' - '.$data['month'],
-                    'amount' => $structure->amount,
-                    'paid_amount' => 0,
-                    'discount_amount' => 0,
-                    'fine_amount' => 0,
-                    'due_date' => $data['due_date'],
-                    'status' => 'Unpaid',
-                    'month' => $data['month'],
-                ]);
-
-                $count++;
+                return $count;
+            });
+        } else {
+            // Batch generate for all classes or selected class
+            $classesQuery = \App\Models\SchoolClass::where('school_id', $schoolId)->where('status', 'Active');
+            if (! empty($data['class_id']) && is_numeric($data['class_id'])) {
+                $classesQuery->where('id', $data['class_id']);
             }
+            $classes = $classesQuery->with(['fees' => fn ($q) => $q->where('frequency', 'Monthly')->where('is_active', true)])->get();
 
-            return $count;
-        });
+            $created = DB::transaction(function () use ($classes, $schoolId, $data) {
+                $count = 0;
+
+                foreach ($classes as $cls) {
+                    $structure = $cls->fees->first();
+                    $feeAmount = $structure ? (float) $structure->amount : 5000.00;
+                    $structureId = $structure?->id;
+
+                    $studentsQuery = Student::where('school_id', $schoolId)
+                        ->where('status', 'Active')
+                        ->where('class_id', $cls->id);
+
+                    if (! empty($data['section_id']) && is_numeric($data['section_id'])) {
+                        $studentsQuery->where('section_id', $data['section_id']);
+                    }
+
+                    $students = $studentsQuery->get();
+
+                    foreach ($students as $student) {
+                        $exists = FeeInvoice::where('school_id', $schoolId)
+                            ->where('student_id', $student->id)
+                            ->where('month', $data['month'])
+                            ->where('title', 'like', "%{$data['month']}%")
+                            ->exists();
+
+                        if ($exists) {
+                            continue;
+                        }
+
+                        FeeInvoice::create([
+                            'school_id' => $schoolId,
+                            'student_id' => $student->id,
+                            'fee_structure_id' => $structureId,
+                            'invoice_number' => 'INV-'.now()->format('Ymd').'-'.str_pad((string) (FeeInvoice::where('school_id', $schoolId)->count() + 1), 5, '0', STR_PAD_LEFT),
+                            'title' => ($structure ? $structure->name : 'Monthly Tuition - '.$cls->name).' - '.$data['month'],
+                            'amount' => $feeAmount,
+                            'paid_amount' => 0,
+                            'discount_amount' => 0,
+                            'fine_amount' => 0,
+                            'due_date' => $data['due_date'],
+                            'status' => 'Unpaid',
+                            'month' => $data['month'],
+                        ]);
+
+                        $count++;
+                    }
+                }
+
+                return $count;
+            });
+        }
 
         return response()->json([
             'status' => 'success',
-            'message' => "Generated {$created} invoice(s).",
+            'message' => "Generated {$created} invoice(s) for {$data['month']}.",
             'created' => $created,
         ]);
     }
@@ -242,7 +304,7 @@ class FeeController extends ApiController
         $schoolId = $this->requireSchoolId($request);
 
         $query = FeePayment::where('school_id', $schoolId)
-            ->with(['student:id,first_name,last_name,roll_number', 'feeInvoice:id,invoice_number,title,due_date', 'receiver:id,name']);
+            ->with(['student:id,first_name,last_name,roll_number,class_id', 'student.class:id,name,section', 'feeInvoice:id,invoice_number,title,due_date', 'receiver:id,name']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->query('status'));
@@ -279,6 +341,8 @@ class FeeController extends ApiController
                 'transaction_id' => $p->transaction_id,
                 'student_id' => $p->student_id,
                 'student_name' => $p->student?->full_name,
+                'roll_number' => $p->student?->roll_number,
+                'class' => $p->student?->class?->name,
                 'invoice_number' => $p->feeInvoice?->invoice_number,
                 'invoice_title' => $p->feeInvoice?->title,
                 'amount' => (float) $p->amount,
