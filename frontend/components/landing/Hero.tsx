@@ -54,101 +54,114 @@ export default function Hero() {
         style={{ background: "radial-gradient(circle, rgba(196,153,60,0.2) 0%, rgba(250,248,245,0) 70%)" }}
       />
 
-      {/* ── 3D Animation as FULL Background ── */}
-      <div
-        id="hero-3d-wrap"
-        className="absolute inset-0 w-full h-full overflow-visible"
-        style={{ zIndex: 1 }}
-      >
-        <HeroOrbit />
-      </div>
+      {/* ── Hero content area with 3D background ── */}
+      <div className="relative overflow-hidden" style={{ minHeight: 620 }}>
+        {/* 3D Animation as FULL Background */}
+        <div
+          id="hero-3d-wrap"
+          className="absolute inset-0 w-full h-full"
+          style={{ zIndex: 1 }}
+        >
+          <HeroOrbit />
+        </div>
 
-      {/* ── Gradient overlay for text readability (left side) ── */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          zIndex: 2,
-          background:
-            "linear-gradient(to right, rgba(250,248,245,0.92) 0%, rgba(250,248,245,0.82) 35%, rgba(250,248,245,0.45) 60%, rgba(250,248,245,0.08) 80%, transparent 100%)",
-        }}
-      />
+        {/* Gradient overlay for text readability (left side) */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            zIndex: 2,
+            background:
+              "linear-gradient(to right, rgba(250,248,245,0.92) 0%, rgba(250,248,245,0.82) 35%, rgba(250,248,245,0.45) 60%, rgba(250,248,245,0.08) 80%, transparent 100%)",
+          }}
+        />
+        {/* Bottom fade so 3D doesn't hard-cut at the edge */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+          style={{
+            zIndex: 2,
+            background: "linear-gradient(to top, rgba(250,248,245,1) 0%, transparent 100%)",
+          }}
+        />
 
-      <div className="max-w-7xl mx-auto px-6 relative w-full" style={{ zIndex: 3 }}>
-        
-        {/* ── Main Hero Content (overlaid on 3D background) ── */}
-        <div className="flex items-center min-h-[580px] lg:min-h-[620px] mb-16">
-          
-          {/* Left Column: Editorial Typography & Schooling CTAs */}
-          <div className="max-w-2xl flex flex-col items-start text-left">
+        {/* Hero text content */}
+        <div className="max-w-7xl mx-auto px-6 relative w-full" style={{ zIndex: 3 }}>
+          <div className="flex items-center min-h-[580px] lg:min-h-[620px]">
             
-            {/* Overline Tag */}
-            <div
-              id="hero-tag"
-              className="flex items-center gap-3 text-xs font-mono tracking-[0.14em] uppercase text-[#706B62] font-semibold mb-6"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#C4993C] animate-pulse" />
-              <span>NEXT-GEN SCHOOL OPERATING SYSTEM</span>
-              <span className="text-[#C4993C]">—</span>
-              <span>SKOOLMS ECOSYSTEM</span>
-            </div>
-
-            {/* Editorial Headline for Schooling */}
-            <h1 className="font-serif leading-[1.08] tracking-tight text-[#23201B] mb-6 text-4xl sm:text-6xl lg:text-[68px]">
-              <span id="hero-title-1" className="block font-bold">
-                Every school,
-              </span>
-              <span id="hero-title-1" className="block font-bold">
-                empowered by <span className="text-[#2B5B84]">intelligence.</span>
-              </span>
-              <span id="hero-title-2" className="block italic font-normal text-[#23201B] mt-1">
-                Every classroom & parent,
-              </span>
-              <span id="hero-title-2" className="block italic font-normal text-[#2E5E4E]">
-                connected in one portal.
-              </span>
-            </h1>
-
-            {/* Subtitle */}
-            <p
-              id="hero-description"
-              className="text-base sm:text-lg text-[#5C564D] max-w-xl mb-9 leading-relaxed font-sans"
-            >
-              The all-in-one ERP built for progressive institutions. Eliminate paper diaries, automate fee recoveries with 3-fold bank deposit challans, track biometric attendance, and give principals 360° real-time intelligence.
-            </p>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4 mb-8 w-full sm:w-auto pointer-events-auto">
-              <a
-                href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hero-action-btn px-7 py-3.5 rounded-full bg-[#23201B] hover:bg-[#3D382F] text-white font-bold text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all inline-flex items-center gap-2"
+            {/* Left Column: Editorial Typography & Schooling CTAs */}
+            <div className="max-w-2xl flex flex-col items-start text-left">
+              
+              {/* Overline Tag */}
+              <div
+                id="hero-tag"
+                className="flex items-center gap-3 text-xs font-mono tracking-[0.14em] uppercase text-[#706B62] font-semibold mb-6"
               >
-                <span>Book a Demo (+92 315 2123010)</span>
-                <ArrowUpRight size={15} className="text-[#C4993C]" />
-              </a>
-
-              <Link
-                href="/login"
-                className="hero-action-btn px-6 py-3.5 rounded-full border border-[#D9D4CC] bg-white hover:bg-[#FAF8F5] text-[#23201B] font-bold text-sm transition-all shadow-xs hover:-translate-y-0.5"
-              >
-                Explore Live Portals
-              </Link>
-            </div>
-
-            {/* Micro Badges */}
-            <div className="flex flex-wrap items-center gap-5 text-xs text-[#706B62]">
-              <div className="flex items-center gap-1.5">
-                <Check size={14} className="text-[#C4993C]" strokeWidth={2.5} />
-                <span>Affordable 50/50 Revenue Share Model</span>
+                <span className="w-2 h-2 rounded-full bg-[#C4993C] animate-pulse" />
+                <span>NEXT-GEN SCHOOL OPERATING SYSTEM</span>
+                <span className="text-[#C4993C]">—</span>
+                <span>SKOOLMS ECOSYSTEM</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Check size={14} className="text-[#C4993C]" strokeWidth={2.5} />
-                <span>Zero Server Maintenance Required</span>
+
+              {/* Editorial Headline for Schooling */}
+              <h1 className="font-serif leading-[1.08] tracking-tight text-[#23201B] mb-6 text-4xl sm:text-6xl lg:text-[68px]">
+                <span id="hero-title-1" className="block font-bold">
+                  Every school,
+                </span>
+                <span id="hero-title-1" className="block font-bold">
+                  empowered by <span className="text-[#2B5B84]">intelligence.</span>
+                </span>
+                <span id="hero-title-2" className="block italic font-normal text-[#23201B] mt-1">
+                  Every classroom & parent,
+                </span>
+                <span id="hero-title-2" className="block italic font-normal text-[#2E5E4E]">
+                  connected in one portal.
+                </span>
+              </h1>
+
+              {/* Subtitle */}
+              <p
+                id="hero-description"
+                className="text-base sm:text-lg text-[#5C564D] max-w-xl mb-9 leading-relaxed font-sans"
+              >
+                The all-in-one ERP built for progressive institutions. Eliminate paper diaries, automate fee recoveries with 3-fold bank deposit challans, track biometric attendance, and give principals 360° real-time intelligence.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-4 mb-8 w-full sm:w-auto pointer-events-auto">
+                <a
+                  href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hero-action-btn px-7 py-3.5 rounded-full bg-[#23201B] hover:bg-[#3D382F] text-white font-bold text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all inline-flex items-center gap-2"
+                >
+                  <span>Book a Demo (+92 315 2123010)</span>
+                  <ArrowUpRight size={15} className="text-[#C4993C]" />
+                </a>
+
+                <Link
+                  href="/login"
+                  className="hero-action-btn px-6 py-3.5 rounded-full border border-[#D9D4CC] bg-white hover:bg-[#FAF8F5] text-[#23201B] font-bold text-sm transition-all shadow-xs hover:-translate-y-0.5"
+                >
+                  Explore Live Portals
+                </Link>
+              </div>
+
+              {/* Micro Badges */}
+              <div className="flex flex-wrap items-center gap-5 text-xs text-[#706B62]">
+                <div className="flex items-center gap-1.5">
+                  <Check size={14} className="text-[#C4993C]" strokeWidth={2.5} />
+                  <span>Affordable 50/50 Revenue Share Model</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Check size={14} className="text-[#C4993C]" strokeWidth={2.5} />
+                  <span>Zero Server Maintenance Required</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
 
         {/* ── Bottom Section Ticker Bar ── */}
         <div
