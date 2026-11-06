@@ -912,8 +912,8 @@ export default function AdminFees() {
                   <input
                     type="number"
                     required
-                    min="1"
-                    step="50"
+                    min="0.01"
+                    step="any"
                     value={feeForm.amount}
                     onChange={e => setFeeForm({ ...feeForm, amount: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-[#D9D4CC] rounded-xl text-xs font-bold text-[#23201B]"

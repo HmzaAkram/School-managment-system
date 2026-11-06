@@ -159,9 +159,9 @@ function Scene({ reduced }: { reduced: boolean }) {
       <pointLight position={[0, 2, 4]} intensity={15} color="#ffedc2" />
       <pointLight position={[-3, 3, -3]} intensity={10} color={GOLD} />
 
-      {/* Main core sphere — 1.75 radius for ~55-60% of viewport height */}
+      {/* Main core sphere — optimized geometry */}
       <mesh ref={core}>
-        <sphereGeometry args={[1.75, 64, 48]} />
+        <sphereGeometry args={[1.75, 48, 32]} />
         <meshStandardMaterial
           color={CORE_COLOR}
           metalness={0.88}
@@ -231,9 +231,9 @@ function Scene({ reduced }: { reduced: boolean }) {
         opacity={0.35}
       />
 
-      {/* Gold sparkle particles — wider spread for full-bg */}
+      {/* Gold sparkle particles — reduced for performance */}
       <Sparkles
-        count={80}
+        count={40}
         scale={[18, 10, 14]}
         size={2.5}
         speed={0.25}
@@ -311,9 +311,9 @@ export default function HeroOrbit({
       }}
     >
       <Canvas
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         camera={{ position: [0, 0, 9], fov: 50 }}
-        gl={{ alpha: true, antialias: true }}
+        gl={{ alpha: true, antialias: false }}
         style={{
           background: "transparent",
           outline: "none",

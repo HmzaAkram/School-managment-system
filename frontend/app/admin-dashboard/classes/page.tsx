@@ -520,7 +520,7 @@ export default function AdminClasses() {
                   required
                   type="number"
                   min="0"
-                  step="50"
+                  step="any"
                   value={formData.monthly_fee}
                   onChange={e => setFormData({...formData, monthly_fee: e.target.value})}
                   className="w-full px-3.5 py-2.5 bg-white border border-amber-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-600"

@@ -129,7 +129,6 @@ export default function Hero() {
               <div className="flex flex-wrap items-center gap-4 mb-8 w-full sm:w-auto pointer-events-auto">
                 <a
                   href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
-                  target="_blank"
                   rel="noopener noreferrer"
                   className="hero-action-btn px-7 py-3.5 rounded-full bg-[#23201B] hover:bg-[#3D382F] text-white font-bold text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all inline-flex items-center gap-2"
                 >

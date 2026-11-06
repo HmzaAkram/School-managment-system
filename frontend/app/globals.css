@@ -16,10 +16,10 @@
   --color-text-muted: #8C847B;
   --color-border: #EBE5D9;
 
-  --font-serif: var(--font-serif);
+  --font-serif: Georgia, 'Times New Roman', serif;
   --font-sora: var(--font-sora);
   --font-sans: var(--font-dm-sans);
-  --font-mono: var(--font-dm-mono);
+  --font-mono: ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace;
 
   /* shadcn compat */
   --color-background: var(--color-bg);

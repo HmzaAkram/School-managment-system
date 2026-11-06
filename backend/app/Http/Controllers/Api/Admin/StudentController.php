@@ -109,9 +109,9 @@ class StudentController extends ApiController
         $data = $request->validate([
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'sometimes|nullable|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'phone' => 'nullable|string|max:30',
+            'phone' => 'required|string|max:30',
             'admission_number' => 'required|string|max:50|unique:student_profiles,admission_number',
             'class_id' => 'required|exists:classes,id',
             'section_id' => 'nullable|exists:sections,id',
@@ -133,9 +133,11 @@ class StudentController extends ApiController
         ]);
 
         $student = DB::transaction(function () use ($data, $schoolId) {
+            $email = $data['email'] ?? $this->generateStudentEmail($data);
+
             $user = User::create([
                 'name' => $data['first_name'].' '.$data['last_name'],
-                'email' => $data['email'],
+                'email' => $email,
                 'password' => Hash::make($data['password']),
                 'role' => 'student',
                 'school_id' => $schoolId,
@@ -204,6 +206,20 @@ class StudentController extends ApiController
             'message' => 'Student enrolled successfully',
             'student' => $student->load(['user', 'class', 'section', 'parents']),
         ], 201);
+    }
+
+    private function generateStudentEmail(array $data): string
+    {
+        $name = trim(implode('.', array_filter([
+            $data['first_name'] ?? '',
+            $data['last_name'] ?? '',
+        ], fn ($value) => $value !== '')));
+
+        $identifier = trim((string) ($data['admission_number'] ?? $data['phone'] ?? 'student'));
+        $safeName = preg_replace('/[^a-z0-9.]+/i', '', strtolower($name)) ?: 'student';
+        $safeIdentifier = preg_replace('/[^a-z0-9]+/i', '', strtolower($identifier)) ?: 'student';
+
+        return $safeName.'.'.$safeIdentifier.'@school.local';
     }
 
     public function promote(Request $request)

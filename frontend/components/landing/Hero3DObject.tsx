@@ -25,12 +25,12 @@ export default function Hero3DObject() {
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: false,
       alpha: true,
       powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     container.appendChild(renderer.domElement);
@@ -234,8 +234,8 @@ export default function Hero3DObject() {
     ring2.rotation.y = Math.PI / 5;
     mainGroup.add(ring2);
 
-    // Particles
-    const particlesCount = 50;
+    // Particles — reduced for performance
+    const particlesCount = 25;
     const posArray = new Float32Array(particlesCount * 3);
     for (let i = 0; i < particlesCount * 3; i += 3) {
       posArray[i] = (Math.random() - 0.5) * 6;

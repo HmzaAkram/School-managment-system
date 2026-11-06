@@ -4,7 +4,15 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 31536000,
+  },
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
+  experimental: {
+    optimizeCss: true,
+    scrollRestoration: true,
   },
 }
 

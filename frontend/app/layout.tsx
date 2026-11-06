@@ -1,20 +1,19 @@
-import type { Metadata } from 'next'
-import { Sora, DM_Sans, DM_Mono, Newsreader } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import LenisProvider from '@/components/providers/LenisProvider'
+import type { Metadata, Viewport } from 'next'
+import { Sora, DM_Sans } from 'next/font/google'
+import dynamic from 'next/dynamic'
 import './globals.css'
 
-const newsreader = Newsreader({
-  subsets: ['latin'],
-  variable: '--font-serif',
-  display: 'swap',
-})
+const Analytics = dynamic(
+  () => import('@vercel/analytics/next').then((mod) => mod.Analytics),
+  { ssr: false }
+)
 
 const sora = Sora({
   subsets: ['latin'],
   weight: ['400', '600', '700', '800'],
   variable: '--font-sora',
   display: 'swap',
+  preload: true,
 })
 
 const dmSans = DM_Sans({
@@ -22,14 +21,14 @@ const dmSans = DM_Sans({
   weight: ['400', '500', '600'],
   variable: '--font-dm-sans',
   display: 'swap',
+  preload: true,
 })
 
-const dmMono = DM_Mono({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-dm-mono',
-  display: 'swap',
-})
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#FAF8F5',
+}
 
 export const metadata: Metadata = {
   title: 'Skoolms — School Management System',
@@ -52,12 +51,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${sora.variable} ${dmSans.variable} ${dmMono.variable} scroll-smooth`}
+      className={`${sora.variable} ${dmSans.variable} scroll-smooth`}
     >
+      <head>
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className="antialiased">
-        <LenisProvider>
-          {children}
-        </LenisProvider>
+        {children}
         <Analytics />
       </body>
     </html>

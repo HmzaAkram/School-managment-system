@@ -70,7 +70,6 @@ export default function FinalCTA() {
           <a
             ref={primaryBtnRef}
             href="https://wa.me/923152123010?text=Hello%20Skoolms%20Team%2C%20I%20would%20like%20to%20book%20a%20demo%20for%20our%20school."
-            target="_blank"
             rel="noopener noreferrer"
             className="cta-btn w-full sm:w-auto px-8 py-4 rounded-full bg-white font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all inline-flex items-center justify-center gap-2"
             style={{ color: "var(--color-accent)" }}

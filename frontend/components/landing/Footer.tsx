@@ -72,7 +72,6 @@ export default function Footer() {
             <span className="text-sm" style={{ color: "#A09A91" }}>hello@skoolms.app</span>
             <a
               href="https://wa.me/923152123010"
-              target="_blank"
               rel="noopener noreferrer"
               className="text-sm inline-flex items-center gap-1.5 transition-colors"
               style={{ color: "#A09A91" }}

@@ -19,6 +19,18 @@ export default function AdminStudents() {
   const [submitting, setSubmitting] = useState(false);
 
   // New Student Form
+  const buildStudentEmail = (student: { first_name: string; last_name: string; admission_number: string; phone: string }) => {
+    const namePart = [student.first_name, student.last_name]
+      .filter(Boolean)
+      .join('.')
+      .toLowerCase()
+      .replace(/\s+/g, '.');
+    const idPart = (student.admission_number || student.phone || 'student')
+      .replace(/[^a-zA-Z0-9]/g, '');
+
+    return `${namePart || 'student'}${idPart ? `.${idPart}` : ''}@school.local`;
+  };
+
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -59,14 +71,20 @@ export default function AdminStudents() {
 
   const handleCreateStudent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.first_name || !formData.email || !formData.admission_number || !formData.class_id) return;
+    const phone = formData.phone.trim();
+
+    if (!formData.first_name || !phone || !formData.admission_number || !formData.class_id) return;
 
     setSubmitting(true);
     try {
-      await api.post("/admin/students", {
+      const payload = {
         ...formData,
+        email: formData.email || buildStudentEmail(formData),
+        phone,
         opening_balance: parseFloat(formData.opening_balance) || 0,
-      });
+      };
+
+      await api.post("/admin/students", payload);
       setIsModalOpen(false);
       setFormData({
         first_name: "",
@@ -318,12 +336,13 @@ export default function AdminStudents() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Student Email *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Phone Number *</label>
                   <input
-                    type="email"
+                    type="tel"
                     required
-                    value={formData.email}
-                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="+92 300 1234567"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-primary"
                   />
                 </div>
@@ -407,7 +426,7 @@ export default function AdminStudents() {
                 <input
                   type="number"
                   min="0"
-                  step="50"
+                  step="any"
                   placeholder="0"
                   value={formData.opening_balance}
                   onChange={e => setFormData({ ...formData, opening_balance: e.target.value })}
